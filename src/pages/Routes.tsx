@@ -5,7 +5,7 @@ import MoldovaBorder from '../components/MoldovaBorder'
 import L from 'leaflet'
 import {
   Upload, Wand2, Plus, Trash2, MapPin, Clock,
-  ChevronRight, Loader2, Link2, CheckCircle2, X, Copy, Check, Radio,
+  ChevronRight, Link2, CheckCircle2, X, Copy, Check, Radio,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -120,7 +120,7 @@ function defaultDateForAddress(address: string): string {
 // ── Capacity helpers ──────────────────────────────────────────────────────────
 
 const STOPS_PER_DRIVER_DAY    = 30   // ~16 min/stop × 8h shift
-const STOPS_PER_DRIVER_HOUR   = 60 / 25  // ~25 min including travel between same-area stops
+// ~25 min including travel between same-area stops
 
 function dayCapacity(numDrivers: number) {
   return Math.max(1, numDrivers) * STOPS_PER_DRIVER_DAY
@@ -321,7 +321,7 @@ function polylineLen(pts: { x: number; y: number }[]) {
 
 function OptimizeLoadingScreen() {
   const [progress, setProgress] = useState(0)
-  const [stepIdx, setStepIdx]   = useState(0)
+  const [, setStepIdx]   = useState(0)
   const [msgIdx, setMsgIdx]     = useState(0)
   const [fade, setFade]         = useState(true)
   const [drawn, setDrawn]       = useState<number[]>([0, 0, 0]) // dashoffset per route
@@ -510,7 +510,7 @@ export default function RoutesPage() {
   const [shiftStart, setShiftStart] = useState('09:00')
 
   const [step, setStep]         = useState<'input' | 'loading' | 'results'>('input')
-  const [loadingMsg, setLoadingMsg] = useState('')
+  const [, setLoadingMsg] = useState('')
   const [result, setResult]     = useState<OptimizeResult | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 

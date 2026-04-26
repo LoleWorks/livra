@@ -196,7 +196,7 @@ export default function Drivers() {
       // Tally totals + today's count per driver from real data
       const totalByDriver: Record<string, number> = {}
       const todayByDriver: Record<string, number> = {}
-      for (const row of (sRes.data ?? []) as Array<{ livra_routes: { driver_id: string; date: string } }>) {
+      for (const row of (sRes.data ?? []) as unknown as Array<{ livra_routes: { driver_id: string; date: string } }>) {
         const did = row.livra_routes?.driver_id
         if (!did) continue
         totalByDriver[did] = (totalByDriver[did] ?? 0) + 1

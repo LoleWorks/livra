@@ -115,9 +115,6 @@ function fmtAgo(iso: string) {
 type SheetState = 'peek' | 'partial' | 'full'
 
 const SHEET_HEIGHT = 0.85 // 85vh
-const SNAP_PEEK    = 0 // translateY% from bottom — peek = just handle showing
-const SNAP_PARTIAL = 55 // show ~45% of sheet
-const SNAP_FULL    = 100 // fully open (translateY = 0 from bottom)
 
 function snapY(state: SheetState) {
   const h = window.innerHeight * SHEET_HEIGHT
@@ -165,7 +162,7 @@ export default function Track() {
   function onTouchStart(e: React.TouchEvent) {
     startY.current = e.touches[0].clientY
     startTranslate.current = currentTranslate.current
-    applyTranslate(currentTranslate.current, false)
+    applyTranslate(currentTranslate.current, 'none')
   }
 
   function onTouchMove(e: React.TouchEvent) {
@@ -178,7 +175,7 @@ export default function Track() {
       : raw > h - 60
       ? (h - 60) + (raw - (h - 60)) / 4
       : raw
-    applyTranslate(clamped, false)
+    applyTranslate(clamped, 'none')
   }
 
   function onTouchEnd(e: React.TouchEvent) {

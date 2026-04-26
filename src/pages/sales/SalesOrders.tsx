@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Package, Phone, Search, Filter, Plus, ChevronDown } from 'lucide-react'
+import { Package, Phone, Search, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 

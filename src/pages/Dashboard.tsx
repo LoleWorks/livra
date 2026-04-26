@@ -129,82 +129,6 @@ type Driver = {
   eta: string
 }
 
-const _UNUSED: Driver[] = [
-  {
-    name: 'Ion Popescu', initials: 'IP', stops: 12, done: 8,
-    pos: [47.037, 28.858], active: true, eta: '8 min',
-    route: [
-      { pos: [47.021, 28.831], address: 'str. Ismail 12', status: 'done' },
-      { pos: [47.024, 28.836], address: 'str. Armenească 5', status: 'done' },
-      { pos: [47.027, 28.842], address: 'bd. Ștefan cel Mare 88', status: 'done' },
-      { pos: [47.029, 28.847], address: 'str. Pușkin 22', status: 'done' },
-      { pos: [47.031, 28.851], address: 'str. Tighina 14', status: 'done' },
-      { pos: [47.033, 28.853], address: 'bd. Dacia 50', status: 'done' },
-      { pos: [47.035, 28.855], address: 'str. Albișoara 7', status: 'done' },
-      { pos: [47.036, 28.857], address: 'str. Grenoble 11', status: 'done' },
-      { pos: [47.040, 28.862], address: 'bd. Moscova 34', customer: 'Ana Constantin', status: 'next' },
-      { pos: [47.042, 28.860], address: 'str. Calea Ieșilor 8', customer: 'Petru Munteanu', status: 'failed', failNote: 'Clientul nu a răspuns la telefon. Ușa încuiată.' },
-      { pos: [47.044, 28.857], address: 'str. Gh. Asachi 3', customer: 'Ioana Dinu', status: 'upcoming' },
-      { pos: [47.046, 28.854], address: 'bd. Decebal 21', customer: 'Vasile Moraru', status: 'upcoming' },
-    ],
-  },
-  {
-    name: 'Andrei Rusu', initials: 'AR', stops: 9, done: 9,
-    pos: [47.018, 28.825], active: false, eta: '—',
-    route: [
-      { pos: [47.010, 28.815], address: 'str. Vadul lui Vodă 4', status: 'done' },
-      { pos: [47.012, 28.818], address: 'str. Florilor 9', status: 'done' },
-      { pos: [47.013, 28.820], address: 'bd. Cantemir 55', status: 'done' },
-      { pos: [47.014, 28.821], address: 'str. Columna 33', status: 'done' },
-      { pos: [47.015, 28.822], address: 'str. Pușkin 7', status: 'done' },
-      { pos: [47.016, 28.823], address: 'str. Mitropolit Dosoftei 14', status: 'done' },
-      { pos: [47.017, 28.824], address: 'str. Kogălniceanu 20', status: 'done' },
-      { pos: [47.018, 28.825], address: 'bd. Ștefan cel Mare 120', status: 'done' },
-      { pos: [47.019, 28.826], address: 'str. Albișoara 30', status: 'done' },
-    ],
-  },
-  {
-    name: 'Mihai Lungu', initials: 'ML', stops: 15, done: 7,
-    pos: [47.042, 28.810], active: true, eta: '5 min',
-    route: [
-      { pos: [47.030, 28.800], address: 'str. Hristo Botev 11', status: 'done' },
-      { pos: [47.032, 28.802], address: 'str. Nicolae Iorga 5', status: 'done' },
-      { pos: [47.034, 28.804], address: 'str. Ion Creangă 8', status: 'done' },
-      { pos: [47.036, 28.806], address: 'str. Mihai Eminescu 22', status: 'done' },
-      { pos: [47.038, 28.808], address: 'bd. Renașterii 3', status: 'done' },
-      { pos: [47.040, 28.809], address: 'str. Calea Orheiului 44', status: 'done' },
-      { pos: [47.041, 28.810], address: 'str. Doina 17', status: 'done' },
-      { pos: [47.043, 28.812], address: 'str. Livezilor 9', customer: 'Radu Florescu', status: 'next' },
-      { pos: [47.045, 28.814], address: 'str. Uzinelor 2', customer: 'Cristina Lupu', status: 'failed', failNote: 'Adresă incorectă. Blocul nu există pe această stradă.' },
-      { pos: [47.047, 28.815], address: 'bd. Republicii 66', customer: 'Mihai Toma', status: 'upcoming' },
-      { pos: [47.049, 28.813], address: 'str. Drumul Viilor 5', status: 'upcoming' },
-      { pos: [47.050, 28.811], address: 'str. Hâncești 18', status: 'upcoming' },
-      { pos: [47.051, 28.809], address: 'str. Sarmizegetusa 7', status: 'upcoming' },
-      { pos: [47.052, 28.807], address: 'str. Burebista 3', status: 'upcoming' },
-      { pos: [47.053, 28.805], address: 'str. Lunca Bâcului 12', status: 'upcoming' },
-    ],
-  },
-  {
-    name: 'Vlad Cojocaru', initials: 'VC', stops: 11, done: 11,
-    pos: [47.008, 28.852], active: false, eta: '—',
-    route: [
-      { pos: [47.000, 28.840], address: 'str. Miorița 4', status: 'done' },
-      { pos: [47.001, 28.842], address: 'str. Petricani 11', status: 'done' },
-      { pos: [47.002, 28.844], address: 'bd. Dacia 80', status: 'done' },
-      { pos: [47.003, 28.846], address: 'str. Spicului 6', status: 'done' },
-      { pos: [47.004, 28.848], address: 'str. Chișinăului 33', status: 'done' },
-      { pos: [47.005, 28.849], address: 'str. Calea Basarabiei 12', status: 'done' },
-      { pos: [47.006, 28.850], address: 'str. Cuza Vodă 55', status: 'done' },
-      { pos: [47.007, 28.851], address: 'bd. Traian 7', customer: 'Sergiu Botnari', status: 'done' },
-      { pos: [47.007, 28.852], address: 'str. Titulescu 19', customer: 'Elena Ciobanu', status: 'failed', failNote: 'Pachetul deteriorat. Clientul a refuzat livrarea.' },
-      { pos: [47.008, 28.852], address: 'str. Independenței 4', customer: 'Ion Apostol', status: 'done' },
-      { pos: [47.009, 28.853], address: 'bd. Moscova 1', customer: 'Natalia Grosu', status: 'done' },
-    ],
-  },
-]
-
-const recent: { id: string; customer: string; time: string; status: string; failNote: string }[] = []
-
 type AttentionStatus = 'returned' | 'contacted' | 'rescheduled' | 'cancelled'
 type FailReason = 'unreachable' | 'wrong_address'
 
@@ -320,7 +244,7 @@ async function loadDrivers(): Promise<Driver[]> {
 }
 
 export default function Dashboard() {
-  const { theme } = useTheme()
+  useTheme()
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
   const [filterCard, setFilterCard] = useState<'total' | 'in_drum' | 'livrate' | 'esuate' | null>(null)
@@ -497,15 +421,7 @@ export default function Dashboard() {
     ? drivers
     : drivers.filter(d => d.route.some(s => matchStatus(s.status)))
 
-  const recentStatusMap: Record<string, string[]> = {
-    total:   ['delivered', 'in_progress', 'failed'],
-    in_drum: ['in_progress'],
-    livrate: ['delivered'],
-    esuate:  ['failed'],
-  }
-  const sidebarRecent = filterCard === null
-    ? []
-    : []
+  const sidebarRecent: { id: string; customer: string; time: string; status: string; failNote: string }[] = []
 
 
   const mapTarget: [number, number] = selected ? selected.pos : CHISINAU

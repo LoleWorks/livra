@@ -34,14 +34,14 @@ export default function SalesChangePassword() {
       const res = await fetch(`${API}/auth/sales/change-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ manager_id: user.id, new_password: newPw }),
+        body: JSON.stringify({ manager_id: user!.id, new_password: newPw }),
       })
       const data = await res.json()
       if (!res.ok) {
         setError(data.detail ?? 'A apărut o eroare')
         return
       }
-      setSalesUser({ ...user, must_change_password: false })
+      setSalesUser({ ...user, must_change_password: false } as import('../../lib/auth').AppUser)
       navigate('/sales', { replace: true })
     } catch {
       setError('Nu s-a putut contacta serverul.')

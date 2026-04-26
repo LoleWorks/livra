@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Activity as ActivityIcon,
   LogIn, LogOut, Play, Flag, CheckCircle, XCircle,
-  Coffee, Droplet, Pause, Navigation, MapPin, Unlock,
+  Coffee, Pause, Navigation, MapPin, Unlock,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Phone, Calendar, Clock, CheckCircle, RotateCcw, Ban, AlertTriangle, ChevronDown, Loader2, X } from 'lucide-react'
+import { Phone, Calendar, Clock, CheckCircle, RotateCcw, Ban, AlertTriangle, Loader2, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 type Return = {
