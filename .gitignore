@@ -32,3 +32,6 @@ dist-ssr
 .claude/
 .superpowers/
 docs/superpowers/
+
+# Nested repos
+livra-driver/
