@@ -1,0 +1,853 @@
+import asyncio
+import math
+import os
+import sys
+from datetime import datetime, timezone, timedelta
+from typing import Optional
+
+# Force UTF-8 output so Romanian characters in addresses don't crash print()
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+import httpx
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+# VROOM solver endpoint — defaults to free ORS public API for dev,
+# overridden by env var when self-hosting on Hetzner in production.
+VROOM_URL     = os.environ.get("VROOM_URL", "https://api.openrouteservice.org/optimization")
+ORS_API_KEY   = os.environ.get("ORS_API_KEY", "")
+VROOM_HOSTED  = "openrouteservice.org" in VROOM_URL  # true when using ORS public API
+
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+DRIVER_COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4"]
+
+# ── Solver constants ─────────────────────────────────────────────────────────
+SERVICE_TIME = 10 * 60   # 10 min per delivery (paperwork + handover average)
+MAX_DAY_SEC  = 8 * 3600  # 8-hour shift
+LUNCH_DUR    = 30 * 60   # mandatory meal break
+FUEL_DUR     = 15 * 60   # short rest/fuel break
+LUNCH_WIN    = (4 * 3600 + 1800, 5 * 3600)   # 4:30h–5h into shift
+FUEL_WIN     = (6 * 3600, 7 * 3600)          # 6h–7h into shift
+
+# ── Models ──────────────────────────────────────────────────────────────────
+
+class DeliveryIn(BaseModel):
+    id: str
+    address: str
+    customer: str
+    phone: str = ""
+    notes: str = ""
+    package_description: str = ""           # what's inside the package
+    time_window_start: Optional[str] = None # "HH:MM" earliest arrival
+    time_window_end: Optional[str] = None   # "HH:MM" latest arrival
+
+class DriverIn(BaseModel):
+    id: str
+    name: str
+    start_lat: Optional[float] = None
+    start_lng: Optional[float] = None
+
+class Constraints(BaseModel):
+    time_windows: bool = False
+    capacity: bool = False
+
+class OptimizeRequest(BaseModel):
+    deliveries: list[DeliveryIn]
+    drivers: list[DriverIn]
+    depot_address: str = "bd. Dacia 50, Chisinau, Moldova"
+    constraints: Constraints = Constraints()
+    skip_breaks: bool = False               # drivers want a faster day
+    shift_start_time: str = "09:00"         # anchors job time windows
+
+class Stop(BaseModel):
+    order: int
+    delivery_id: str
+    customer: str
+    address: str
+    phone: str
+    lat: float
+    lng: float
+    type: str = 'delivery'          # 'delivery' | 'lunch_break' | 'fuel_break'
+    break_duration_min: int = 0
+    package_description: str = ""   # echoed back so drivers know what they carry
+    arrival_time: Optional[str] = None  # "HH:MM" — when driver arrives at this stop
+
+class DriverRoute(BaseModel):
+    driver_id: str
+    driver_name: str
+    color: str
+    stops: list[Stop]
+    total_distance_km: float
+    total_duration_min: int
+    start_lat: float
+    start_lng: float
+
+class DeferredDelivery(BaseModel):
+    delivery_id: str
+    customer: str
+    address: str
+    reason: str        # "no capacity" | "time window unreachable" | "geocode failed"
+
+class OptimizeResponse(BaseModel):
+    routes: list[DriverRoute]
+    savings_pct: int
+    total_stops: int
+    deferred: list[DeferredDelivery] = []
+
+class WebhookOrder(BaseModel):
+    order_id: str
+    customer_name: str
+    customer_phone: str = ""
+    delivery_address: str
+    notes: str = ""
+
+# ── Geocoding ────────────────────────────────────────────────────────────────
+
+_geocode_cache: dict[str, Optional[tuple[float, float]]] = {}
+_geocode_sem = asyncio.Semaphore(1)  # serialize geocoding requests
+
+# Moldova bounding box for Photon bbox filter
+_MD_BBOX = "26.6,45.4,30.2,48.5"
+# Geographic centre of Moldova — used as location bias
+_MD_LAT, _MD_LON = 47.0245, 28.8322
+
+async def _geocode_photon(query: str) -> Optional[tuple[float, float]]:
+    """Photon (komoot) geocoder — good Moldova coverage, no hard rate limit."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            "https://photon.komoot.io/api/",
+            params={"q": query, "limit": 5, "lang": "en",
+                    "lat": str(_MD_LAT), "lon": str(_MD_LON)},
+            headers={"User-Agent": "Livra/1.0"},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            return None
+        features = r.json().get("features", [])
+        for f in features:
+            p = f["properties"]
+            if p.get("country") in ("Moldova", "Republic of Moldova"):
+                lng, lat = f["geometry"]["coordinates"]  # GeoJSON = [lng, lat]
+                return float(lat), float(lng)
+    return None
+
+async def _geocode_nominatim(query: str) -> Optional[tuple[float, float]]:
+    """Nominatim fallback — respects 1 req/sec limit, skips on 429."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            "https://nominatim.openstreetmap.org/search",
+            params={"q": query, "format": "json", "limit": 1, "countrycodes": "md"},
+            headers={"User-Agent": "Livra/1.0 loredanloleworks@gmail.com"},
+            timeout=10,
+        )
+        if r.status_code == 429:
+            print("[geocode] Nominatim 429 — skipping")
+            return None
+        if r.status_code == 200 and "json" in r.headers.get("content-type", ""):
+            data = r.json()
+            if data:
+                return float(data[0]["lat"]), float(data[0]["lon"])
+    return None
+
+async def geocode(address: str) -> Optional[tuple[float, float]]:
+    key = address.lower().strip()
+    if key in _geocode_cache:
+        return _geocode_cache[key]
+
+    query = address if "moldova" in key.lower() else f"{address}, Moldova"
+    result: Optional[tuple[float, float]] = None
+
+    async with _geocode_sem:
+        if key in _geocode_cache:
+            return _geocode_cache[key]
+        try:
+            result = await _geocode_photon(query)
+            if result:
+                print(f"[geocode] Photon OK  {address!r} -> {result}")
+            else:
+                await asyncio.sleep(1.1)
+                result = await _geocode_nominatim(query)
+                if result:
+                    print(f"[geocode] Nominatim OK  {address!r} -> {result}")
+                else:
+                    print(f"[geocode] MISS  {address!r}")
+        except Exception as exc:
+            print(f"[geocode] ERROR {address!r}: {exc}")
+        await asyncio.sleep(0.3)  # brief pause between requests
+
+    _geocode_cache[key] = result
+    return result
+
+# ── Routing matrices (GraphHopper primary, OSRM fallback) ────────────────────
+
+GH_URL  = "http://localhost:8989"
+GH_PROFILE = "delivery"
+
+async def get_graphhopper_matrices(
+    locations: list[tuple[float, float]],
+) -> tuple[list[list[int]], list[list[int]]] | None:
+    """
+    Returns (duration_seconds, distance_meters) from self-hosted GraphHopper.
+    GraphHopper's delivery profile has turn_costs=true and left-turn penalties
+    baked into the custom model, so the matrix already reflects real-world
+    fuel, safety, and time costs at the arc level.
+    Returns None if GraphHopper is not reachable.
+    """
+    points = [[lng, lat] for lat, lng in locations]
+    payload = {
+        "profile": GH_PROFILE,
+        "from_points": points,
+        "to_points": points,
+        "out_arrays": ["times", "distances"],
+        "fail_fast": False,
+    }
+    async with httpx.AsyncClient() as client:
+        try:
+            r = await client.post(
+                f"{GH_URL}/matrix",
+                json=payload,
+                timeout=30,
+            )
+            if r.status_code == 200:
+                data = r.json()
+                dur  = [[int(v or 99999) for v in row] for row in data["times"]]
+                dist = [[int(v or 99999) for v in row] for row in data["distances"]]
+                return dur, dist
+        except Exception:
+            pass
+    return None
+
+async def get_osrm_matrices(
+    locations: list[tuple[float, float]],
+) -> tuple[list[list[int]], list[list[int]]]:
+    """Returns (duration_seconds, distance_meters) matrices from OSRM."""
+    coords = ";".join(f"{lng},{lat}" for lat, lng in locations)
+    async with httpx.AsyncClient() as client:
+        try:
+            r = await client.get(
+                f"http://router.project-osrm.org/table/v1/driving/{coords}",
+                params={"annotations": "duration,distance"},
+                timeout=30,
+            )
+            data = r.json()
+            if data.get("code") == "Ok":
+                dur  = [[int(d or 99999) for d in row] for row in data["durations"]]
+                dist = [[int(d or 99999) for d in row] for row in data["distances"]]
+                return dur, dist
+        except Exception:
+            pass
+
+    # Last-resort fallback: straight-line estimates at 30 km/h
+    n = len(locations)
+    dur  = [[0] * n for _ in range(n)]
+    dist = [[0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                dlat = locations[i][0] - locations[j][0]
+                dlng = locations[i][1] - locations[j][1]
+                m = math.sqrt(dlat ** 2 + dlng ** 2) * 111_000
+                dist[i][j] = int(m)
+                dur[i][j]  = int(m / (30_000 / 3600))
+    return dur, dist
+
+async def get_matrices(
+    locations: list[tuple[float, float]],
+) -> tuple[list[list[int]], list[list[int]]]:
+    """Try GraphHopper first (left-turn penalties + eco routing), fall back to OSRM."""
+    gh = await get_graphhopper_matrices(locations)
+    if gh is not None:
+        return gh
+    return await get_osrm_matrices(locations)
+
+# ── Geo helpers ───────────────────────────────────────────────────────────────
+
+def _haversine_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    R = 6_371_000
+    dLat = (lat2 - lat1) * math.pi / 180
+    dLng = (lng2 - lng1) * math.pi / 180
+    a = (math.sin(dLat / 2) ** 2
+         + math.cos(lat1 * math.pi / 180) * math.cos(lat2 * math.pi / 180)
+         * math.sin(dLng / 2) ** 2)
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+def _geo_d(a: tuple[float, float], b: tuple[float, float]) -> float:
+    return _haversine_m(a[0], a[1], b[0], b[1])
+
+def _time_of_day_risk() -> float:
+    hour = datetime.now(MOLDOVA_TZ).hour
+    return _RISK_BY_HOUR.get(hour, 1.0)
+
+# ── Geographic clustering ──────────────────────────────────────────────────────
+
+def _kmeans_geo(points: list[tuple[float, float]], k: int, max_iter: int = 100) -> list[int]:
+    """
+    K-means++ clustering on (lat, lng) coordinates.
+    Returns a list of cluster indices (0..k-1), one per point.
+    """
+    import random
+    n = len(points)
+    k = min(k, n)
+
+    # K-means++ initialisation: spread initial centroids out
+    centers: list[tuple[float, float]] = [points[random.randrange(n)]]
+    for _ in range(k - 1):
+        d2 = [min(_geo_d(p, c) ** 2 for c in centers) for p in points]
+        total = sum(d2) or 1.0
+        r = random.uniform(0, total)
+        cum = 0.0
+        for i, v in enumerate(d2):
+            cum += v
+            if cum >= r:
+                centers.append(points[i])
+                break
+        else:
+            centers.append(points[-1])
+
+    labels = [0] * n
+    for _ in range(max_iter):
+        new_labels = [min(range(k), key=lambda c: _geo_d(points[i], centers[c])) for i in range(n)]
+        if new_labels == labels:
+            break
+        labels = new_labels
+        for c in range(k):
+            pts = [points[i] for i in range(n) if labels[i] == c]
+            if pts:
+                centers[c] = (
+                    sum(p[0] for p in pts) / len(pts),
+                    sum(p[1] for p in pts) / len(pts),
+                )
+    return labels
+
+
+def _nn_order(
+    coords: list[tuple[float, float]],
+    start: tuple[float, float],
+    indices: list[int],
+    duration_row: list[int] | None,
+) -> list[int]:
+    """
+    Nearest-neighbour TSP ordering starting from `start`.
+    Uses real road duration when available, haversine fallback otherwise.
+    """
+    remaining = list(indices)
+    ordered: list[int] = []
+    current = start
+    current_idx: int | None = None
+
+    while remaining:
+        if duration_row is not None and current_idx is not None:
+            # Use OSRM/GH road times from current node's row
+            nxt = min(remaining, key=lambda i: duration_row[i])
+        else:
+            nxt = min(remaining, key=lambda i: _geo_d(current, coords[i]))
+        ordered.append(nxt)
+        remaining.remove(nxt)
+        current = coords[nxt]
+        current_idx = nxt
+        # Switch to geo distance after first hop (avoids rebuilding full row)
+        duration_row = None
+
+    return ordered
+
+
+def plan_routes(
+    delivery_coords: list[tuple[float, float]],
+    driver_starts: list[tuple[float, float]],
+    duration_matrix: list[list[int]],
+    delivery_offset: int,
+) -> list[list[int]]:
+    """
+    Two-phase geographic routing:
+      1. K-means cluster delivery stops into num_drivers groups.
+      2. Assign each cluster to its nearest driver start.
+      3. Order stops within each cluster via nearest-neighbour TSP
+         (using real road durations from the OSRM/GH matrix).
+
+    This guarantees geographically compact routes and no cross-country jumps
+    regardless of how far apart the depot and stops are.
+    """
+    n = len(delivery_coords)
+    k = len(driver_starts)
+
+    # Phase 1: cluster stops by geography
+    labels = _kmeans_geo(delivery_coords, k)
+
+    # Build cluster lists (indices into delivery_coords)
+    clusters: list[list[int]] = [[] for _ in range(k)]
+    for i, lbl in enumerate(labels):
+        clusters[lbl].append(i)
+
+    # Phase 2: assign clusters to drivers by nearest centroid
+    # Build centroid for each cluster
+    centroids: list[tuple[float, float] | None] = []
+    for c in range(k):
+        if clusters[c]:
+            lat = sum(delivery_coords[i][0] for i in clusters[c]) / len(clusters[c])
+            lng = sum(delivery_coords[i][1] for i in clusters[c]) / len(clusters[c])
+            centroids.append((lat, lng))
+        else:
+            centroids.append(None)
+
+    used_drivers: set[int] = set()
+    cluster_to_driver: dict[int, int] = {}
+
+    # Sort clusters by size descending (assign largest clusters first)
+    for c in sorted(range(k), key=lambda x: -len(clusters[x])):
+        if centroids[c] is None:
+            cluster_to_driver[c] = (set(range(k)) - used_drivers or {0}).pop()
+            continue
+        available = [d for d in range(k) if d not in used_drivers]
+        if not available:
+            available = list(range(k))
+        best = min(available, key=lambda d: _geo_d(centroids[c], driver_starts[d]))  # type: ignore[arg-type]
+        cluster_to_driver[c] = best
+        used_drivers.add(best)
+
+    # Phase 3: directional sweep ordering — sort stops along the main travel axis
+    # (home → cluster centroid direction), so near stops come first and far stops
+    # last. This ensures day-overflow stops cluster at the far end, minimising
+    # empty deadhead on Day 2+.
+    routes: list[list[int]] = [[] for _ in range(k)]
+    for c, stop_indices in enumerate(clusters):
+        if not stop_indices:
+            continue
+        d = cluster_to_driver[c]
+        start = driver_starts[d]
+
+        # Direction vector: from driver home to cluster centroid
+        cent_lat = sum(delivery_coords[i][0] for i in stop_indices) / len(stop_indices)
+        cent_lng = sum(delivery_coords[i][1] for i in stop_indices) / len(stop_indices)
+        dlat = cent_lat - start[0]
+        dlng = cent_lng - start[1]
+        mag = math.sqrt(dlat ** 2 + dlng ** 2) or 1.0
+
+        def projection(i: int) -> float:
+            # Scalar projection of stop i onto the home→centroid axis
+            return ((delivery_coords[i][0] - start[0]) * dlat / mag +
+                    (delivery_coords[i][1] - start[1]) * dlng / mag)
+
+        # Sort nearest-to-furthest along the main corridor
+        ordered = sorted(stop_indices, key=projection)
+
+        # Convert local delivery indices to matrix node indices
+        routes[d] = [delivery_offset + i for i in ordered]
+
+    return routes
+
+# ── Day-budget splitter ───────────────────────────────────────────────────────
+
+SERVICE_TIME   = 8  * 60   # 8 min to hand over a package
+MAX_DAY_SEC    = 8  * 3600 # 8-hour working day
+LUNCH_AFTER    = 4  * 3600 # take 30-min lunch after 4 h of work
+LUNCH_DUR      = 30 * 60
+FUEL_EVERY     = 3  * 3600 # fuel/rest break every 3 h of driving
+FUEL_DUR       = 15 * 60
+
+def split_by_day_budget(
+    stop_nodes: list[int],
+    start_node: int,
+    duration_matrix: list[list[int]],
+    distance_matrix: list[list[int]],
+) -> list[list[int]]:
+    """
+    Split an ordered stop list into daily chunks so that each day fits within
+    MAX_DAY_SEC (travel + service + mandatory breaks + return to start).
+    """
+    days: list[list[int]] = []
+    remaining = list(stop_nodes)
+    day_num = 0
+
+    while remaining:
+        day_num += 1
+        day_stops: list[int] = []
+
+        # Day 2+: the driver starts from home but must drive past all Day 1 stops
+        # to reach the first remaining stop (deadhead). Charge that travel time
+        # upfront so the budget reflects the real cost of the day.
+        if day_num > 1:
+            deadhead = duration_matrix[start_node][remaining[0]]
+            elapsed  = deadhead
+            driven   = deadhead
+        else:
+            elapsed = 0
+            driven  = 0
+
+        had_lunch = False
+        prev      = start_node
+
+        for node in remaining[:]:
+            travel = duration_matrix[prev][node]
+
+            # Fuel break needed before this leg?
+            fuel = FUEL_DUR if driven + travel >= FUEL_EVERY else 0
+            # Lunch break needed after this leg?
+            lunch = 0
+            if not had_lunch and elapsed + travel >= LUNCH_AFTER:
+                lunch = LUNCH_DUR
+
+            # Time to drive back home after this stop
+            ret = duration_matrix[node][start_node]
+
+            candidate = elapsed + fuel + travel + SERVICE_TIME + lunch + ret
+
+            if candidate > MAX_DAY_SEC and day_stops:
+                # This stop won't fit today — push to next day
+                break
+
+            # Commit this stop to today
+            elapsed += fuel + travel + SERVICE_TIME + lunch
+            driven  += travel
+            if fuel:
+                driven = 0        # reset counter after fuel stop
+            if lunch:
+                had_lunch = True
+            day_stops.append(node)
+            remaining.remove(node)
+            prev = node
+
+        if not day_stops:
+            # Single stop exceeds budget on its own — take it anyway
+            day_stops.append(remaining.pop(0))
+
+        days.append(day_stops)
+
+    return days
+
+
+# ── Overflow rebalancer ───────────────────────────────────────────────────────
+
+def _day1_elapsed(route: list[int], start_node: int, dur: list[list[int]]) -> int:
+    """Compute total elapsed seconds for a Day-1 route (travel + service, no return)."""
+    total, prev = 0, start_node
+    for node in route:
+        total += dur[prev][node] + SERVICE_TIME
+        prev = node
+    return total
+
+
+def _cheapest_insertion(
+    stop: int,
+    route: list[int],
+    start_node: int,
+    dur: list[list[int]],
+) -> tuple[int, int]:
+    """Return (extra_seconds, insert_position) for cheapest place to insert stop."""
+    best, best_pos = 10**9, 0
+    prev_nodes = [start_node] + route
+    for pos in range(len(route) + 1):
+        prev = prev_nodes[pos]
+        if pos < len(route):
+            nxt = route[pos]
+            extra = dur[prev][stop] + SERVICE_TIME + dur[stop][nxt] - dur[prev][nxt]
+        else:
+            extra = dur[prev][stop] + SERVICE_TIME
+        if extra < best:
+            best, best_pos = extra, pos
+    return best, best_pos
+
+
+def rebalance_overflow(
+    vehicle_routes: list[list[int]],
+    start_indices: list[int],
+    duration_matrix: list[list[int]],
+    distance_matrix: list[list[int]],
+) -> list[list[int]]:
+    """
+    Move overflow stops (those that would become Day 2+) into other drivers'
+    Day 1 routes when it's cheaper than sending the original driver back the
+    next day with heavy deadhead. If no driver can absorb a stop, it stays
+    as Day 2 for the original driver.
+    """
+    # Identify Day 1 stops and overflow per driver
+    day1: list[list[int]] = []
+    overflow_pool: list[tuple[int, int]] = []  # (stop_node, src_driver_idx)
+
+    for v_idx, stops in enumerate(vehicle_routes):
+        days = split_by_day_budget(stops, start_indices[v_idx], duration_matrix, distance_matrix)
+        day1.append(list(days[0]) if days else [])
+        for day_stops in days[1:]:
+            overflow_pool.extend((s, v_idx) for s in day_stops)
+
+    if not overflow_pool:
+        return vehicle_routes  # nothing to rebalance
+
+    # Precompute elapsed time for each driver's current Day 1
+    elapsed: list[int] = [
+        _day1_elapsed(day1[v], start_indices[v], duration_matrix)
+        for v in range(len(vehicle_routes))
+    ]
+
+    absorbed: set[int] = set()
+
+    for stop, src in overflow_pool:
+        best_driver, best_cost, best_pos = -1, 10**9, 0
+
+        for v_idx, route in enumerate(day1):
+            extra, pos = _cheapest_insertion(stop, route, start_indices[v_idx], duration_matrix)
+            return_node = route[-1] if route else start_indices[v_idx]
+            ret = duration_matrix[return_node][start_indices[v_idx]]
+            if elapsed[v_idx] + extra + ret <= MAX_DAY_SEC and extra < best_cost:
+                best_cost, best_driver, best_pos = extra, v_idx, pos
+
+        if best_driver >= 0:
+            day1[best_driver].insert(best_pos, stop)
+            elapsed[best_driver] += best_cost
+            absorbed.add(stop)
+
+    # Rebuild vehicle_routes: Day 1 (rebalanced) + any unabsorbed overflow
+    result: list[list[int]] = []
+    unabsorbed_by_driver: list[list[int]] = [[] for _ in vehicle_routes]
+    for stop, src in overflow_pool:
+        if stop not in absorbed:
+            unabsorbed_by_driver[src].append(stop)
+
+    for v_idx in range(len(vehicle_routes)):
+        result.append(day1[v_idx] + unabsorbed_by_driver[v_idx])
+
+    absorbed_count = len(absorbed)
+    if absorbed_count:
+        print(f"[rebalance] absorbed {absorbed_count} overflow stops into other drivers' Day 1")
+
+    return result
+
+
+# ── Break-stop helpers ────────────────────────────────────────────────────────
+
+def find_break_positions(
+    day_nodes: list[int],
+    start_node: int,
+    duration_matrix: list[list[int]],
+) -> list[tuple[int, str]]:
+    """
+    Return [(before_stop_index, break_type), ...].
+    A break at index i is inserted BEFORE stop i — i.e. the driver finishes
+    stop i-1, takes a break at a nearby POI, then drives the long leg to stop i.
+    We check BEFORE each leg: if this leg would push driven/elapsed over the
+    threshold, schedule a break at the current position first.
+    """
+    breaks: list[tuple[int, str]] = []
+    elapsed, driven = 0, 0
+    had_lunch = False
+    prev = start_node
+
+    for i, node in enumerate(day_nodes):
+        travel = duration_matrix[prev][node]
+
+        if driven + travel >= FUEL_EVERY:
+            breaks.append((i, 'fuel_break'))
+            driven = 0
+            elapsed += FUEL_DUR
+
+        if not had_lunch and elapsed + travel >= LUNCH_AFTER:
+            breaks.append((i, 'lunch_break'))
+            had_lunch = True
+            elapsed += LUNCH_DUR
+
+        elapsed += travel + SERVICE_TIME
+        driven  += travel
+        prev = node
+
+    return breaks
+
+
+async def lookup_break_poi(
+    lat: float, lng: float, break_type: str
+) -> tuple[float, float, str, str]:
+    """
+    Query Overpass for nearest gas station (fuel) or restaurant (lunch).
+    Returns (lat, lng, name, address).  Falls back to input coords on error.
+    """
+    amenity = "fuel" if break_type == "fuel_break" else "restaurant|cafe|fast_food"
+    query = (
+        f'[out:json][timeout:10];'
+        f'(node["amenity"~"{amenity}"](around:10000,{lat},{lng}););'
+        f'out 1;'
+    )
+    try:
+        async with httpx.AsyncClient() as c:
+            r = await c.post(
+                "https://overpass-api.de/api/interpreter",
+                data={"data": query}, timeout=12,
+                headers={"User-Agent": "Livra/1.0 loredanloleworks@gmail.com"},
+            )
+            els = r.json().get("elements", [])
+            if els:
+                el   = els[0]
+                tags = el.get("tags", {})
+                name = tags.get("name") or ("Stație peco" if break_type == "fuel_break" else "Restaurant")
+                street = tags.get("addr:street", "")
+                house  = tags.get("addr:housenumber", "")
+                addr   = f"{street} {house}".strip() or name
+                return float(el["lat"]), float(el["lon"]), name, addr
+    except Exception as exc:
+        print(f"[poi] {break_type} lookup failed: {exc}")
+    label = "Stație peco" if break_type == "fuel_break" else "Restaurant"
+    return lat, lng, label, "În apropiere"
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
+@app.post("/optimize", response_model=OptimizeResponse)
+async def optimize(req: OptimizeRequest):
+    # 1. Geocode fallback depot
+    depot_coords = await geocode(req.depot_address) or (47.0245, 28.8322)
+
+    # 2. Per-driver start coordinates (GPS position if known, else depot)
+    driver_starts: list[tuple[float, float]] = []
+    for d in req.drivers:
+        if d.start_lat is not None and d.start_lng is not None:
+            driver_starts.append((d.start_lat, d.start_lng))
+        else:
+            driver_starts.append(depot_coords)
+
+    # 3. Geocode delivery addresses in parallel
+    coords_list = await asyncio.gather(*[geocode(d.address) for d in req.deliveries])
+
+    valid: list[tuple[DeliveryIn, tuple[float, float]]] = [
+        (d, c) for d, c in zip(req.deliveries, coords_list) if c
+    ]
+    if not valid:
+        return OptimizeResponse(routes=[], savings_pct=0, total_stops=0)
+
+    deliveries_ok, delivery_coords = zip(*valid)
+
+    # 4. Location list: [depot(0), driver_starts(1..D), deliveries(D+1..)]
+    num_drivers = len(req.drivers)
+    all_locations = [depot_coords, *driver_starts, *delivery_coords]
+    start_indices = list(range(1, 1 + num_drivers))
+    delivery_offset = 1 + num_drivers
+
+    # 5. Fetch duration + distance matrices (GraphHopper if running, else OSRM)
+    duration_matrix, distance_matrix = await get_matrices(list(all_locations))
+
+    # 6. Geographic cluster + directional ordering
+    vehicle_routes = plan_routes(
+        list(delivery_coords),
+        driver_starts,
+        duration_matrix,
+        delivery_offset,
+    )
+
+    # 6b. Move overflow stops into other drivers where it saves deadhead
+    vehicle_routes = rebalance_overflow(
+        vehicle_routes, start_indices, duration_matrix, distance_matrix
+    )
+
+    # 7. Naive cost baseline (duration-based, for savings % display)
+    naive_cost = sum(
+        duration_matrix[0][delivery_offset + i] + duration_matrix[delivery_offset + i][0]
+        for i in range(len(deliveries_ok))
+    )
+
+    # 8. Build response — split each driver's stops across days as needed
+    routes, optimized_cost = [], 0
+    for v_idx, (driver, stop_nodes) in enumerate(zip(req.drivers, vehicle_routes)):
+        if not stop_nodes:
+            continue
+        start_node = start_indices[v_idx]
+        s_lat, s_lng = driver_starts[v_idx]
+        color = DRIVER_COLORS[v_idx % len(DRIVER_COLORS)]
+
+        daily_chunks = split_by_day_budget(
+            stop_nodes, start_node, duration_matrix, distance_matrix
+        )
+
+        for day_num, day_nodes in enumerate(daily_chunks, 1):
+            # Build delivery stops
+            delivery_stops: list[Stop] = []
+            prev, duration = start_node, 0
+            for node in day_nodes:
+                d = deliveries_ok[node - delivery_offset]
+                lat, lng = all_locations[node]
+                delivery_stops.append(Stop(
+                    order=0,  # renumbered after injecting breaks
+                    delivery_id=d.id, customer=d.customer,
+                    address=d.address, phone=d.phone, lat=lat, lng=lng,
+                ))
+                duration += duration_matrix[prev][node]
+                prev = node
+
+            # Find where breaks should go and look up nearby POIs concurrently.
+            # Break at before_idx → POI near the stop BEFORE that index.
+            break_positions = find_break_positions(day_nodes, start_node, duration_matrix)
+            def poi_coord(before_idx: int) -> tuple[float, float]:
+                # Search near the destination stop (within-city area) rather than
+                # the driver's home, so we find POIs along/near the actual route.
+                target = delivery_stops[before_idx] if before_idx < len(delivery_stops) else delivery_stops[-1]
+                return target.lat, target.lng
+
+            poi_tasks = [
+                lookup_break_poi(*poi_coord(idx), btype)
+                for idx, btype in break_positions
+            ]
+            poi_results = await asyncio.gather(*poi_tasks) if poi_tasks else []
+
+            # Inject breaks before their target stop (reverse order to keep indices valid)
+            for (before_idx, btype), (plat, plng, pname, paddr) in zip(
+                reversed(break_positions), reversed(poi_results)
+            ):
+                dur_min = LUNCH_DUR // 60 if btype == 'lunch_break' else FUEL_DUR // 60
+                label   = "Pauză de masă" if btype == 'lunch_break' else "Pauză combustibil"
+                delivery_stops.insert(before_idx, Stop(
+                    order=0, delivery_id=f'_break_{btype}_{before_idx}',
+                    customer=label, address=f"{pname} — {paddr}",
+                    phone='', lat=plat, lng=plng,
+                    type=btype, break_duration_min=dur_min,
+                ))
+
+            # Renumber all stops in sequence
+            stops = []
+            for i, s in enumerate(delivery_stops, 1):
+                stops.append(s.model_copy(update={'order': i}))
+
+            # Include return trip from last stop back to driver start
+            last_node = day_nodes[-1]
+            duration += duration_matrix[last_node][start_node]
+            optimized_cost += duration
+            total_dist_m = sum(
+                distance_matrix[start_node if i == 0 else day_nodes[i - 1]][node]
+                for i, node in enumerate(day_nodes)
+            )
+            total_dist_m += distance_matrix[last_node][start_node]
+            routes.append(DriverRoute(
+                driver_id=driver.id,
+                driver_name=driver.name,
+                color=color,
+                stops=stops,
+                total_distance_km=round(total_dist_m / 1000, 1),
+                total_duration_min=(duration + len(day_nodes) * SERVICE_TIME) // 60,
+                start_lat=s_lat,
+                start_lng=s_lng,
+                day=day_num,
+            ))
+
+    savings = max(0, int((1 - optimized_cost / max(naive_cost, 1)) * 100))
+    return OptimizeResponse(routes=routes, savings_pct=savings, total_stops=len(deliveries_ok))
+
+
+# ── Webhook receiver (in-memory, replace with DB in prod) ────────────────────
+
+_pending: list[dict] = []
+
+@app.post("/webhook/orders", status_code=201)
+async def receive_order(order: WebhookOrder):
+    _pending.append({
+        "id": order.order_id, "customer": order.customer_name,
+        "phone": order.customer_phone, "address": order.delivery_address,
+        "notes": order.notes,
+    })
+    return {"status": "received", "total_pending": len(_pending)}
+
+@app.get("/webhook/pending")
+async def get_pending():
+    return {"deliveries": _pending}
+
+@app.delete("/webhook/pending")
+async def clear_pending():
+    _pending.clear()
+    return {"status": "cleared"}

@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out both;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* Leaflet */
+.leaflet-container {
+  font-family: inherit;
+}
+.dark .leaflet-container {
+  background: #09090b;
+}
+.leaflet-control-attribution {
+  font-size: 10px !important;
+}
+.dark .leaflet-control-attribution {
+  background: rgba(9,9,11,0.7) !important;
+  color: #52525b !important;
+}
+.dark .leaflet-control-attribution a {
+  color: #71717a !important;
+}
+.leaflet-control-zoom {
+  border: 1px solid #e4e4e7 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+.dark .leaflet-control-zoom {
+  border-color: #27272a !important;
+}
+.leaflet-control-zoom a {
+  background: #fff !important;
+  color: #52525b !important;
+  border-bottom: 1px solid #e4e4e7 !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+}
+.leaflet-control-zoom a:hover {
+  background: #f4f4f5 !important;
+  color: #09090b !important;
+}
+.dark .leaflet-control-zoom a {
+  background: #18181b !important;
+  color: #71717a !important;
+  border-bottom-color: #27272a !important;
+}
+.dark .leaflet-control-zoom a:hover {
+  background: #27272a !important;
+  color: #fafafa !important;
+}
+
+/* Leaflet tooltip — readable pill-shaped background */
+.leaflet-tooltip {
+  background: rgba(24, 24, 27, 0.92) !important;     /* zinc-900 @ ~92% */
+  color: #f4f4f5 !important;                         /* zinc-100 */
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  padding: 5px 9px !important;
+  white-space: normal !important;
+  max-width: 240px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.35 !important;
+}
+/* small caret pointing toward marker */
+.leaflet-tooltip-top::before,
+.leaflet-tooltip-bottom::before,
+.leaflet-tooltip-left::before,
+.leaflet-tooltip-right::before {
+  border-top-color: rgba(24, 24, 27, 0.92) !important;
+  border-bottom-color: rgba(24, 24, 27, 0.92) !important;
+  border-left-color: rgba(24, 24, 27, 0.92) !important;
+  border-right-color: rgba(24, 24, 27, 0.92) !important;
+}

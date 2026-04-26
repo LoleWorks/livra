@@ -1,0 +1,126 @@
+import { useState } from 'react'
+import { NavLink, Outlet, Navigate } from 'react-router-dom'
+import { LayoutDashboard, RouteIcon, UserCog, CreditCard, Truck, Sun, Moon, Plug, ChevronLeft, ChevronRight, Activity, LogOut } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
+import { getUser, clearUser } from '../lib/auth'
+
+const nav = [
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/routes',    icon: RouteIcon,        label: 'Rute' },
+  { to: '/drivers',   icon: UserCog,          label: 'Utilizatori' },
+  { to: '/activity',  icon: Activity,         label: 'Activitate' },
+  { to: '/integrations', icon: Plug,          label: 'Integrări' },
+  { to: '/credits',   icon: CreditCard,       label: 'Credite' },
+]
+
+export default function Layout() {
+  const { theme, toggle } = useTheme()
+  const [collapsed, setCollapsed] = useState(false)
+  const user = getUser()
+
+  if (!user) return <Navigate to="/login" replace />
+  if (user.must_change_password) return <Navigate to="/change-password" replace />
+  if (user.role !== 'admin') return <Navigate to="/sales" replace />
+
+  return (
+    <div className="flex h-screen min-h-0 bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
+      <aside className={`flex-shrink-0 flex flex-col bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
+
+        {/* Logo */}
+        <div className={`flex items-center h-12 border-b border-zinc-100 dark:border-zinc-800 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <Truck size={12} className="text-white" />
+            </div>
+            {!collapsed && (
+              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">Livra</span>
+            )}
+          </div>
+          {!collapsed && (
+            <button
+              onClick={toggle}
+              className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            >
+              {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+            </button>
+          )}
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 p-2 space-y-0.5">
+          {nav.map(({ to, icon: Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              title={collapsed ? label : undefined}
+              className={({ isActive }) =>
+                `flex items-center rounded-lg text-[13px] font-medium transition-colors ${collapsed ? 'justify-center px-0 py-2' : 'gap-2.5 px-2.5 py-2'} ${
+                  isActive
+                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon size={14} className={isActive ? 'text-blue-600 dark:text-blue-400' : ''} />
+                  {!collapsed && label}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-2 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
+          {collapsed ? (
+            <div className="flex justify-center py-2" title={user.name}>
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+                <span className="text-[10px] font-bold text-white">{user.initials}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg">
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center flex-shrink-0">
+                <span className="text-[10px] font-bold text-white">{user.initials}</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200 truncate">{user.name}</div>
+                <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{user.email}</div>
+              </div>
+              <button
+                onClick={() => { clearUser(); window.location.href = '/login' }}
+                title="Deconectare"
+                className="w-6 h-6 flex items-center justify-center rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex-shrink-0"
+              >
+                <LogOut size={12} />
+              </button>
+            </div>
+          )}
+
+          {/* Collapse toggle */}
+          <button
+            onClick={() => setCollapsed(c => !c)}
+            className={`w-full flex items-center rounded-lg py-2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors ${collapsed ? 'justify-center px-0' : 'gap-2 px-2.5'}`}
+          >
+            {collapsed ? <ChevronRight size={13} /> : <><ChevronLeft size={13} /><span className="text-[12px]">Restrânge</span></>}
+          </button>
+
+          {collapsed && (
+            <button
+              onClick={toggle}
+              title={theme === 'dark' ? 'Mod luminos' : 'Mod întunecat'}
+              className="w-full flex justify-center py-2 rounded-lg text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+            >
+              {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+            </button>
+          )}
+        </div>
+      </aside>
+
+      <main className="flex-1 overflow-hidden flex flex-col">
+        <Outlet />
+      </main>
+    </div>
+  )
+}
