@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Bell, Package, CheckCircle, Star, History, Navigation, Shield, Clock } from 'lucide-react'
+import { Bell, Package, CheckCircle, Star, History, Navigation, Shield, Clock } from 'lucide-react'
 
 // ── Phone Mockup ──────────────────────────────────────────────────────────────
 
@@ -343,7 +343,7 @@ export default function AppDownload() {
           {/* Connector line */}
           <div className="hidden md:block absolute top-10 left-[calc(16.6%+24px)] right-[calc(16.6%+24px)] h-0.5 bg-gradient-to-r from-brand-orange via-violet-500 to-emerald-500 opacity-30" />
 
-          {STEPS.map((s, i) => {
+          {STEPS.map((s) => {
             const Icon = s.icon
             return (
               <div key={s.num} className="relative flex flex-col items-center text-center">
