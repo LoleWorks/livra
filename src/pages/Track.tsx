@@ -448,6 +448,13 @@ export default function Track() {
                 <span>Actualizat {fmtAgo(data.driver_location.updated_at)}</span>
               </div>
             )}
+
+            {/* Partner Ad Space */}
+            <div className="mt-4 pt-4 border-t border-zinc-200">
+              <div className="w-full h-24 bg-gradient-to-r from-zinc-100 to-zinc-50 rounded-xl flex items-center justify-center text-[12px] text-zinc-400 cursor-pointer hover:bg-zinc-100 transition-colors">
+                [Partner Ad - 100% width]
+              </div>
+            </div>
           </div>
         )}
 
