@@ -4,23 +4,15 @@
   },
   "build": {
     "preview": {
-      "env": {
-        "ANDROID_NDK_HOME": "",
-        "ANDROID_NDK_ROOT": "",
-        "NDK_HOME": ""
-      },
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "prebuildCommand": "npx expo prebuild --clean && sed -i '/ndk.dir/d' android/local.properties"
       }
     },
     "production": {
-      "env": {
-        "ANDROID_NDK_HOME": "",
-        "ANDROID_NDK_ROOT": "",
-        "NDK_HOME": ""
-      },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "prebuildCommand": "npx expo prebuild --clean && sed -i '/ndk.dir/d' android/local.properties"
       }
     }
   }
