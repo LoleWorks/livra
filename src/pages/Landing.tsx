@@ -5,9 +5,117 @@ import {
   CheckCircle, ArrowRight, Star, Globe, ChevronDown, ChevronUp,
   Route, Gift, TrendingUp, Mail, MapPin, Clock, Zap,
 } from 'lucide-react'
-import { useLang } from '../context/LanguageContext'
-import { getLandingStrings } from '../locales/landing'
-import LangSwitcher from '../components/LangSwitcher'
+
+// ── How it works ──────────────────────────────────────────────────────────────
+
+const STEPS = [
+  {
+    step: '01',
+    title: 'Conectează magazinul',
+    desc: 'Integrează WooCommerce, OpenCart sau adaugă comenzi manual. Toate comenzile ajung automat în Livra, gata de procesare.',
+    icon: Plug,
+    color: 'bg-orange-500',
+  },
+  {
+    step: '02',
+    title: 'Optimizăm rutele',
+    desc: 'Algoritmul nostru calculează traseele optime pentru toți șoferii tăi, ținând cont de ferestre orare, distanțe și capacitate.',
+    icon: Route,
+    color: 'bg-violet-500',
+  },
+  {
+    step: '03',
+    title: 'Șoferii livrează',
+    desc: 'Aplicația mobilă Livra ghidează șoferii pas cu pas. Semnătură digitală, foto la livrare, raport în timp real.',
+    icon: Smartphone,
+    color: 'bg-emerald-500',
+  },
+  {
+    step: '04',
+    title: 'Clienții urmăresc live',
+    desc: 'Fiecare client primește un link de urmărire. Vede pe hartă unde e coletul și ETA actualizat la fiecare câteva secunde.',
+    icon: Radio,
+    color: 'bg-amber-500',
+  },
+]
+
+// ── Network ───────────────────────────────────────────────────────────────────
+
+const NETWORK_BENEFITS = [
+  {
+    icon: Smartphone,
+    title: 'Reclame pe pagina de tracking',
+    desc: 'Când un client așteaptă o livrare de la alt partener, magazinul tău apare pe ecranul lui. 10 minute de atenție pură, inclus în prețul creditelor, fără costuri extra.',
+  },
+  {
+    icon: Gift,
+    title: 'Livrare gratuită la primul ordin',
+    desc: 'Oferă livrare gratuită clienților noi din rețeaua Livra. Noi știm cine nu a mai comandat de la tine, tu nu trebuie să faci nimic, se aplică automat.',
+  },
+  {
+    icon: MapPin,
+    title: 'Promovare pe zone',
+    desc: 'Vrei să crești în Botanica sau Ciocana? Targetezi clienții din zona respectivă care au comandat produse similare. Livra știe exact cine și unde.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Date despre comportamentul clienților',
+    desc: 'Află când comandă cel mai mult clienții din zona ta, ce categorii de produse preferă și cum evoluează cererea. Date reale, nu presupuneri.',
+  },
+  {
+    icon: Users,
+    title: 'Bază de clienți partajată',
+    desc: 'Un client care și-a salvat adresa și preferințele la un partener Livra primește automat livrare perfectă și la tine, fără să completeze nimic din nou.',
+  },
+  {
+    icon: Zap,
+    title: 'Buton Livra pe site-ul tău',
+    desc: 'Adaugi un buton „Livrează cu Livra" pe site-ul tău. Clienții cu cont Livra plasează comanda cu un singur click: adresa, fereastra orară și toate preferințele lor sunt completate automat. Fără formulare, fără întrebări, fără livrări ratate.',
+  },
+]
+
+// ── Pricing ───────────────────────────────────────────────────────────────────
+
+
+// ── Onboarding ────────────────────────────────────────────────────────────────
+
+const ONBOARDING_STEPS = [
+  {
+    num: '01',
+    title: 'Creăm conturile',
+    desc: 'Tu ne dai datele companiei, noi ne ocupăm de tot: contul tău de manager, conturile șoferilor, conturile agenților de vânzări. Nu trebuie să configurezi nimic.',
+  },
+  {
+    num: '02',
+    title: 'Instalăm aplicația pe telefoanele șoferilor',
+    desc: 'Mergem la șoferi sau îi ghidăm pas cu pas la distanță. Fiecare telefon iese configurat și gata de prima livrare.',
+  },
+  {
+    num: '03',
+    title: 'Instruim echipa',
+    desc: 'Fiecare șofer știe exact ce să facă: cum pornește ruta, cum confirmă livrarea, cum raportează un eșec. Fără surprize în prima zi.',
+  },
+  {
+    num: '04',
+    title: 'Conectăm magazinul tău',
+    desc: 'Instalăm plugin-ul în WooCommerce sau OpenCart, configurăm webhook-ul dacă folosești altă platformă și testăm că totul funcționează înainte să plecăm.',
+  },
+  {
+    num: '05',
+    title: 'Prima zi, împreună',
+    desc: 'La prima zi de livrări reale, suntem disponibili. Dacă apare ceva, rezolvăm pe loc. Tu nu ești lăsat singur niciodată.',
+  },
+]
+
+// ── FAQ ───────────────────────────────────────────────────────────────────────
+
+const FAQS = [
+  { q: 'Cât durează să îl configurez?', a: 'Majoritatea companiilor sunt live în mai puțin de 1 oră. Conectarea WooCommerce durează 5 minute cu plugin-ul nostru.' },
+  { q: 'Ce se întâmplă dacă un credit rămâne nefolosit?', a: 'Creditele nu expiră. Le poți folosi oricând, la propriul ritm.' },
+  { q: 'Am nevoie de aplicație mobilă pentru șoferi?', a: 'Da, Livra Driver este disponibilă pe iOS și Android, gratuită pentru șoferi.' },
+  { q: 'Funcționează și în afara Chișinăului?', a: 'Da, Livra optimizează livrări în toată Moldova și poate fi configurat pentru orice regiune.' },
+  { q: 'Există un contract pe termen lung?', a: 'Nu. Funcționezi pe bază de credite prepaid, fără abonament lunar obligatoriu.' },
+]
 
 // ── Feature section data ───────────────────────────────────────────────────────
 
@@ -694,13 +802,8 @@ function Faq({ q, a }: { q: string; a: string }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function Landing() {
-  const { lang } = useLang()
-  const t = getLandingStrings(lang)
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
-
-  const stepIcons = [Plug, Route, Smartphone, Radio]
-  const benefitIcons = [Smartphone, Gift, MapPin, TrendingUp, Users, Zap]
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
@@ -713,18 +816,17 @@ export default function Landing() {
             <svg width="36" height="4" viewBox="0 0 36 4"><line x1="0" y1="2" x2="28" y2="2" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="28,0 36,2 28,4" fill="#ff5c2c"/></svg>
           </div>
           <div className="hidden md:flex items-center gap-6 text-[13px] text-zinc-500 dark:text-zinc-400">
-            <a href="#cum-functioneaza" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">{t.navbar.howItWorks}</a>
-            <a href="#functionalitati" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">{t.navbar.features}</a>
-            <a href="#retea" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">{t.navbar.network}</a>
-            <a href="#preturi" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">{t.navbar.pricing}</a>
+            <a href="#cum-functioneaza" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Cum funcționează</a>
+            <a href="#functionalitati" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Funcționalități</a>
+            <a href="#retea" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Rețeaua Livra</a>
+            <a href="#preturi" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Prețuri</a>
           </div>
-          <div className="flex items-center gap-3">
-            <LangSwitcher />
+          <div className="flex items-center gap-2">
             <Link to="/login" className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 transition-colors">
-              {t.navbar.login}
+              Autentificare
             </Link>
             <a href="#contact" className="text-[13px] font-medium bg-brand-orange hover:bg-brand-orange-hover text-white px-4 py-1.5 rounded-lg transition-colors">
-              {t.navbar.requestDemo}
+              Solicită demo
             </a>
           </div>
         </div>
@@ -734,28 +836,28 @@ export default function Landing() {
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/50 text-[12px] font-medium text-orange-700 dark:text-orange-400 mb-6">
           <Star size={11} className="fill-current" />
-          {t.hero.badge}
+          Construit pentru companii din Moldova
         </div>
         <h1 className="text-[48px] md:text-[60px] font-bold tracking-tight leading-[1.1] text-zinc-900 dark:text-zinc-50 mb-6">
-          <span className="text-brand-orange">Livra</span>{t.hero.title1}<br />
-          {t.hero.title2}
+          <span className="text-brand-orange">Livra</span>za mai rapid.<br />
+          Crești mai mult.
         </h1>
         <p className="text-[18px] text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
-          {t.hero.subtitle}
+          Livra optimizează rutele de livrare, urmărește șoferii în timp real și îți arată exact ce se întâmplă cu fiecare comandă.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <a href="#contact" className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange hover:bg-brand-orange-hover text-white text-[15px] font-medium rounded-xl transition-colors">
-            {t.hero.startFree} <ArrowRight size={16} />
+            Începe gratuit <ArrowRight size={16} />
           </a>
           <a href="#cum-functioneaza" className="inline-flex items-center gap-2 px-6 py-3 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 text-[15px] font-medium rounded-xl transition-colors">
-            {t.hero.seeHow}
+            Vezi cum funcționează
           </a>
         </div>
         <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
           {[
-            { value: t.hero.stat1Value, label: t.hero.stat1Label },
-            { value: t.hero.stat2Value, label: t.hero.stat2Label },
-            { value: t.hero.stat3Value, label: t.hero.stat3Label },
+            { value: '30%', label: 'mai puțin combustibil' },
+            { value: '2×',  label: 'mai multe livrări/zi' },
+            { value: '98%', label: 'satisfacție clienți' },
           ].map(({ value, label }) => (
             <div key={label} className="text-center">
               <div className="text-[32px] font-bold text-brand-orange">{value}</div>
@@ -769,23 +871,22 @@ export default function Landing() {
       <section id="cum-functioneaza" className="bg-zinc-50 dark:bg-zinc-900 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <h2 className="text-[32px] font-bold tracking-tight mb-3">{t.howItWorks.title}</h2>
-            <p className="text-[16px] text-zinc-500 dark:text-zinc-400">{t.howItWorks.subtitle}</p>
+            <h2 className="text-[32px] font-bold tracking-tight mb-3">Cum funcționează Livra</h2>
+            <p className="text-[16px] text-zinc-500 dark:text-zinc-400">De la comandă la livrare, totul automatizat în 4 pași.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {t.howItWorks.steps.map((s, i) => {
-              const colors = ['bg-orange-500', 'bg-violet-500', 'bg-emerald-500', 'bg-amber-500']
-              const Icon = stepIcons[i]
+            {STEPS.map((s, i) => {
+              const Icon = s.icon
               return (
-                <div key={i} className="relative">
-                  {i < t.howItWorks.steps.length - 1 && (
+                <div key={s.step} className="relative">
+                  {i < STEPS.length - 1 && (
                     <div className="hidden md:block absolute top-8 left-1/2 w-full h-px bg-zinc-200 dark:bg-zinc-700" />
                   )}
                   <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 relative z-10 h-full">
-                    <div className={`w-14 h-14 rounded-xl ${colors[i]} flex items-center justify-center mb-4`}>
+                    <div className={`w-14 h-14 rounded-xl ${s.color} flex items-center justify-center mb-4`}>
                       <Icon size={24} className="text-white" />
                     </div>
-                    <div className="text-[11px] font-bold text-zinc-300 dark:text-zinc-600 tracking-widest mb-2">Pas {String(i + 1).padStart(2, '0')}</div>
+                    <div className="text-[11px] font-bold text-zinc-300 dark:text-zinc-600 tracking-widest mb-2">Pas {s.step}</div>
                     <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-50 mb-2">{s.title}</h3>
                     <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{s.desc}</p>
                   </div>
@@ -863,32 +964,29 @@ export default function Landing() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[12px] font-medium text-white/80 mb-6">
               <Globe size={11} />
-              {t.networkBenefits.badge}
+              Exclusiv pentru parteneri Livra
             </div>
             <h2 className="text-[36px] md:text-[44px] font-bold tracking-tight text-white mb-4 leading-tight">
-              {t.networkBenefits.title1}<br />{t.networkBenefits.title2}
+              Nu ești doar un client.<br />Ești parte dintr-o rețea.
             </h2>
             <p className="text-[17px] text-blue-100 leading-relaxed max-w-2xl mx-auto mb-6">
-              {t.networkBenefits.subtitle}
+              Companiile din rețeaua Livra nu concurează între ele, se completează. Fiecare partener nou aduce clienți noi pentru toți ceilalți. <strong className="text-white">Livra devine canalul tău de creștere, nu doar de livrare.</strong>
             </p>
           </div>
 
-          {/* Feature cards */}
+          {/* 5 feature cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {t.networkBenefits.items.map((item, i) => {
-              const Icon = benefitIcons[i]
-              return (
-                <div key={item.title} className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-5 flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
-                    <Icon size={18} className="text-white" />
-                  </div>
-                  <div>
-                    <div className="text-[14px] font-semibold text-white mb-1.5">{item.title}</div>
-                    <div className="text-[12px] text-blue-100 leading-relaxed">{item.desc}</div>
-                  </div>
+            {NETWORK_BENEFITS.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-5 flex gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+                  <Icon size={18} className="text-white" />
                 </div>
-              )
-            })}
+                <div>
+                  <div className="text-[14px] font-semibold text-white mb-1.5">{title}</div>
+                  <div className="text-[12px] text-blue-100 leading-relaxed">{desc}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -896,34 +994,50 @@ export default function Landing() {
       {/* ── Pricing ── */}
       <section id="preturi" className="py-20 max-w-6xl mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-[32px] font-bold tracking-tight mb-3">{t.pricing.title}</h2>
+          <h2 className="text-[32px] font-bold tracking-tight mb-3">Prețuri transparente, fără surprize</h2>
           <p className="text-[16px] text-zinc-500 dark:text-zinc-400">
-            {t.pricing.subtitle}
+            Plătești per livrare, nu per lună. Fără abonament, fără contract.
           </p>
         </div>
 
         <div className="max-w-3xl mx-auto">
           {/* Hero price */}
           <div className="bg-brand-orange rounded-3xl p-10 text-center mb-6">
-            <p className="text-blue-200 text-[14px] font-medium mb-2">{t.pricing.priceFrom}</p>
+            <p className="text-blue-200 text-[14px] font-medium mb-2">De la</p>
             <div className="flex items-end justify-center gap-2 mb-2">
-              <span className="text-[72px] font-bold text-white leading-none">{t.pricing.price}</span>
+              <span className="text-[72px] font-bold text-white leading-none">10</span>
               <span className="text-[24px] text-blue-200 mb-3">MDL</span>
             </div>
-            <p className="text-blue-100 text-[18px] font-medium mb-6">{t.pricing.perDelivery}</p>
+            <p className="text-blue-100 text-[18px] font-medium mb-6">per livrare</p>
             <a
               href="#contact"
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-brand-orange text-[15px] font-semibold rounded-xl hover:bg-orange-50 transition-colors"
             >
-              {t.pricing.requestOffer} <ArrowRight size={16} />
+              Solicită ofertă <ArrowRight size={16} />
             </a>
           </div>
 
           {/* How credits work */}
           <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-[18px] font-bold text-zinc-900 dark:text-zinc-50 mb-6">{t.pricing.creditsTitle}</h3>
+            <h3 className="text-[18px] font-bold text-zinc-900 dark:text-zinc-50 mb-6">Cum funcționează creditele?</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-              {t.pricing.creditItems.map(item => (
+              {[
+                {
+                  num: '1',
+                  title: '1 credit = 1 livrare',
+                  desc: 'Fiecare livrare optimizată consumă un singur credit, indiferent de distanță sau complexitate.',
+                },
+                {
+                  num: '2',
+                  title: 'Cumperi în avans',
+                  desc: 'Alegi câte credite vrei și le plătești o singură dată. Cu cât cumperi mai multe, cu atât prețul per livrare scade.',
+                },
+                {
+                  num: '3',
+                  title: 'Nu expiră niciodată',
+                  desc: 'Creditele rămân în contul tău până le folosești. Nu există presiune de timp și nu pierzi nimic.',
+                },
+              ].map(item => (
                 <div key={item.num} className="flex gap-4">
                   <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/40 text-brand-orange dark:text-orange-400 text-[14px] font-bold flex items-center justify-center flex-shrink-0">
                     {item.num}
@@ -938,9 +1052,9 @@ export default function Landing() {
             <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1.5">
                 {[
-                  t.pricing.included1,
-                  t.pricing.included2,
-                  t.pricing.included3,
+                  'Aplicație mobilă șofer inclusă în orice pachet',
+                  'Urmărire live pentru clienți inclusă',
+                  'Integrări e-commerce și webhook incluse',
                 ].map(f => (
                   <div key={f} className="flex items-center gap-2 text-[13px] text-zinc-600 dark:text-zinc-400">
                     <CheckCircle size={13} className="text-emerald-500 flex-shrink-0" />
@@ -952,7 +1066,7 @@ export default function Landing() {
                 href="#contact"
                 className="flex-shrink-0 px-5 py-2.5 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 text-[13px] font-medium rounded-xl hover:border-orange-400 hover:text-brand-orange transition-colors"
               >
-                {t.pricing.contactForOffer}
+                Contactează-ne pentru ofertă
               </a>
             </div>
           </div>
@@ -964,14 +1078,14 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/50 text-[12px] font-medium text-brand-orange dark:text-orange-400 mb-5">
-              {t.onboarding.badge}
+              Onboarding inclus
             </div>
             <h2 className="text-[32px] md:text-[40px] font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-4">
-              {t.onboarding.title1}<br />
-              <span className="text-zinc-400">{t.onboarding.title2}</span>
+              Noi ne ocupăm de tot.<br />
+              <span className="text-zinc-400">Tu nu faci nimic singur.</span>
             </h2>
             <p className="text-[16px] text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
-              {t.onboarding.subtitle}
+              Când te decizi să lucrezi cu noi, echipa Livra vine la tine, fizic sau online, și se asigură că totul funcționează din prima zi.
             </p>
           </div>
 
@@ -979,12 +1093,12 @@ export default function Landing() {
           <div className="relative">
             <div className="hidden lg:block absolute top-8 left-0 right-0 h-px bg-zinc-200 dark:bg-zinc-700 mx-[10%]" />
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              {t.onboarding.steps.map((s, i) => (
+              {ONBOARDING_STEPS.map((s, i) => (
                 <div key={s.num} className="relative flex flex-col items-start lg:items-center">
                   <div className="relative z-10 w-16 h-16 rounded-2xl bg-brand-orange flex items-center justify-center mb-5 flex-shrink-0">
                     <span className="text-white text-[13px] font-bold tracking-wider">{s.num}</span>
                   </div>
-                  {i < t.onboarding.steps.length - 1 && (
+                  {i < ONBOARDING_STEPS.length - 1 && (
                     <div className="lg:hidden absolute left-8 top-16 w-px h-8 bg-zinc-200 dark:bg-zinc-700" />
                   )}
                   <div className="lg:text-center">
@@ -999,14 +1113,14 @@ export default function Landing() {
           {/* Bottom callout */}
           <div className="mt-14 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
             <div>
-              <p className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-50 mb-1">{t.onboarding.noDowntime1}</p>
-              <p className="text-[14px] text-zinc-500 dark:text-zinc-400">{t.onboarding.noDowntime2}</p>
+              <p className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-50 mb-1">Nu pierzi nicio zi de muncă în perioada de tranziție.</p>
+              <p className="text-[14px] text-zinc-500 dark:text-zinc-400">Onboardingul se face în paralel cu activitatea ta curentă. Când suntem gata, facem switch.</p>
             </div>
             <a
               href="#contact"
               className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-brand-orange hover:bg-brand-orange-hover text-white text-[14px] font-medium rounded-xl transition-colors"
             >
-              {t.onboarding.requestDemo} <ArrowRight size={15} />
+              Solicită demo <ArrowRight size={15} />
             </a>
           </div>
         </div>
@@ -1017,7 +1131,7 @@ export default function Landing() {
         <div className="max-w-2xl mx-auto px-6">
           <h2 className="text-[28px] font-bold tracking-tight text-center mb-10">Întrebări frecvente</h2>
           <div>
-            {t.faqs.map(faq => <Faq key={faq.q} {...faq} />)}
+            {FAQS.map(faq => <Faq key={faq.q} {...faq} />)}
           </div>
         </div>
       </section>
@@ -1025,16 +1139,16 @@ export default function Landing() {
       {/* ── CTA / Contact ── */}
       <section id="contact" className="py-20 max-w-6xl mx-auto px-6">
         <div className="bg-zinc-900 dark:bg-zinc-800 rounded-3xl p-12 text-center">
-          <h2 className="text-[32px] font-bold text-white mb-3">{t.cta.title}</h2>
+          <h2 className="text-[32px] font-bold text-white mb-3">Gata să optimizezi livrările?</h2>
           <p className="text-[16px] text-zinc-400 mb-8 max-w-lg mx-auto">
-            {t.cta.subtitle}
+            Lasă-ne adresa de email și te contactăm în maxim 24 de ore pentru un demo personalizat.
           </p>
           {submitted ? (
             <div className="flex flex-col items-center gap-3">
               <div className="w-14 h-14 bg-emerald-500/20 rounded-full flex items-center justify-center">
                 <CheckCircle size={28} className="text-emerald-400" />
               </div>
-              <p className="text-emerald-400 font-medium">{t.cta.thanks}</p>
+              <p className="text-emerald-400 font-medium">Mulțumim! Te contactăm în curând.</p>
             </div>
           ) : (
             <form
@@ -1048,7 +1162,7 @@ export default function Landing() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder={t.cta.placeholder}
+                  placeholder="email@compania.md"
                   className="w-full pl-9 pr-4 py-3 bg-zinc-800 dark:bg-zinc-700 border border-zinc-700 dark:border-zinc-600 rounded-xl text-white placeholder:text-zinc-500 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-orange-500"
                 />
               </div>
@@ -1056,7 +1170,7 @@ export default function Landing() {
                 type="submit"
                 className="w-full sm:w-auto px-6 py-3 bg-brand-orange hover:bg-brand-orange-hover text-white text-[14px] font-medium rounded-xl transition-colors whitespace-nowrap"
               >
-                {t.cta.requestDemo}
+                Solicită demo
               </button>
             </form>
           )}
@@ -1070,11 +1184,11 @@ export default function Landing() {
             <span className="text-[14px] font-bold text-[#161513] dark:text-white tracking-widest uppercase">Livra</span>
             <svg width="32" height="4" viewBox="0 0 32 4"><line x1="0" y1="2" x2="25" y2="2" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="25,0 32,2 25,4" fill="#ff5c2c"/></svg>
           </div>
-          <p className="text-[12px] text-zinc-400">© {new Date().getFullYear()} Livra. {t.footer.copyright}</p>
+          <p className="text-[12px] text-zinc-400">© {new Date().getFullYear()} Livra. Toate drepturile rezervate.</p>
           <div className="flex items-center gap-4 text-[12px] text-zinc-400">
-            <a href="#" className="hover:text-zinc-600 transition-colors">{t.footer.privacy}</a>
-            <a href="#" className="hover:text-zinc-600 transition-colors">{t.footer.terms}</a>
-            <a href="mailto:contact@livra.md" className="hover:text-zinc-600 transition-colors">{t.footer.contact}</a>
+            <a href="#" className="hover:text-zinc-600 transition-colors">Confidențialitate</a>
+            <a href="#" className="hover:text-zinc-600 transition-colors">Termeni</a>
+            <a href="mailto:contact@livra.md" className="hover:text-zinc-600 transition-colors">Contact</a>
           </div>
         </div>
       </footer>

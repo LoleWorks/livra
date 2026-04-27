@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
-import { LanguageProvider } from './context/LanguageContext'
 import Dashboard from './pages/Dashboard'
 import RoutesPage from './pages/Routes'
 import Drivers from './pages/Drivers'
@@ -21,9 +20,8 @@ import SalesReturns from './pages/sales/SalesReturns'
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <ThemeProvider>
-        <BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/app" element={<AppDownload />} />
@@ -49,7 +47,6 @@ export default function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-      </ThemeProvider>
-    </LanguageProvider>
+    </ThemeProvider>
   )
 }
