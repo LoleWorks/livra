@@ -8,13 +8,14 @@ import {
 
 // ── Logo ──────────────────────────────────────────────────────────────────────
 
-function Logo({ size = 32 }: { size?: number }) {
+function Logo() {
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} className="flex-shrink-0">
-      <rect width="32" height="32" rx="6" fill="#f4f3ef"/>
-      <text x="4" y="23" style={{ fontFamily: "Georgia, serif", fontWeight: 700, fontSize: 20 }} fill="#161513">L</text>
-      <line x1="4" y1="27" x2="25" y2="27" stroke="#ff5c2c" strokeWidth="2"/>
-      <polygon points="25,24.5 30,27 25,29.5" fill="#ff5c2c"/>
+    <svg viewBox="0 0 460 120" width="200" height="52" className="flex-shrink-0">
+      {/* LIVRA text */}
+      <text x="10" y="85" fontFamily="Georgia, serif" fontSize="90" fontWeight="700" fill="#161513" letterSpacing="-2">LIVRA</text>
+      {/* Orange line with arrow */}
+      <line x1="10" y1="105" x2="380" y2="105" stroke="#ff5c2c" strokeWidth="8" strokeLinecap="round"/>
+      <polygon points="390,105 370,95 375,115" fill="#ff5c2c"/>
     </svg>
   )
 }
@@ -323,9 +324,8 @@ export default function AppDownload() {
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/90 dark:bg-brand-black/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <Logo size={32} />
-            <span className="text-xl font-bold">ivra</span>
+          <Link to="/" className="flex items-center">
+            <Logo />
           </Link>
           <Link to="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-colors font-medium">
             Pentru business →
@@ -667,9 +667,12 @@ export default function AppDownload() {
       {/* Footer */}
       <footer className="border-t border-gray-100 dark:border-gray-800 py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <Logo size={28} />
-            <span className="text-lg font-bold text-brand-black dark:text-white">Livra</span>
+          <div className="flex items-center">
+            <svg viewBox="0 0 460 120" width="120" height="32" className="flex-shrink-0">
+              <text x="10" y="85" fontFamily="Georgia, serif" fontSize="90" fontWeight="700" fill="#161513" letterSpacing="-2">LIVRA</text>
+              <line x1="10" y1="105" x2="380" y2="105" stroke="#ff5c2c" strokeWidth="8" strokeLinecap="round"/>
+              <polygon points="390,105 370,95 375,115" fill="#ff5c2c"/>
+            </svg>
           </div>
           <p>© 2026 Livra. Toate drepturile rezervate.</p>
           <div className="flex gap-6">
