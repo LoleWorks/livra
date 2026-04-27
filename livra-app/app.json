@@ -39,14 +39,6 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Livra are nevoie de locația ta pentru a seta adresa de livrare."
         }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "ndkVersion": "25.1.8937393"
-          }
-        }
       ]
     ]
   }

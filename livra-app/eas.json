@@ -4,11 +4,21 @@
   },
   "build": {
     "preview": {
+      "env": {
+        "ANDROID_NDK_HOME": "",
+        "ANDROID_NDK_ROOT": "",
+        "NDK_HOME": ""
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
+      "env": {
+        "ANDROID_NDK_HOME": "",
+        "ANDROID_NDK_ROOT": "",
+        "NDK_HOME": ""
+      },
       "android": {
         "buildType": "app-bundle"
       }
