@@ -4,6 +4,7 @@ import { MapContainer, Marker, useMap } from 'react-leaflet'
 import { YandexMapLayer } from '../components/YandexLayer'
 import L from 'leaflet'
 import { MapPin, Package, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { API } from '../lib/auth'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -152,7 +153,7 @@ function snapY(state: SheetState) {
 
 export default function Track() {
   const { token } = useParams<{ token: string }>()
-  const [data, setData] = useState<TrackData | null>(MOCK_DELIVERY)
+  const [data, setData] = useState<TrackData | null>(null)
   const [error, setError] = useState('')
   const [sheet, setSheet] = useState<SheetState>('partial')
   const [bubble, setBubble] = useState<string | null>(null)
@@ -228,10 +229,26 @@ export default function Track() {
     snapTo(sheet === 'peek' ? 'partial' : 'peek')
   }
 
+  const DEMO_TOKENS = ['test', 'mock', 'demo']
+
   async function load() {
     if (!token) return
-    setData(MOCK_DELIVERY)
-    setError('')
+    if (DEMO_TOKENS.includes(token)) {
+      setData(MOCK_DELIVERY)
+      setError('')
+      return
+    }
+    try {
+      const res = await fetch(`${API}/track/${token}`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError(body.detail ?? 'Comanda nu a fost găsită.')
+        return
+      }
+      setData(await res.json())
+    } catch {
+      setError('Nu s-a putut încărca informația. Încearcă din nou.')
+    }
   }
 
   useEffect(() => {
