@@ -10,7 +10,7 @@ import {
 
 function Logo() {
   return (
-    <svg viewBox="0 0 460 120" width="200" height="52" className="flex-shrink-0">
+    <svg viewBox="0 0 460 120" width="140" height="36" className="flex-shrink-0">
       {/* LIVRA text */}
       <text x="10" y="85" fontFamily="Georgia, serif" fontSize="90" fontWeight="700" fill="#161513" letterSpacing="-2">LIVRA</text>
       {/* Orange line with arrow */}
