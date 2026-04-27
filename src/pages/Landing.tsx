@@ -512,16 +512,27 @@ function DriverVisual() {
 }
 
 function ReportsVisual() {
-  const bars = [
-    { day: 'Lu', h: 78 }, { day: 'Ma', h: 92 }, { day: 'Mi', h: 85 },
-    { day: 'Jo', h: 96 }, { day: 'Vi', h: 88 }, { day: 'Sa', h: 94 }, { day: 'Du', h: 71 },
+  const weeks = [
+    { label: 'S1', v: 45 }, { label: 'S2', v: 52 }, { label: 'S3', v: 61 },
+    { label: 'S4', v: 58 }, { label: 'S5', v: 74 }, { label: 'S6', v: 83 },
+    { label: 'S7', v: 79 }, { label: 'S8', v: 95 }, { label: 'S9', v: 108 },
+    { label: 'S10', v: 127 },
   ]
+  const W = 260, H = 56, min = 36, max = 136
+  const pts = weeks.map((w, i) => ({
+    x: parseFloat(((i / (weeks.length - 1)) * W).toFixed(1)),
+    y: parseFloat((H - ((w.v - min) / (max - min)) * H).toFixed(1)),
+    ...w,
+  }))
+  const line = pts.map(p => `${p.x},${p.y}`).join(' ')
+  const area = `${line} ${W},${H} 0,${H}`
+
   return (
     <div className="bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-6 border border-amber-100 dark:border-amber-900/30">
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { value: '94%', label: 'Rată succes',  color: 'text-emerald-500' },
-          { value: '127', label: 'Livrări ieri', color: 'text-amber-500' },
+          { value: '127', label: 'Livrări ieri', color: 'text-brand-orange' },
           { value: '3',   label: 'Eșecuri',      color: 'text-red-400' },
         ].map(s => (
           <div key={s.label} className="bg-white dark:bg-zinc-800/60 rounded-xl p-3 text-center border border-zinc-100 dark:border-zinc-700/50">
@@ -530,23 +541,44 @@ function ReportsVisual() {
           </div>
         ))}
       </div>
+
       <div className="bg-white dark:bg-zinc-800/60 rounded-xl p-4 border border-zinc-100 dark:border-zinc-700/50">
-        <div className="text-[11px] font-semibold text-zinc-400 mb-4">Livrări reușite · ultimele 7 zile</div>
-        <div className="flex items-end gap-2 h-20">
-          {bars.map(b => (
-            <div key={b.day} className="flex-1 flex flex-col items-center gap-1.5">
-              <div
-                className="w-full bg-amber-400 rounded-t-md"
-                style={{ height: `${b.h * 0.75}%` }}
-              />
-              <span className="text-[9px] text-zinc-400">{b.day}</span>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-semibold text-zinc-400">Livrări · ultimele 10 săptămâni</span>
+          <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
+            <TrendingUp size={11} />+182%
+          </span>
         </div>
-      </div>
-      <div className="mt-4 flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-        <TrendingUp size={12} className="text-emerald-500" />
-        <span>+8% față de săptămâna trecută</span>
+        <svg viewBox={`0 0 ${W} ${H + 14}`} className="w-full" height={70}>
+          <defs>
+            <linearGradient id="lineAreaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff5c2c" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#ff5c2c" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {/* horizontal grid lines */}
+          {[0.25, 0.5, 0.75].map(t => (
+            <line key={t} x1="0" y1={H * (1 - t)} x2={W} y2={H * (1 - t)}
+              stroke="#e5e7eb" strokeWidth="0.5" strokeDasharray="3 3" />
+          ))}
+          {/* area fill */}
+          <polygon points={area} fill="url(#lineAreaFill)" />
+          {/* line */}
+          <polyline points={line} fill="none" stroke="#ff5c2c"
+            strokeWidth="1.75" strokeLinejoin="round" strokeLinecap="round" />
+          {/* dots */}
+          {pts.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y}
+              r={i === pts.length - 1 ? 3.5 : 2.5}
+              fill={i === pts.length - 1 ? '#ff5c2c' : '#fff'}
+              stroke="#ff5c2c" strokeWidth="1.5" />
+          ))}
+          {/* x-axis labels */}
+          {pts.filter((_, i) => i === 0 || i === 3 || i === 6 || i === 9).map(p => (
+            <text key={p.label} x={p.x} y={H + 11}
+              textAnchor="middle" fontSize="7.5" fill="#9ca3af">{p.label}</text>
+          ))}
+        </svg>
       </div>
     </div>
   )
