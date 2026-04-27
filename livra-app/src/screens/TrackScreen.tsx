@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
 import { Ionicons } from '@expo/vector-icons'
+import MapView, { Marker, Polyline } from 'react-native-maps'
 import { colors, statusColors } from '../lib/colors'
 import type { RootStackParamList, Delivery } from '../types'
 
@@ -32,39 +33,28 @@ const MOCK: Delivery = {
   createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
 }
 
-function MapPlaceholder({ driverInitials }: { driverInitials: string }) {
-  return (
-    <View style={map.container}>
-      {/* Street grid */}
-      <View style={[map.street, map.streetH, { top: '30%' }]} />
-      <View style={[map.street, map.streetH, { top: '55%' }]} />
-      <View style={[map.street, map.streetH, { top: '75%' }]} />
-      <View style={[map.street, map.streetV, { left: '25%' }]} />
-      <View style={[map.street, map.streetV, { left: '60%' }]} />
-      {/* Route line (dashed simulation) */}
-      {[0, 1, 2, 3, 4, 5].map(i => (
-        <View key={i} style={[map.dash, { top: `${28 + i * 8}%`, left: `${28 + i * 5}%` }]} />
-      ))}
-      {/* Destination */}
-      <View style={map.dest}>
-        <Ionicons name="home" size={16} color={colors.white} />
-      </View>
-      {/* Driver */}
-      <View style={map.driver}>
-        <Text style={map.driverText}>{driverInitials}</Text>
-      </View>
-    </View>
-  )
-}
-
 export default function TrackScreen({ route }: Props) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const [delivery, setDelivery] = useState<Delivery | null>(null)
   const [loading, setLoading] = useState(true)
+  const mapRef = useRef<MapView>(null)
 
   useEffect(() => {
     setTimeout(() => { setDelivery(MOCK); setLoading(false) }, 600)
   }, [route.params.deliveryId])
+
+  useEffect(() => {
+    if (!delivery?.driverLocation) return
+    const { lat: dLat, lng: dLng } = delivery.driverLocation
+    const { destinationLat, destinationLng } = delivery
+    mapRef.current?.fitToCoordinates(
+      [
+        { latitude: dLat, longitude: dLng },
+        { latitude: destinationLat, longitude: destinationLng },
+      ],
+      { edgePadding: { top: 80, right: 60, bottom: 360, left: 60 }, animated: true },
+    )
+  }, [delivery])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator size="large" color={colors.orange} /></View>
@@ -72,10 +62,47 @@ export default function TrackScreen({ route }: Props) {
   if (!delivery) return null
 
   const sc = statusColors[delivery.status]
+  const driverCoord = delivery.driverLocation
+    ? { latitude: delivery.driverLocation.lat, longitude: delivery.driverLocation.lng }
+    : null
+  const destCoord = { latitude: delivery.destinationLat, longitude: delivery.destinationLng }
 
   return (
     <View style={styles.container}>
-      <MapPlaceholder driverInitials={delivery.driverInitials} />
+      <MapView
+        ref={mapRef}
+        style={StyleSheet.absoluteFillObject}
+        initialRegion={{
+          latitude: (delivery.destinationLat + (delivery.driverLocation?.lat ?? delivery.destinationLat)) / 2,
+          longitude: (delivery.destinationLng + (delivery.driverLocation?.lng ?? delivery.destinationLng)) / 2,
+          latitudeDelta: 0.03,
+          longitudeDelta: 0.03,
+        }}
+        showsUserLocation={false}
+        showsCompass={false}
+        toolbarEnabled={false}
+      >
+        {driverCoord && (
+          <Marker coordinate={driverCoord} anchor={{ x: 0.5, y: 0.5 }}>
+            <View style={map.driverMarker}>
+              <Text style={map.driverText}>{delivery.driverInitials}</Text>
+            </View>
+          </Marker>
+        )}
+        <Marker coordinate={destCoord} anchor={{ x: 0.5, y: 1 }}>
+          <View style={map.destMarker}>
+            <Ionicons name="home" size={16} color={colors.white} />
+          </View>
+        </Marker>
+        {driverCoord && (
+          <Polyline
+            coordinates={[driverCoord, destCoord]}
+            strokeColor={colors.orange}
+            strokeWidth={3}
+            lineDashPattern={[8, 6]}
+          />
+        )}
+      </MapView>
 
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={20} color={colors.black} />
@@ -146,30 +173,25 @@ export default function TrackScreen({ route }: Props) {
 }
 
 const map = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#e8f0e8', position: 'relative', overflow: 'hidden' },
-  street: { position: 'absolute', backgroundColor: '#d0d8d0' },
-  streetH: { left: 0, right: 0, height: 10 },
-  streetV: { top: 0, bottom: 0, width: 10 },
-  dash: { position: 'absolute', width: 18, height: 4, borderRadius: 2, backgroundColor: colors.orange, opacity: 0.8 },
-  dest: {
-    position: 'absolute', top: '22%', left: '58%',
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: colors.emerald,
-    borderWidth: 3, borderColor: colors.white,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  driver: {
-    position: 'absolute', bottom: '35%', left: '25%',
+  driverMarker: {
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: colors.orange,
     borderWidth: 3, borderColor: colors.white,
     alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 6, elevation: 6,
   },
   driverText: { fontSize: 11, fontWeight: '700', color: colors.white },
+  destMarker: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: colors.emerald,
+    borderWidth: 3, borderColor: colors.white,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 6, elevation: 6,
+  },
 })
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.cream },
+  container: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   backBtn: {
     position: 'absolute', top: 52, left: 20,
@@ -178,6 +200,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 4,
   },
   card: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
     backgroundColor: colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 20, paddingBottom: 32,
     shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20, elevation: 10,

@@ -13,19 +13,33 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "md.livra.app"
+      "bundleIdentifier": "md.livra.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Livra are nevoie de locația ta pentru a seta adresa de livrare.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Livra are nevoie de locația ta pentru a seta adresa de livrare."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#f4f3ef"
       },
-      "package": "md.livra.app"
+      "package": "md.livra.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Livra are nevoie de locația ta pentru a seta adresa de livrare."
+        }
+      ],
       [
         "expo-build-properties",
         {
