@@ -810,7 +810,7 @@ export default function Landing() {
           Construit pentru companii din Moldova
         </div>
         <h1 className="text-[48px] md:text-[60px] font-bold tracking-tight leading-[1.1] text-zinc-900 dark:text-zinc-50 mb-6">
-          <span className="text-blue-600">Livra</span>ează mai rapid.<br />
+          <span className="text-blue-600">Livra</span>za mai rapid.<br />
           Crești mai mult.
         </h1>
         <p className="text-[18px] text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
