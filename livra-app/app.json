@@ -24,6 +24,16 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "ndkVersion": "25.1.8937393"
+          }
+        }
+      ]
+    ]
   }
 }
