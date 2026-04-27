@@ -21,6 +21,7 @@ type TrackData = {
   time_window_end: string | null
   notes: string
   driver_location: { lat: number; lng: number; updated_at: string } | null
+  ad?: { image_url: string; click_url: string } | null
 }
 
 // ── Easter egg messages ───────────────────────────────────────────────────────
@@ -136,6 +137,7 @@ const MOCK_DELIVERY = {
     lng: 28.835,
     updated_at: new Date(Date.now() - 30000).toISOString(),
   },
+  ad: null,
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -449,12 +451,23 @@ export default function Track() {
               </div>
             )}
 
-            {/* Partner Ad Space */}
-            <div className="mt-4 pt-4 border-t border-zinc-200">
-              <div className="w-full h-24 bg-gradient-to-r from-zinc-100 to-zinc-50 rounded-xl flex items-center justify-center text-[12px] text-zinc-400 cursor-pointer hover:bg-zinc-100 transition-colors">
-                [Partner Ad - 100% width]
+            {/* Partner Ad Space - only show if ad exists */}
+            {data.ad && (
+              <div className="mt-4 pt-4 border-t border-zinc-200">
+                <a
+                  href={data.ad.click_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full h-24 bg-zinc-100 rounded-xl overflow-hidden hover:opacity-90 transition-opacity"
+                >
+                  <img
+                    src={data.ad.image_url}
+                    alt="Partner ad"
+                    className="w-full h-full object-cover"
+                  />
+                </a>
               </div>
-            </div>
+            )}
           </div>
         )}
 
