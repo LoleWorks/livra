@@ -146,7 +146,7 @@ function snapY(state: SheetState) {
 
 export default function Track() {
   const { token } = useParams<{ token: string }>()
-  const [data, setData] = useState<TrackData | null>(null)
+  const [data, setData] = useState<TrackData | null>(MOCK_DELIVERY)
   const [error, setError] = useState('')
   const [sheet, setSheet] = useState<SheetState>('partial')
   const [bubble, setBubble] = useState<string | null>(null)
