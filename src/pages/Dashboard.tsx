@@ -455,7 +455,7 @@ export default function Dashboard() {
                   <div className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-50">{selected.name}</div>
                   <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{selected.done}/{selected.stops} opriri · {eta ? `ETA ${eta}` : 'Se calculează…'}</div>
                 </div>
-                <div className={`w-2 h-2 rounded-full ${selected.active ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                <div className={`w-2 h-2 rounded-full ${selected.active ? 'bg-emerald-500' : 'bg-orange-500'}`} />
               </div>
 
               {/* Progress bar */}
@@ -478,12 +478,12 @@ export default function Dashboard() {
                   <div
                     key={i}
                     className={`flex items-start gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800/50 ${
-                      stop.status === 'next' ? 'bg-blue-50 dark:bg-blue-950/20' : ''
+                      stop.status === 'next' ? 'bg-orange-50 dark:bg-orange-950/20' : ''
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 mt-0.5 ${
                       stop.status === 'done' ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500' :
-                      stop.status === 'next' ? 'bg-blue-600 text-white' :
+                      stop.status === 'next' ? 'bg-brand-orange text-white' :
                       'border border-zinc-200 dark:border-zinc-700 text-zinc-400 dark:text-zinc-500'
                     }`}>
                       {stop.status === 'done' ? '✓' : i + 1}
@@ -491,11 +491,11 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <div className={`text-[12px] font-medium truncate ${
                         stop.status === 'done' ? 'text-zinc-400 dark:text-zinc-500 line-through' :
-                        stop.status === 'next' ? 'text-blue-700 dark:text-blue-300' :
+                        stop.status === 'next' ? 'text-orange-700 dark:text-orange-300' :
                         'text-zinc-700 dark:text-zinc-300'
                       }`}>{stop.address}</div>
                       {stop.status === 'next' && (
-                        <div className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-1">
+                        <div className="text-[10px] text-brand-orange dark:text-orange-400 mt-0.5 flex items-center gap-1">
                           <Clock size={9} /> Următoarea · {eta ?? '…'}
                         </div>
                       )}
@@ -598,7 +598,7 @@ export default function Dashboard() {
                       {item.status === 'returned' && (
                         <button
                           onClick={() => advanceAttention(item.id, 'contacted')}
-                          className="w-full flex items-center justify-center gap-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 hover:border-blue-400 dark:hover:border-blue-600 text-zinc-700 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 text-[11px] font-medium py-1.5 rounded-lg transition-colors"
+                          className="w-full flex items-center justify-center gap-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 hover:border-orange-400 dark:hover:border-brand-orange text-zinc-700 dark:text-zinc-300 hover:text-brand-orange dark:hover:text-orange-400 text-[11px] font-medium py-1.5 rounded-lg transition-colors"
                         >
                           <Phone size={10} /> Am contactat clientul
                         </button>
@@ -638,7 +638,7 @@ export default function Dashboard() {
                       {{ total: 'Total', in_drum: 'În drum', livrate: 'Livrate', esuate: 'Eșuate' }[filterCard]}
                     </span>
                   </span>
-                  <button onClick={() => setFilterCard(null)} className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline">
+                  <button onClick={() => setFilterCard(null)} className="text-[11px] text-brand-orange dark:text-orange-400 hover:underline">
                     Resetează
                   </button>
                 </div>
@@ -676,7 +676,7 @@ export default function Dashboard() {
                       <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">
                         {d.initials}
                       </div>
-                      <div className={`absolute -bottom-px -right-px w-2 h-2 rounded-full border border-white dark:border-zinc-900 ${d.active ? 'bg-emerald-500' : 'bg-blue-500'}`} />
+                      <div className={`absolute -bottom-px -right-px w-2 h-2 rounded-full border border-white dark:border-zinc-900 ${d.active ? 'bg-emerald-500' : 'bg-orange-500'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200">{d.name}</div>
@@ -687,7 +687,7 @@ export default function Dashboard() {
                       ) : (
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex-1 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${pct === 100 ? 'bg-blue-500' : 'bg-emerald-500'}`} style={{ width: `${pct}%` }} />
+                            <div className={`h-full rounded-full ${pct === 100 ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${pct}%` }} />
                           </div>
                           <span className="text-[10px] text-zinc-400 dark:text-zinc-500 tabular-nums">{d.done}/{d.stops}</span>
                         </div>
@@ -905,7 +905,7 @@ export default function Dashboard() {
               <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Activ</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <div className="w-2 h-2 rounded-full bg-orange-500" />
               <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Finalizat</span>
             </div>
             {selectedIdx !== null && (

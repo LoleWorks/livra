@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { MapContainer, Marker, useMap } from 'react-leaflet'
 import { YandexMapLayer } from '../components/YandexLayer'
 import L from 'leaflet'
-import { MapPin, Truck, Package, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { MapPin, Package, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
 import { API } from '../lib/auth'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -317,11 +317,9 @@ export default function Track() {
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-2 pb-3 md:pt-4 border-b border-zinc-100">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
-              <Truck size={11} className="text-white" />
-            </div>
-            <span className="text-[13px] font-bold text-zinc-900 tracking-tight">Livra</span>
+          <div className="flex flex-col leading-none">
+            <span className="text-[12px] font-bold text-[#161513] tracking-widest uppercase">Livra</span>
+            <svg width="28" height="3" viewBox="0 0 28 3"><line x1="0" y1="1.5" x2="22" y2="1.5" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="22,0 28,1.5 22,3" fill="#ff5c2c"/></svg>
           </div>
           <button
             onClick={() => setSheet(s => s === 'peek' ? 'partial' : 'peek')}

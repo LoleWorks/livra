@@ -119,7 +119,7 @@ export default function Credits() {
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">Pachet {selectedPkg.credits} credite</span>
                       {selectedPkg.popular && (
-                        <span className="flex items-center gap-1 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="flex items-center gap-1 bg-brand-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                           <Zap size={8} /> Popular
                         </span>
                       )}
@@ -140,13 +140,13 @@ export default function Credits() {
                       <div className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200">•••• •••• •••• 4242</div>
                       <div className="text-[11px] text-zinc-400 dark:text-zinc-500">Visa · exp 12/26</div>
                     </div>
-                    <button className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Schimbă</button>
+                    <button className="text-[11px] text-brand-orange dark:text-orange-400 hover:underline">Schimbă</button>
                   </div>
 
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={handlePurchase}
-                      className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 bg-brand-orange hover:bg-orange-500 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors"
                     >
                       <Check size={14} /> Plătește {selectedPkg.price}
                     </button>
@@ -169,7 +169,7 @@ export default function Credits() {
 
         <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 space-y-4">
           <div className="grid grid-cols-4 gap-3">
-            <div className="bg-blue-600 rounded-xl p-4 flex flex-col justify-between">
+            <div className="bg-brand-orange rounded-xl p-4 flex flex-col justify-between">
               <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider">Sold curent</div>
               <div>
                 <div className="text-4xl font-bold text-white">{balance}</div>
@@ -206,12 +206,12 @@ export default function Credits() {
                   onClick={() => openPurchase(pkg)}
                   className={`relative text-left rounded-xl p-4 border transition-all hover:scale-[1.02] active:scale-[0.99] ${
                     pkg.popular
-                      ? 'bg-white dark:bg-zinc-900 border-blue-500 dark:border-blue-600 ring-1 ring-blue-500 dark:ring-blue-600'
+                      ? 'bg-white dark:bg-zinc-900 border-orange-500 dark:border-brand-orange ring-1 ring-blue-500 dark:ring-blue-600'
                       : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                   }`}
                 >
                   {pkg.popular && (
-                    <span className="absolute -top-2.5 left-3 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="absolute -top-2.5 left-3 bg-brand-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <Zap size={8} /> Popular
                     </span>
                   )}

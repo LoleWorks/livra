@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Truck, Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
 import { API, setUser } from '../lib/auth'
 
 export default function Login() {
@@ -48,11 +48,14 @@ export default function Login() {
       <div className="w-full max-w-sm">
 
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-violet-600 flex items-center justify-center mb-3 shadow-lg shadow-violet-500/25">
-            <Truck size={22} className="text-white" />
+          <div className="flex flex-col items-center mb-3">
+            <span className="text-[32px] font-bold text-[#161513] dark:text-white tracking-widest uppercase font-serif leading-none">LIVRA</span>
+            <svg width="72" height="5" viewBox="0 0 72 5">
+              <line x1="0" y1="2.5" x2="58" y2="2.5" stroke="#ff5c2c" strokeWidth="2"/>
+              <polygon points="58,0.5 72,2.5 58,4.5" fill="#ff5c2c"/>
+            </svg>
           </div>
-          <h1 className="text-[20px] font-bold text-zinc-900 dark:text-zinc-50">Livra</h1>
-          <p className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-1">Autentifică-te în contul tău</p>
+          <p className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-2">Autentifică-te în contul tău</p>
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">

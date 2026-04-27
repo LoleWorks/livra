@@ -21,8 +21,8 @@ type Step = 'platform' | 'credentials' | 'testing' | 'done'
 const PLATFORM_META: Record<Platform, { label: string; color: string; bg: string; logo: string }> = {
   opencart: {
     label: 'OpenCart',
-    color: 'text-blue-600 dark:text-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800',
+    color: 'text-brand-orange dark:text-orange-400',
+    bg: 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-blue-800',
     logo: '🛒',
   },
   woocommerce: {
@@ -192,7 +192,7 @@ export default function Integrations() {
                     {(['platform', 'credentials', 'testing', 'done'] as Step[]).map((s, i) => (
                       <div key={s} className={`h-1 rounded-full transition-all ${
                         ['platform', 'credentials', 'testing', 'done'].indexOf(step) >= i
-                          ? 'bg-blue-500 w-8'
+                          ? 'bg-orange-500 w-8'
                           : 'bg-zinc-200 dark:bg-zinc-700 w-4'
                       }`} />
                     ))}
@@ -249,7 +249,7 @@ export default function Integrations() {
                   <ol className="space-y-1.5">
                     {(platform === 'opencart' ? OPENCART_STEPS : WOOCOMMERCE_STEPS).map((s, i) => (
                       <li key={i} className="flex items-start gap-2 text-[12px] text-zinc-600 dark:text-zinc-300">
-                        <span className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold flex items-center justify-center mt-0.5">
+                        <span className="flex-shrink-0 w-4 h-4 rounded-full bg-orange-100 dark:bg-orange-900/40 text-brand-orange dark:text-orange-400 text-[10px] font-bold flex items-center justify-center mt-0.5">
                           {i + 1}
                         </span>
                         {s}
@@ -267,24 +267,24 @@ export default function Integrations() {
                 <div className="space-y-3">
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">Nume magazin</label>
-                    <input autoFocus value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Magazinul Meu SRL" className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors" />
+                    <input autoFocus value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Magazinul Meu SRL" className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors" />
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">URL magazin *</label>
-                    <input value={form.url} onChange={e => setForm(p => ({ ...p, url: e.target.value }))} placeholder="https://magazin.md" className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors" />
+                    <input value={form.url} onChange={e => setForm(p => ({ ...p, url: e.target.value }))} placeholder="https://magazin.md" className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors" />
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">{platform === 'opencart' ? 'API Username *' : 'Consumer Key *'}</label>
-                    <input value={form.username} onChange={e => setForm(p => ({ ...p, username: e.target.value }))} placeholder={platform === 'opencart' ? 'livra' : 'ck_xxxxxxxxxxxxxxxx'} className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors" />
+                    <input value={form.username} onChange={e => setForm(p => ({ ...p, username: e.target.value }))} placeholder={platform === 'opencart' ? 'livra' : 'ck_xxxxxxxxxxxxxxxx'} className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors" />
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">{platform === 'opencart' ? 'API Key *' : 'Consumer Secret *'}</label>
-                    <input type="password" value={form.key} onChange={e => setForm(p => ({ ...p, key: e.target.value }))} placeholder="••••••••••••••••" className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors" />
+                    <input type="password" value={form.key} onChange={e => setForm(p => ({ ...p, key: e.target.value }))} placeholder="••••••••••••••••" className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors" />
                   </div>
                 </div>
 
                 <div className="flex gap-2 pt-1">
-                  <button onClick={testConnection} disabled={!form.url.trim() || !form.username.trim() || !form.key.trim()} className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors">
+                  <button onClick={testConnection} disabled={!form.url.trim() || !form.username.trim() || !form.key.trim()} className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors">
                     <Zap size={13} /> Testează conexiunea
                   </button>
                   <button onClick={() => setStep('platform')} className="text-[13px] text-zinc-500 px-4 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">Înapoi</button>
@@ -295,7 +295,7 @@ export default function Integrations() {
             {/* Step: Testing */}
             {step === 'testing' && (
               <div className="p-10 flex flex-col items-center gap-4">
-                <div className="w-14 h-14 rounded-full border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 animate-spin" />
+                <div className="w-14 h-14 rounded-full border-4 border-orange-200 dark:border-orange-900 border-t-brand-orange dark:border-t-blue-400 animate-spin" />
                 <div className="text-center">
                   <div className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-50">Verificăm conexiunea</div>
                   <div className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-1">Conectăm la {form.url || 'magazin'}…</div>
@@ -323,7 +323,7 @@ export default function Integrations() {
                     </div>
                   ))}
                 </div>
-                <button onClick={saveConnection} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
+                <button onClick={saveConnection} className="w-full flex items-center justify-center gap-2 bg-brand-orange hover:bg-orange-500 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors">
                   <Check size={14} /> Salvează și activează
                 </button>
               </div>
@@ -335,7 +335,7 @@ export default function Integrations() {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
           <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Integrări</span>
-          <button onClick={openModal} className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors">
+          <button onClick={openModal} className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors">
             <Plus size={12} /> Conectează magazin
           </button>
         </div>
@@ -345,7 +345,7 @@ export default function Integrations() {
             <div className="flex flex-col items-center justify-center py-20 gap-3 text-zinc-400 dark:text-zinc-600">
               <Globe size={32} strokeWidth={1.5} />
               <p className="text-[13px]">Niciun magazin conectat</p>
-              <button onClick={openModal} className="flex items-center gap-1.5 text-[12px] text-blue-600 dark:text-blue-400 hover:underline">
+              <button onClick={openModal} className="flex items-center gap-1.5 text-[12px] text-brand-orange dark:text-orange-400 hover:underline">
                 <Plus size={12} /> Conectează primul magazin
               </button>
             </div>
@@ -392,8 +392,8 @@ export default function Integrations() {
                 { icon: Route,     title: 'Optimizezi și livrezi', desc: 'Mergi la Rute → Optimizează și distribui șoferilor.' },
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center mb-3">
-                    <Icon size={15} className="text-blue-600 dark:text-blue-400" />
+                  <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/40 flex items-center justify-center mb-3">
+                    <Icon size={15} className="text-brand-orange dark:text-orange-400" />
                   </div>
                   <div className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200 mb-1">{title}</div>
                   <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{desc}</div>
