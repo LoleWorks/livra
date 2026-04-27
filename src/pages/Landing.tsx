@@ -822,6 +822,9 @@ export default function Landing() {
             <a href="#preturi" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Prețuri</a>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/app" className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 transition-colors hidden sm:block">
+              Aplicație clienți
+            </Link>
             <Link to="/login" className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 transition-colors">
               Autentificare
             </Link>
