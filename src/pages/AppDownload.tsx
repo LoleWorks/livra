@@ -266,7 +266,7 @@ const ONBOARDING = [
   { num: '02', title: 'Primești SMS cu link live', desc: 'Tap pe link. Deschide hartă direct din browser, fără app.' },
   { num: '03', title: 'Primul wow moment', desc: 'Îl vezi pe curier mișcând pe hartă. Acesta e Livra.' },
   { num: '04', title: 'Descarci pentru mai mult', desc: 'Un tap. Gata. App instalat.' },
-  { num: '05', title: '60 de secunde de setup', desc: 'Pin pe ușa ta, telefon, gata. Nu mai completezi nimic niciodată.' },
+  { num: '05', title: '60 de secunde de setup', desc: 'Marchezi ușa ta pe hartă, adaugi telefon, gata. Nu mai completezi nimic niciodată.' },
 ]
 
 const TESTIMONIALS = [
@@ -301,7 +301,7 @@ const FAQS = [
   },
   {
     q: 'Funcționează și în sate / zone neobișnuite?',
-    a: 'E punctul nostru forte. Nu ai nevoie de adresă pe hartă. Pui pin-ul pe ușa ta și gata. Toți curierii ajung acolo.',
+    a: 'E punctul nostru forte. Nu ai nevoie de adresă pe hartă. Marchezi pe hartă exact unde stă ușa ta și gata. Toți curierii ajung acolo.',
   },
   {
     q: 'Trebuie obligatoriu aplicația?',
@@ -317,7 +317,7 @@ const FAQS = [
   },
   {
     q: 'Cum salvez o locație?',
-    a: 'Prima dată când deschizi Livra, ți se va cere locația. Pui pin-ul pe hartă, dai un nume (Acasă, Birou) și gata. Se salvează forever.',
+    a: 'Prima dată când deschizi Livra, ți se va cere locația. Marchezi pe hartă exact unde stă ușa ta, dai un nume (Acasă, Birou) și gata. Se salvează forever.',
   },
   {
     q: 'Lucrează Livra și pe iOS?',
@@ -482,7 +482,7 @@ export default function AppDownload() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-brand-orange font-bold">•</span>
-                    <span>Pui pin-ul pe ușa ta pe hartă</span>
+                    <span>Marchezi pe hartă exact unde stă ușa ta</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-brand-orange font-bold">•</span>
@@ -523,7 +523,7 @@ export default function AppDownload() {
                   <div className="bg-emerald-50 dark:bg-emerald-900/30 rounded-lg p-4 space-y-2 text-sm text-emerald-700 dark:text-emerald-300">
                     <p className="flex items-start gap-2">
                       <span className="text-emerald-500">✓</span>
-                      <span>Pin GPS pe ușa ta</span>
+                      <span>Marchezi pe hartă exact unde stă ușa ta</span>
                     </p>
                     <p className="flex items-start gap-2">
                       <span className="text-emerald-500">✓</span>
