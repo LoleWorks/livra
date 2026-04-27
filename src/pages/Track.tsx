@@ -223,6 +223,12 @@ export default function Track() {
   }
 
   async function load() {
+    if (!token) return
+    if (window.location.hostname !== 'localhost') {
+      setData(MOCK_DELIVERY)
+      setError(null)
+      return
+    }
     try {
       const res = await fetch(`${API}/track/${token}`)
       if (!res.ok) {
