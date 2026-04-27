@@ -4,7 +4,6 @@ import { MapContainer, Marker, useMap } from 'react-leaflet'
 import { YandexMapLayer } from '../components/YandexLayer'
 import L from 'leaflet'
 import { MapPin, Package, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
-import { API } from '../lib/auth'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
