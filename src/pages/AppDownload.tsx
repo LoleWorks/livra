@@ -190,7 +190,7 @@ const PAIN_POINTS = [
     icon: XCircle,
     color: 'text-red-400',
     bg: 'bg-red-400/10',
-    title: '"Absent" — dar tu erai acasă',
+    title: '"Absent"dar tu erai acasă',
     body: 'Nu a sunat. Pe portal scrie "client absent". Tu erai în bucătărie. Conflict cu comerciantul.',
   },
   {
@@ -229,7 +229,7 @@ const FEATURES = [
     color: 'text-blue-600',
     bg: 'bg-blue-50 dark:bg-blue-950/50',
     title: 'Toate comenzile într-un loc',
-    desc: 'Electronice, haine, farmacie — toate de la toți partenerii în același feed.',
+    desc: 'Electronice, haine, farmacietoate de la toți partenerii în același feed.',
   },
   {
     icon: Zap,
@@ -250,7 +250,7 @@ const FEATURES = [
     color: 'text-indigo-600',
     bg: 'bg-indigo-50 dark:bg-indigo-950/50',
     title: 'Istoric complet cu dovezi',
-    desc: 'Data, ora, curierul, foto. Dacă e dispută: "Am livrat" — tu ai dovada.',
+    desc: 'Data, ora, curierul, foto. Dacă e dispută: "Am livrat"tu ai dovada.',
   },
   {
     icon: Star,
@@ -428,7 +428,7 @@ export default function AppDownload() {
                   <div className="w-2 h-2 bg-brand-orange rounded-full mt-2 flex-shrink-0" />
                   <div>
                     <p className="font-bold text-brand-black">ETA precis</p>
-                    <p className="text-sm text-gray-600">„Ajunge la 14:32" — nu la 14:35 sau 14:28.</p>
+                    <p className="text-sm text-gray-600">„Ajunge la 14:32"nu la 14:35 sau 14:28.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
