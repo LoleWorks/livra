@@ -9,6 +9,7 @@ import Track from './pages/Track'
 import Activity from './pages/Activity'
 import Layout from './components/Layout'
 import Landing from './pages/Landing'
+import AppDownload from './pages/AppDownload'
 import Login from './pages/Login'
 import ChangePassword from './pages/ChangePassword'
 import SalesLayout from './pages/sales/SalesLayout'
@@ -23,6 +24,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/app" element={<AppDownload />} />
           <Route path="/login" element={<Login />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/t/:token" element={<Track />} />
