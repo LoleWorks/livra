@@ -148,7 +148,7 @@ function AppStoreBtn({ large = false }: { large?: boolean }) {
   const px = large ? 'px-8 py-5' : 'px-6 py-4'
   const textSize = large ? 'text-xl' : 'text-lg'
   return (
-    <a href="#" className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors shadow-lg`}>
+    <a href="#" aria-label="Descarcă Livra din App Store" className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 active:scale-95 transition-all shadow-lg`}>
       <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
       </svg>
@@ -164,7 +164,7 @@ function GooglePlayBtn({ large = false }: { large?: boolean }) {
   const px = large ? 'px-8 py-5' : 'px-6 py-4'
   const textSize = large ? 'text-xl' : 'text-lg'
   return (
-    <a href="#" className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors shadow-lg`}>
+    <a href="#" aria-label="Descarcă Livra din Google Play" className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 active:scale-95 transition-all shadow-lg`}>
       <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.199c.494.287.806.808.806 1.387 0 .58-.31 1.1-.806 1.387l-1.87 1.082L13.503 12l2.325-2.325 1.87 1.033zM5.864 2.658L16.8 8.99l-2.302 2.302-8.635-8.635z"/>
       </svg>
@@ -311,6 +311,18 @@ const FAQS = [
     q: 'De ce comercianți pot comanda?',
     a: 'Dacă folosesc Livra, o vei vedea automat. Fiecare partener nou = un motiv să ții aplicația.',
   },
+  {
+    q: 'Ce se întâmplă dacă curierul nu mă găsește?',
+    a: 'Curierul navigă direct la pin-ul tău pe GPS. Dacă e ceva în neregulă, suportul Livra intervine imediat.',
+  },
+  {
+    q: 'Cum salvez o locație?',
+    a: 'Prima dată când deschizi Livra, ți se va cere locația. Pui pin-ul pe hartă, dai un nume (Acasă, Birou) și gata. Se salvează forever.',
+  },
+  {
+    q: 'Lucrează Livra și pe iOS?',
+    a: 'Da, pe iOS și Android în egală măsură. App Store și Google Play sunt linkurile principale de download.',
+  },
 ]
 
 // ── Main page ──────────────────────────────────────────────────────────────────
@@ -334,16 +346,16 @@ export default function AppDownload() {
       </nav>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 flex flex-col lg:flex-row items-center gap-16">
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-12 lg:pb-20 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
         <div className="flex-1">
-          <h1 className="text-5xl md:text-6xl font-bold leading-[1.1] mb-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
             Urmărești<br />curierul live.<br />
             <span className="text-brand-orange">Știi exact când.</span>
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-md">
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 lg:mb-10 leading-relaxed max-w-md">
             Fiecare comandă pe hartă. Notificare cu 10 minute înainte. Nu mai aștepți 6 ore. Nu mai ratezi nicio livrare.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row gap-3 mb-8 lg:mb-10">
             <AppStoreBtn />
             <GooglePlayBtn />
           </div>
@@ -354,7 +366,7 @@ export default function AppDownload() {
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
-              iOS &amp; Android
+              iOS & Android
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -362,8 +374,10 @@ export default function AppDownload() {
             </span>
           </div>
         </div>
-        <div className="flex-shrink-0">
-          <PhoneMockup />
+        <div className="flex-shrink-0 w-full sm:w-auto flex justify-center lg:justify-end">
+          <div className="scale-75 sm:scale-90 lg:scale-100 origin-top">
+            <PhoneMockup />
+          </div>
         </div>
       </section>
 
@@ -538,7 +552,7 @@ export default function AppDownload() {
           <p className="text-gray-600 dark:text-gray-400 text-lg text-center mb-12 max-w-2xl mx-auto">
             8 feature-uri care fac din Livra aplicația numarul 1 pentru livrări în Moldova.
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
             {FEATURES.map((f) => {
               const Icon = f.icon
               return (
@@ -622,6 +636,7 @@ export default function AppDownload() {
               <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  aria-expanded={openFaq === i}
                   className="w-full flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <h3 className="font-bold text-lg text-left">{faq.q}</h3>
