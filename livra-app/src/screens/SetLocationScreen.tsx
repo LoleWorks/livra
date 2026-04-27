@@ -1,24 +1,64 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import { WebView } from 'react-native-webview'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../lib/colors'
 import type { RootStackParamList } from '../types'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SetLocation'>
 
-const CHISINAU = { latitude: 47.0245, longitude: 28.8322, latitudeDelta: 0.04, longitudeDelta: 0.04 }
+const MAP_HTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    #map { width:100vw; height:100vh; }
+    .pin-icon { font-size:32px; line-height:1; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  var map = L.map('map', { zoomControl:true, attributionControl:false });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
+  map.setView([47.0245, 28.8322], 14);
+
+  var pinIcon = L.divIcon({ html:'<div class="pin-icon">\\u{1F4CD}</div>', iconSize:[32,32], iconAnchor:[16,32], className:'' });
+  var marker = null;
+
+  map.on('click', function(e) {
+    var lat = e.latlng.lat;
+    var lng = e.latlng.lng;
+    if (marker) {
+      marker.setLatLng([lat, lng]);
+    } else {
+      marker = L.marker([lat, lng], { icon:pinIcon, draggable:true }).addTo(map);
+      marker.on('dragend', function() {
+        var pos = marker.getLatLng();
+        window.ReactNativeWebView.postMessage(JSON.stringify({ lat: pos.lat, lng: pos.lng }));
+      });
+    }
+    window.ReactNativeWebView.postMessage(JSON.stringify({ lat: lat, lng: lng }));
+  });
+</script>
+</body>
+</html>`
 
 export default function SetLocationScreen({ route }: Props) {
   const navigation = useNavigation()
   const [pin, setPin] = useState<{ latitude: number; longitude: number } | null>(null)
   const [name, setName] = useState('')
-  const mapRef = useRef<MapView>(null)
 
-  function onMapPress(e: any) {
-    setPin(e.nativeEvent.coordinate)
+  function onMessage(event: any) {
+    try {
+      const { lat, lng } = JSON.parse(event.nativeEvent.data)
+      setPin({ latitude: lat, longitude: lng })
+    } catch {}
   }
 
   function save() {
@@ -32,24 +72,14 @@ export default function SetLocationScreen({ route }: Props) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Map */}
-      <MapView
-        ref={mapRef}
+      <WebView
         style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={CHISINAU}
-        onPress={onMapPress}
-      >
-        {pin && (
-          <Marker coordinate={pin} draggable onDragEnd={e => setPin(e.nativeEvent.coordinate)}>
-            <View style={styles.pinMarker}>
-              <Ionicons name="location" size={32} color={colors.orange} />
-            </View>
-          </Marker>
-        )}
-      </MapView>
+        originWhitelist={['*']}
+        source={{ html: MAP_HTML }}
+        onMessage={onMessage}
+        scrollEnabled={false}
+      />
 
-      {/* Instruction overlay */}
       {!pin && (
         <View style={styles.instructionOverlay}>
           <Text style={styles.instructionText}>
@@ -58,9 +88,7 @@ export default function SetLocationScreen({ route }: Props) {
         </View>
       )}
 
-      {/* Bottom panel */}
       <View style={styles.panel}>
-        {/* Handle */}
         <View style={styles.handle} />
 
         {pin ? (
@@ -127,9 +155,6 @@ const styles = StyleSheet.create({
     color: colors.black,
     fontWeight: '500',
     textAlign: 'center',
-  },
-  pinMarker: {
-    alignItems: 'center',
   },
   panel: {
     backgroundColor: colors.white,

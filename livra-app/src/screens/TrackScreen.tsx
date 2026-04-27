@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native'
 import { useEffect, useState, useRef } from 'react'
-import { useRoute, useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps'
+import { WebView } from 'react-native-webview'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, statusColors } from '../lib/colors'
 import type { RootStackParamList, Delivery } from '../types'
@@ -33,27 +33,63 @@ const MOCK: Delivery = {
   createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
 }
 
+function buildMapHtml(driverLat: number, driverLng: number, destLat: number, destLng: number) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    #map { width:100vw; height:100vh; }
+    .driver-icon { width:40px; height:40px; background:#ff5c2c; border-radius:50%; border:3px solid #fff; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+    .dest-icon { width:36px; height:36px; background:#10b981; border-radius:50%; border:3px solid #fff; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  var map = L.map('map', { zoomControl:false, attributionControl:false });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(map);
+
+  var driverIcon = L.divIcon({ html:'<div class="driver-icon">🚐</div>', iconSize:[40,40], iconAnchor:[20,20], className:'' });
+  var destIcon   = L.divIcon({ html:'<div class="dest-icon">🏠</div>',  iconSize:[36,36], iconAnchor:[18,18], className:'' });
+
+  var driverMarker = L.marker([${driverLat},${driverLng}], { icon:driverIcon }).addTo(map);
+  var destMarker   = L.marker([${destLat},${destLng}],     { icon:destIcon   }).addTo(map);
+  var routeLine    = L.polyline([[${driverLat},${driverLng}],[${destLat},${destLng}]], { color:'#ff5c2c', weight:3, dashArray:'8,5' }).addTo(map);
+
+  map.fitBounds([[${driverLat},${driverLng}],[${destLat},${destLng}]], { padding:[80,80] });
+
+  window.updateDriver = function(lat, lng) {
+    driverMarker.setLatLng([lat, lng]);
+    routeLine.setLatLngs([[lat, lng],[${destLat},${destLng}]]);
+  };
+</script>
+</body>
+</html>`
+}
+
 export default function TrackScreen({ route }: Props) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const [delivery, setDelivery] = useState<Delivery | null>(null)
   const [loading, setLoading] = useState(true)
-  const mapRef = useRef<MapView>(null)
+  const webViewRef = useRef<WebView>(null)
 
   useEffect(() => {
-    // Simulating API fetch; replace with real call
     setTimeout(() => {
       setDelivery(MOCK)
       setLoading(false)
     }, 600)
   }, [route.params.deliveryId])
 
-  // Simulate live driver movement
   useEffect(() => {
     if (!delivery) return
     const interval = setInterval(() => {
       setDelivery(prev => {
         if (!prev?.driverLocation) return prev
-        return {
+        const next = {
           ...prev,
           driverLocation: {
             lat: prev.driverLocation.lat + 0.0001,
@@ -61,6 +97,10 @@ export default function TrackScreen({ route }: Props) {
             updatedAt: new Date().toISOString(),
           },
         }
+        webViewRef.current?.injectJavaScript(
+          `window.updateDriver(${next.driverLocation.lat}, ${next.driverLocation.lng}); true;`
+        )
+        return next
       })
     }, 5000)
     return () => clearInterval(interval)
@@ -77,69 +117,31 @@ export default function TrackScreen({ route }: Props) {
   if (!delivery) return null
 
   const sc = statusColors[delivery.status]
-  const driverCoord = delivery.driverLocation
-    ? { latitude: delivery.driverLocation.lat, longitude: delivery.driverLocation.lng }
-    : null
-  const destCoord = { latitude: delivery.destinationLat, longitude: delivery.destinationLng }
+  const dLat = delivery.driverLocation?.lat ?? delivery.destinationLat - 0.002
+  const dLng = delivery.driverLocation?.lng ?? delivery.destinationLng - 0.002
 
   return (
     <View style={styles.container}>
-      {/* Map */}
-      <MapView
-        ref={mapRef}
+      <WebView
+        ref={webViewRef}
         style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={{
-          latitude: delivery.destinationLat,
-          longitude: delivery.destinationLng,
-          latitudeDelta: 0.02,
-          longitudeDelta: 0.02,
-        }}
-      >
-        {/* Destination pin */}
-        <Marker coordinate={destCoord} title="Destinație">
-          <View style={styles.destMarker}>
-            <Ionicons name="home" size={16} color={colors.white} />
-          </View>
-        </Marker>
+        originWhitelist={['*']}
+        source={{ html: buildMapHtml(dLat, dLng, delivery.destinationLat, delivery.destinationLng) }}
+        scrollEnabled={false}
+      />
 
-        {/* Driver marker */}
-        {driverCoord && (
-          <Marker coordinate={driverCoord} title={delivery.driverName ?? 'Curier'}>
-            <View style={styles.driverMarker}>
-              <Ionicons name="car" size={18} color={colors.white} />
-            </View>
-          </Marker>
-        )}
-
-        {/* Route line */}
-        {driverCoord && (
-          <Polyline
-            coordinates={[driverCoord, destCoord]}
-            strokeColor={colors.orange}
-            strokeWidth={3}
-            lineDashPattern={[8, 4]}
-          />
-        )}
-      </MapView>
-
-      {/* Back button */}
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={20} color={colors.black} />
       </TouchableOpacity>
 
-      {/* Bottom card */}
       <View style={styles.card}>
-        {/* Handle */}
         <View style={styles.handle} />
 
-        {/* Status */}
         <View style={[styles.statusChip, { backgroundColor: sc.bg }]}>
           <View style={[styles.statusDot, { backgroundColor: sc.text }]} />
           <Text style={[styles.statusText, { color: sc.text }]}>{sc.label}</Text>
         </View>
 
-        {/* Time window */}
         <View style={styles.timeBlock}>
           <Text style={styles.timeLabel}>Interval de livrare</Text>
           <Text style={styles.timeValue}>
@@ -149,7 +151,6 @@ export default function TrackScreen({ route }: Props) {
           </Text>
         </View>
 
-        {/* Progress */}
         <View style={styles.progressSection}>
           <View style={styles.progressRow}>
             {Array.from({ length: delivery.totalStops }, (_, i) => (
@@ -172,7 +173,6 @@ export default function TrackScreen({ route }: Props) {
           <Text style={styles.progressLabel}>Oprirea {delivery.stopOrder} din {delivery.totalStops}</Text>
         </View>
 
-        {/* Driver + call */}
         <View style={styles.driverRow}>
           <View style={styles.driverAvatar}>
             <Text style={styles.driverInitials}>{delivery.driverInitials}</Text>
@@ -189,7 +189,6 @@ export default function TrackScreen({ route }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* Address */}
         {delivery.address && (
           <View style={styles.addressRow}>
             <Ionicons name="location-outline" size={14} color={colors.gray400} />
@@ -197,7 +196,6 @@ export default function TrackScreen({ route }: Props) {
           </View>
         )}
 
-        {/* Notes */}
         {delivery.notes && (
           <View style={styles.notesRow}>
             <Ionicons name="chatbubble-outline" size={14} color={colors.gray400} />
@@ -227,26 +225,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
-  },
-  destMarker: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.emerald,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: colors.white,
-  },
-  driverMarker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.orange,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: colors.white,
   },
   card: {
     backgroundColor: colors.white,
