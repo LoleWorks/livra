@@ -563,7 +563,7 @@ export default function AppDownload() {
             Onboarding simplu. Valoare imediată. Nici o durere.
           </p>
           <div className="space-y-4">
-            {ONBOARDING.map((step, i) => (
+            {ONBOARDING.map((step) => (
               <div key={step.num} className="flex gap-6 items-start">
                 <div className="flex-shrink-0 w-12 h-12 bg-brand-orange text-white rounded-full flex items-center justify-center font-bold">
                   {step.num}
