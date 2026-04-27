@@ -1,94 +1,115 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, Package, CheckCircle, Star, History, Navigation, Shield, Clock } from 'lucide-react'
+import {
+  Bell, Package, CheckCircle, Star, Navigation, Clock,
+  History, MapPin, Zap, AlertCircle, Phone,
+  XCircle, ChevronDown, ChevronUp, ArrowRight,
+} from 'lucide-react'
+
+// ── Logo ──────────────────────────────────────────────────────────────────────
+
+function Logo({ size = 32 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 32 32" width={size} height={size} className="flex-shrink-0">
+      <rect width="32" height="32" rx="6" fill="#f4f3ef"/>
+      <text x="4" y="23" style={{ fontFamily: "Georgia, serif", fontWeight: 700, fontSize: 20 }} fill="#161513">L</text>
+      <line x1="4" y1="27" x2="25" y2="27" stroke="#ff5c2c" strokeWidth="2"/>
+      <polygon points="25,24.5 30,27 25,29.5" fill="#ff5c2c"/>
+    </svg>
+  )
+}
 
 // ── Phone Mockup ──────────────────────────────────────────────────────────────
 
 function PhoneMockup() {
   return (
-    <div className="relative w-[280px] h-[560px] mx-auto">
-      {/* Phone body */}
-      <div className="absolute inset-0 bg-gray-900 rounded-[48px] shadow-2xl border-[6px] border-gray-800">
-        {/* Notch */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-b-2xl z-10" />
-        {/* Side button */}
-        <div className="absolute right-[-10px] top-28 w-[5px] h-12 bg-gray-700 rounded-r-lg" />
-        <div className="absolute left-[-10px] top-20 w-[5px] h-8 bg-gray-700 rounded-l-lg" />
-        <div className="absolute left-[-10px] top-32 w-[5px] h-8 bg-gray-700 rounded-l-lg" />
+    <div className="relative w-[280px] h-[560px] mx-auto select-none">
+      <div className="absolute inset-0 bg-[#1c1c1e] rounded-[48px] shadow-2xl ring-1 ring-white/10">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-[#1c1c1e] rounded-b-3xl z-10" />
+        <div className="absolute right-[-7px] top-28 w-[5px] h-10 bg-[#2a2a2e] rounded-r-lg" />
+        <div className="absolute left-[-7px] top-20 w-[5px] h-7 bg-[#2a2a2e] rounded-l-lg" />
+        <div className="absolute left-[-7px] top-32 w-[5px] h-10 bg-[#2a2a2e] rounded-l-lg" />
 
-        {/* Screen */}
-        <div className="absolute inset-[4px] rounded-[42px] overflow-hidden bg-[#e8f0e8]">
-          {/* Map background */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 268 544" fill="none">
-            {/* Background */}
-            <rect width="268" height="544" fill="#e8f0e8"/>
-            {/* Streets */}
-            <line x1="0" y1="180" x2="268" y2="180" stroke="#d0d8d0" strokeWidth="10"/>
-            <line x1="0" y1="320" x2="268" y2="320" stroke="#d0d8d0" strokeWidth="8"/>
-            <line x1="80" y1="0" x2="80" y2="544" stroke="#d0d8d0" strokeWidth="8"/>
-            <line x1="190" y1="0" x2="190" y2="544" stroke="#d0d8d0" strokeWidth="8"/>
-            <line x1="0" y1="420" x2="268" y2="380" stroke="#d0d8d0" strokeWidth="6"/>
+        <div className="absolute inset-[4px] rounded-[43px] overflow-hidden">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 268 550" fill="none">
+            <rect width="268" height="550" fill="#eaf2ea"/>
+
+            {/* Roads */}
+            <rect x="60" y="0" width="14" height="550" fill="#dce8dc"/>
+            <rect x="148" y="0" width="14" height="550" fill="#dce8dc"/>
+            <rect x="218" y="0" width="14" height="550" fill="#dce8dc"/>
+            <rect x="0" y="93" width="268" height="14" fill="#dce8dc"/>
+            <rect x="0" y="203" width="268" height="14" fill="#dce8dc"/>
+            <rect x="0" y="313" width="268" height="14" fill="#dce8dc"/>
+
+            {/* Road dashes */}
+            <line x1="67" y1="0" x2="67" y2="550" stroke="#ccdccc" strokeWidth="1" strokeDasharray="7,5"/>
+            <line x1="155" y1="0" x2="155" y2="550" stroke="#ccdccc" strokeWidth="1" strokeDasharray="7,5"/>
+            <line x1="0" y1="100" x2="268" y2="100" stroke="#ccdccc" strokeWidth="1" strokeDasharray="7,5"/>
+            <line x1="0" y1="210" x2="268" y2="210" stroke="#ccdccc" strokeWidth="1" strokeDasharray="7,5"/>
+
             {/* Buildings */}
-            <rect x="90" y="195" width="90" height="115" rx="4" fill="#d4dbd4"/>
-            <rect x="10" y="195" width="60" height="75" rx="4" fill="#d4dbd4"/>
-            <rect x="200" y="195" width="58" height="115" rx="4" fill="#d4dbd4"/>
-            <rect x="90" y="60" width="90" height="108" rx="4" fill="#d4dbd4"/>
-            <rect x="10" y="60" width="60" height="108" rx="4" fill="#d4dbd4"/>
-            <rect x="200" y="60" width="58" height="108" rx="4" fill="#d4dbd4"/>
-            <rect x="10" y="335" width="60" height="60" rx="4" fill="#d4dbd4"/>
-            <rect x="200" y="335" width="58" height="55" rx="4" fill="#d4dbd4"/>
-            {/* Route path */}
-            <path d="M 60 430 Q 55 350 80 320 Q 80 250 134 230 Q 180 218 190 180"
-              stroke="#ff5c2c" strokeWidth="4" fill="none" strokeDasharray="10,5"
-              strokeLinecap="round" strokeLinejoin="round"/>
-            {/* Accuracy circle */}
-            <circle cx="60" cy="430" r="20" fill="#ff5c2c" fillOpacity="0.15"/>
-            {/* Driver dot */}
-            <circle cx="60" cy="430" r="10" fill="#ff5c2c"/>
-            <circle cx="60" cy="430" r="6" fill="white"/>
+            <rect x="4" y="4" width="52" height="85" rx="3" fill="#d4e2d4"/>
+            <rect x="77" y="4" width="67" height="85" rx="3" fill="#d4e2d4"/>
+            <rect x="165" y="4" width="49" height="85" rx="3" fill="#d4e2d4"/>
+            <rect x="235" y="4" width="29" height="85" rx="3" fill="#d4e2d4"/>
+            <rect x="4" y="110" width="52" height="89" rx="3" fill="#d4e2d4"/>
+            <rect x="77" y="110" width="67" height="89" rx="3" fill="#d4e2d4"/>
+            <rect x="165" y="110" width="49" height="89" rx="3" fill="#d4e2d4"/>
+            <rect x="235" y="110" width="29" height="89" rx="3" fill="#d4e2d4"/>
+            <rect x="4" y="220" width="52" height="89" rx="3" fill="#d4e2d4"/>
+            <rect x="77" y="220" width="67" height="89" rx="3" fill="#d4e2d4"/>
+            <rect x="165" y="220" width="49" height="89" rx="3" fill="#d4e2d4"/>
+            <rect x="235" y="220" width="29" height="89" rx="3" fill="#d4e2d4"/>
+
+            {/* Route – follows roads */}
+            <path d="M 67,395 L 67,100 L 155,100 L 155,34" stroke="#ff5c2c" strokeWidth="4" fill="none" strokeDasharray="10,5" strokeLinecap="round" strokeLinejoin="round"/>
+
+            {/* Driver */}
+            <circle cx="67" cy="395" r="22" fill="#ff5c2c" fillOpacity="0.12"/>
+            <circle cx="67" cy="395" r="13" fill="#ff5c2c" fillOpacity="0.22"/>
+            <circle cx="67" cy="395" r="8" fill="#ff5c2c"/>
+            <circle cx="67" cy="395" r="4" fill="white"/>
+
             {/* Destination */}
-            <circle cx="190" cy="172" r="12" fill="#10b981"/>
-            <circle cx="190" cy="172" r="7" fill="white"/>
+            <circle cx="155" cy="28" r="11" fill="#10b981"/>
+            <circle cx="155" cy="28" r="6" fill="white"/>
           </svg>
 
-          {/* Top bar */}
-          <div className="absolute top-0 left-0 right-0 h-7 bg-white/80 backdrop-blur-sm flex items-center justify-between px-5 z-10">
-            <span className="text-[11px] text-gray-600 font-medium">9:41</span>
-            <div className="flex gap-1 items-center">
-              <div className="w-3 h-2 border border-gray-500 rounded-sm relative">
-                <div className="absolute inset-[1px] bg-gray-500 w-[70%]"/>
+          {/* Status bar */}
+          <div className="absolute top-0 left-0 right-0 h-7 bg-white/75 backdrop-blur-sm flex items-center justify-between px-5 z-10">
+            <span className="text-[10px] font-semibold text-gray-700">9:41</span>
+            <div className="flex items-center gap-1.5">
+              <div className="flex gap-0.5 items-end h-[10px]">
+                {[2, 3, 4, 5].map((h) => <div key={h} className="w-[3px] bg-gray-600 rounded-sm" style={{ height: h * 2 }} />)}
+              </div>
+              <div className="w-4 h-[9px] border border-gray-600 rounded-[2px] relative">
+                <div className="absolute left-[1.5px] top-[1.5px] bottom-[1.5px] w-[60%] bg-gray-600 rounded-[1px]" />
               </div>
             </div>
           </div>
 
-          {/* Bottom card */}
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-10 shadow-2xl">
-            <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-
-            {/* Live badge */}
+          {/* Tracking card */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 z-10">
+            <div className="w-8 h-1 bg-gray-200 rounded-full mx-auto mb-3.5" />
             <div className="flex items-center gap-2 bg-orange-50 text-brand-orange px-3 py-1.5 rounded-full text-[11px] font-bold w-fit mb-4">
               <span className="w-2 h-2 bg-brand-orange rounded-full animate-pulse inline-block" />
-              Curierul e la 3 minute
+              Curierul e la 10 minute
             </div>
-
-            {/* Driver row */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center font-bold text-brand-orange text-sm">
-                  AM
-                </div>
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center font-bold text-brand-orange text-xs">AM</div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Andrei M.</p>
-                  <p className="text-xs text-gray-500">Ajunge la 14:32</p>
+                  <p className="text-xs text-gray-400">Ajunge la 14:32</p>
                 </div>
               </div>
               <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
-                <Bell className="w-4 h-4 text-gray-500" />
+                <Phone className="w-4 h-4 text-gray-500" />
               </div>
             </div>
-
-            {/* Progress bar */}
-            <div className="mt-4 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-brand-orange rounded-full w-[72%]" />
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-brand-orange rounded-full" style={{ width: '78%' }} />
             </div>
             <div className="flex justify-between mt-1.5">
               <span className="text-[10px] text-gray-400">Preluat</span>
@@ -99,19 +120,19 @@ function PhoneMockup() {
       </div>
 
       {/* Floating notification */}
-      <div className="absolute -right-6 top-20 bg-white rounded-2xl shadow-2xl px-4 py-3 w-52 border border-gray-100">
+      <div className="absolute -right-8 top-20 bg-white rounded-2xl shadow-2xl px-4 py-3 w-52 border border-gray-100">
         <div className="flex items-start gap-2.5">
           <div className="w-8 h-8 bg-brand-orange rounded-xl flex items-center justify-center flex-shrink-0">
             <Package className="w-4 h-4 text-white" />
           </div>
           <div>
             <p className="text-[11px] font-bold text-gray-900">Livra</p>
-            <p className="text-[11px] text-gray-500 leading-tight">Curierul tău pleacă spre tine! ETA 14:32 🚐</p>
+            <p className="text-[11px] text-gray-500 leading-tight">Curierul tău e la 10 min! 🚐 Fii gata.</p>
           </div>
         </div>
       </div>
 
-      {/* Delivered badge */}
+      {/* Delivered */}
       <div className="absolute -left-6 bottom-36 bg-emerald-500 text-white rounded-2xl shadow-xl px-4 py-2.5 flex items-center gap-2">
         <CheckCircle className="w-5 h-5" />
         <span className="text-sm font-bold">Livrat!</span>
@@ -120,18 +141,14 @@ function PhoneMockup() {
   )
 }
 
-// ── Store Buttons ─────────────────────────────────────────────────────────────
+// ── Store buttons ──────────────────────────────────────────────────────────────
 
-function AppStoreButton({ large = false }: { large?: boolean }) {
+function AppStoreBtn({ large = false }: { large?: boolean }) {
   const px = large ? 'px-8 py-5' : 'px-6 py-4'
-  const iconSize = large ? 'w-8 h-8' : 'w-7 h-7'
   const textSize = large ? 'text-xl' : 'text-lg'
   return (
-    <a
-      href="#"
-      className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors shadow-lg`}
-    >
-      <svg className={`${iconSize} flex-shrink-0`} viewBox="0 0 24 24" fill="currentColor">
+    <a href="#" className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors shadow-lg`}>
+      <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
       </svg>
       <div className="text-left">
@@ -142,16 +159,12 @@ function AppStoreButton({ large = false }: { large?: boolean }) {
   )
 }
 
-function GooglePlayButton({ large = false }: { large?: boolean }) {
+function GooglePlayBtn({ large = false }: { large?: boolean }) {
   const px = large ? 'px-8 py-5' : 'px-6 py-4'
-  const iconSize = large ? 'w-8 h-8' : 'w-7 h-7'
   const textSize = large ? 'text-xl' : 'text-lg'
   return (
-    <a
-      href="#"
-      className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors shadow-lg`}
-    >
-      <svg className={`${iconSize} flex-shrink-0`} viewBox="0 0 24 24" fill="currentColor">
+    <a href="#" className={`flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 ${px} rounded-2xl hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors shadow-lg`}>
+      <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
         <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.199c.494.287.806.808.806 1.387 0 .58-.31 1.1-.806 1.387l-1.87 1.082L13.503 12l2.325-2.325 1.87 1.033zM5.864 2.658L16.8 8.99l-2.302 2.302-8.635-8.635z"/>
       </svg>
       <div className="text-left">
@@ -162,118 +175,179 @@ function GooglePlayButton({ large = false }: { large?: boolean }) {
   )
 }
 
-// ── Features ──────────────────────────────────────────────────────────────────
+// ── Data ───────────────────────────────────────────────────────────────────────
+
+const PAIN_POINTS = [
+  {
+    icon: Clock,
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    title: 'Stai acasă toată ziua așteptând',
+    body: 'Ți s-a zis că vine între 9 și 17. Ai stat. La 16:58 SMS că nu au reușit să livreze.',
+  },
+  {
+    icon: XCircle,
+    color: 'text-red-400',
+    bg: 'bg-red-400/10',
+    title: '"Absent" — dar tu erai acasă',
+    body: 'Nu a sunat. Pe portal scrie "client absent". Tu erai în bucătărie. Conflict cu comerciantul.',
+  },
+  {
+    icon: AlertCircle,
+    color: 'text-orange-400',
+    bg: 'bg-orange-400/10',
+    title: 'Nimeni nu știe unde e coletul',
+    body: 'Status-ul n-a mai mișcat de ieri. Apelezi call center. "Verificăm și revenim." Nu revin.',
+  },
+]
 
 const FEATURES = [
   {
     icon: Navigation,
-    bg: 'bg-orange-100 dark:bg-orange-950',
     color: 'text-brand-orange',
-    title: 'Urmărire live pe hartă',
-    desc: 'Vezi exact unde se află curierul tău și câte minute are până ajunge la tine.',
+    bg: 'bg-orange-50 dark:bg-orange-950/50',
+    title: 'GPS live, la 30 de secunde',
+    desc: 'Locația curierului se actualizează constant pe hartă. Nu un status. O hartă live.',
   },
   {
     icon: Bell,
-    bg: 'bg-violet-100 dark:bg-violet-950',
-    color: 'text-violet-600 dark:text-violet-400',
-    title: 'Notificări în timp real',
-    desc: 'Primești notificare când curierul pleacă spre tine, când e aproape și la livrare.',
+    color: 'text-violet-600',
+    bg: 'bg-violet-50 dark:bg-violet-950/50',
+    title: 'Notificare cu 10 minute înainte',
+    desc: 'Trăiești normal. Livra te anunță exact când să cobori. Nicio ratare din nou.',
+  },
+  {
+    icon: MapPin,
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/50',
+    title: 'Pin GPS pentru orice adresă',
+    desc: 'Locuiești în sat, bloc fără număr, zonă nouă? Pui pin-ul o dată. Toți curierii ajung acolo.',
+  },
+  {
+    icon: Package,
+    color: 'text-blue-600',
+    bg: 'bg-blue-50 dark:bg-blue-950/50',
+    title: 'Toate comenzile într-un loc',
+    desc: 'Electronice, haine, farmacie — toate de la toți partenerii în același feed.',
+  },
+  {
+    icon: Zap,
+    color: 'text-amber-600',
+    bg: 'bg-amber-50 dark:bg-amber-950/50',
+    title: 'Checkout cu un tap',
+    desc: 'Setezi adresa o dată. La fiecare comandă pe site partener, datele sunt deja completate.',
+  },
+  {
+    icon: Clock,
+    color: 'text-pink-600',
+    bg: 'bg-pink-50 dark:bg-pink-950/50',
+    title: 'Tu alegi fereastră orară',
+    desc: 'Dimineață, după-amiază sau seară. Tu decizi când vrei să primești. Nu firma de curierat.',
   },
   {
     icon: History,
-    bg: 'bg-blue-100 dark:bg-blue-950',
-    color: 'text-blue-600 dark:text-blue-400',
-    title: 'Istoricul comenzilor',
-    desc: 'Toate livrările tale într-un singur loc, cu confirmare foto și semnătură digitală.',
+    color: 'text-indigo-600',
+    bg: 'bg-indigo-50 dark:bg-indigo-950/50',
+    title: 'Istoric complet cu dovezi',
+    desc: 'Data, ora, curierul, foto. Dacă e dispută: "Am livrat" — tu ai dovada.',
   },
   {
-    icon: Shield,
-    bg: 'bg-emerald-100 dark:bg-emerald-950',
-    color: 'text-emerald-600 dark:text-emerald-400',
-    title: 'Livrare sigură garantată',
-    desc: 'Foto la livrare, semnătură electronică și raport detaliat pentru fiecare comandă.',
+    icon: Star,
+    color: 'text-orange-500',
+    bg: 'bg-orange-50 dark:bg-orange-950/50',
+    title: 'Evaluezi livrarea imediat',
+    desc: 'Un tap după fiecare livrare. Feedback-ul tău îi ajută pe alții și pe comerciant.',
   },
 ]
 
-// ── Steps ─────────────────────────────────────────────────────────────────────
+const ONBOARDING = [
+  { num: '01', title: 'Comanzi la un magazin partener', desc: 'Dai comanda ca de obicei.' },
+  { num: '02', title: 'Primești SMS cu link live', desc: 'Tap pe link. Deschide hartă direct din browser, fără app.' },
+  { num: '03', title: 'Primul wow moment', desc: 'Îl vezi pe curier mișcând pe hartă. Acesta e Livra.' },
+  { num: '04', title: 'Descarci pentru mai mult', desc: 'Un tap. Gata. App instalat.' },
+  { num: '05', title: '60 de secunde de setup', desc: 'Pin pe ușa ta, telefon, gata. Nu mai completezi nimic niciodată.' },
+]
 
-const STEPS = [
+const TESTIMONIALS = [
   {
-    num: '01',
-    color: 'bg-brand-orange',
-    icon: Package,
-    title: 'Comanzi online',
-    desc: 'Plasezi o comandă la oricare magazin partener Livra din Moldova.',
+    name: 'Sergiu D.',
+    location: 'Durlești',
+    text: 'Locuiesc pe o stradă care nu apare pe Google Maps. Pin-ul în Livra, o dată. De atunci niciun curier nu m-a mai sunat.',
   },
   {
-    num: '02',
-    color: 'bg-violet-500',
-    icon: Bell,
-    title: 'Primești SMS cu link',
-    desc: 'Imediat ce curierul preia comanda, primești un SMS cu link de urmărire live.',
+    name: 'Marina C.',
+    location: 'Chișinău',
+    text: 'Notificare la 10 minute, am coborât exact pe timp. Niciodată nu am prins livrarea prima dată înainte de Livra.',
   },
   {
-    num: '03',
-    color: 'bg-emerald-500',
-    icon: Navigation,
-    title: 'Urmărești din aplicație',
-    desc: 'Descarci Livra pentru experiența completă: hartă live, notificări și istoric.',
+    name: 'Alexandru P.',
+    location: 'Bălți',
+    text: 'Comand des de la magazine diferite. Totul apare în aceeași aplicație. Atât îmi trebuia.',
   },
 ]
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+const STATS = [
+  { value: '30s', label: 'Actualizare GPS' },
+  { value: '10 min', label: 'Notificare înainte' },
+  { value: '0', label: 'Formulare de completat' },
+  { value: '100%', label: 'Gratuit pentru tine' },
+]
+
+const FAQS = [
+  {
+    q: 'Livra e gratuit?',
+    a: 'Da, complet gratuit. Plătesc comercianții. Tu doar primești beneficiile.',
+  },
+  {
+    q: 'Funcționează și în sate / zone neobișnuite?',
+    a: 'E punctul nostru forte. Nu ai nevoie de adresă pe hartă. Pui pin-ul pe ușa ta și gata. Toți curierii ajung acolo.',
+  },
+  {
+    q: 'Trebuie obligatoriu aplicația?',
+    a: 'Nu. Primești SMS cu link. Deschide hartă direct din browser. Dar cu app, ai notificări și checkout instant.',
+  },
+  {
+    q: 'De ce comercianți pot comanda?',
+    a: 'Dacă folosesc Livra, o vei vedea automat. Fiecare partener nou = un motiv să ții aplicația.',
+  },
+]
+
+// ── Main page ──────────────────────────────────────────────────────────────────
 
 export default function AppDownload() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
   return (
     <div className="min-h-screen bg-white dark:bg-brand-black text-brand-black dark:text-white">
 
-      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
+      {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/90 dark:bg-brand-black/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold">
-            <span className="text-brand-orange">L</span>ivra
+          <Link to="/" className="flex items-center gap-2.5">
+            <Logo size={32} />
+            <span className="text-xl font-bold">ivra</span>
           </Link>
-          <Link
-            to="/"
-            className="text-sm text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-colors font-medium"
-          >
+          <Link to="/" className="text-sm text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-colors font-medium">
             Pentru business →
           </Link>
         </div>
       </nav>
 
-      {/* ── Hero ───────────────────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 flex flex-col lg:flex-row items-center gap-16 lg:gap-20">
-        {/* Left */}
-        <div className="flex-1 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-950 text-brand-orange text-sm font-semibold px-4 py-2 rounded-full mb-6">
-            <span className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              ))}
-            </span>
-            Aplicația #1 pentru livrări în Moldova
-          </div>
-
-          <h1 className="text-[48px] md:text-[60px] font-bold leading-[1.1] mb-6">
-            Știi mereu<br />
-            unde e<br />
-            <span className="text-brand-orange">coletul tău</span>
+      {/* Hero */}
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-20 flex flex-col lg:flex-row items-center gap-16">
+        <div className="flex-1">
+          <h1 className="text-5xl md:text-6xl font-bold leading-[1.1] mb-6">
+            Urmărești<br />curierul live.<br />
+            <span className="text-brand-orange">Știi exact când.</span>
           </h1>
-
-          <p className="text-[18px] text-gray-600 dark:text-gray-300 mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed">
-            Urmărește curierul live pe hartă, primește notificări instant și nu mai rata nicio livrare.
-            Gratuit pentru tine.
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-md">
+            Fiecare comandă pe hartă. Notificare cu 10 minute înainte. Nu mai aștepți 6 ore. Nu mai ratezi nicio livrare.
           </p>
-
-          {/* Download buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
-            <AppStoreButton />
-            <GooglePlayButton />
+          <div className="flex flex-col sm:flex-row gap-4 mb-10">
+            <AppStoreBtn />
+            <GooglePlayBtn />
           </div>
-
-          {/* Trust badges */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 justify-center lg:justify-start text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1.5">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
               Gratuit
@@ -284,43 +358,32 @@ export default function AppDownload() {
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
-              Fără abonament
+              30 secunde setup
             </span>
           </div>
         </div>
-
-        {/* Right: phone */}
-        <div className="flex-shrink-0 pt-8">
+        <div className="flex-shrink-0">
           <PhoneMockup />
         </div>
       </section>
 
-      {/* ── Features ───────────────────────────────────────────────────────── */}
-      <section className="bg-brand-cream dark:bg-gray-900 py-20">
+      {/* Pain section */}
+      <section className="bg-brand-black dark:bg-gray-900 text-white py-20">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-[36px] md:text-[44px] font-bold mb-4">
-              Tot ce ai nevoie,<br />
-              <span className="text-brand-orange">într-o singură aplicație</span>
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg max-w-xl mx-auto">
-              Livra îți arată exact ce se întâmplă cu comanda ta, de la preluare până la ușa ta.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURES.map((f) => {
-              const Icon = f.icon
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-center">Recunoști situația?</h2>
+          <p className="text-gray-300 text-lg text-center mb-12 max-w-2xl mx-auto">
+            Fiecare comandă online în Moldova începe acum cu o singură speranță: "Oare mă va găsi curierul acasă?"
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {PAIN_POINTS.map((pain) => {
+              const Icon = pain.icon
               return (
-                <div
-                  key={f.title}
-                  className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className={`w-12 h-12 ${f.bg} ${f.color} rounded-2xl flex items-center justify-center mb-4`}>
+                <div key={pain.title} className="bg-gray-800 dark:bg-gray-800 rounded-2xl p-6">
+                  <div className={`w-12 h-12 ${pain.bg} ${pain.color} rounded-xl flex items-center justify-center mb-4`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-bold text-[16px] mb-2">{f.title}</h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+                  <h3 className="font-bold text-lg mb-2">{pain.title}</h3>
+                  <p className="text-gray-300 text-sm leading-relaxed">{pain.body}</p>
                 </div>
               )
             })}
@@ -328,94 +391,287 @@ export default function AppDownload() {
         </div>
       </section>
 
-      {/* ── How it works ───────────────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-[36px] md:text-[44px] font-bold mb-4">
-            Cum funcționează
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
-            De la comandă la livrare, în 3 pași simpli.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 relative">
-          {/* Connector line */}
-          <div className="hidden md:block absolute top-10 left-[calc(16.6%+24px)] right-[calc(16.6%+24px)] h-0.5 bg-gradient-to-r from-brand-orange via-violet-500 to-emerald-500 opacity-30" />
-
-          {STEPS.map((s) => {
-            const Icon = s.icon
-            return (
-              <div key={s.num} className="relative flex flex-col items-center text-center">
-                <div className={`w-16 h-16 ${s.color} text-white rounded-2xl flex items-center justify-center shadow-lg mb-5 relative z-10`}>
-                  <Icon className="w-8 h-8" />
-                </div>
-                <div className={`absolute top-0 right-1/2 translate-x-1/2 -translate-y-1 text-[11px] font-bold ${s.color.replace('bg-', 'text-')} opacity-60`}>
-                  {s.num}
-                </div>
-                <h3 className="font-bold text-[18px] mb-2">{s.title}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-[220px]">{s.desc}</p>
+      {/* Live tracking feature */}
+      <section className="bg-gradient-to-br from-brand-orange to-orange-600 text-white py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold mb-6">GPS live. La 30 de secunde.</h2>
+              <p className="text-lg text-white/90 mb-6 leading-relaxed">
+                Locația curierului se actualizează constant pe hartă. Nu o imagine staică. O hartă care se mișcă în timp real. Tu știi exact unde e, pe care stradă merge, când ajunge.
+              </p>
+              <p className="text-lg text-white/90 mb-6 leading-relaxed">
+                Notificarea la 10 minute nu e doar un feature. E diferența dintre a sta cu anxietate și a fi pregătit exact pe timp.
+              </p>
+              <div className="flex items-center gap-2 text-white/80">
+                <ArrowRight className="w-5 h-5" />
+                <span>Nicio ratare din nou</span>
               </div>
-            )
-          })}
+            </div>
+            <div className="bg-white rounded-2xl p-8 shadow-2xl">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-brand-orange rounded-full mt-2 flex-shrink-0" />
+                  <div>
+                    <p className="font-bold text-brand-black">Deschizi Livra</p>
+                    <p className="text-sm text-gray-600">Doar iți iei telefonul.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-brand-orange rounded-full mt-2 flex-shrink-0" />
+                  <div>
+                    <p className="font-bold text-brand-black">Vezi curierul pe hartă</p>
+                    <p className="text-sm text-gray-600">Mișcă-se în timp real, fiecare 30 secunde.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-brand-orange rounded-full mt-2 flex-shrink-0" />
+                  <div>
+                    <p className="font-bold text-brand-black">ETA precis</p>
+                    <p className="text-sm text-gray-600">„Ajunge la 14:32" — nu la 14:35 sau 14:28.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-brand-orange rounded-full mt-2 flex-shrink-0" />
+                  <div>
+                    <p className="font-bold text-brand-black">Ești gata pe timp</p>
+                    <p className="text-sm text-gray-600">Cobori din bucătărie fix când sună la ușă.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Social proof strip ─────────────────────────────────────────────── */}
-      <section className="border-y border-gray-100 dark:border-gray-800 py-10">
-        <div className="max-w-4xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { value: '50k+', label: 'Livrări urmărite' },
-            { value: '4.8', label: 'Rating mediu' },
-            { value: '98%', label: 'Livrări la timp' },
-            { value: '24/7', label: 'Urmărire non-stop' },
-          ].map((s) => (
+      {/* GPS pin – biggest differentiator */}
+      <section className="bg-brand-cream dark:bg-gray-900 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold mb-4">
+                <span className="text-brand-orange">Cea mai mare problemă a Moldovei:</span><br />
+                Adresele care nu există pe hartă
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                Sate fără nume de străzi. Blocuri noi fără număr înregistrat. Case la marginea satului. Fără Livra, curierul sună de 5 ori și pierde 20 de minute.
+              </p>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed font-bold text-brand-orange">
+                Cu Livra: pui pin-ul pe ușa ta o singură dată. Fiecare curier de la orice comerciant ajunge direct acolo.
+              </p>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 space-y-3">
+                <p className="font-bold text-brand-black dark:text-white">Cum funcționează:</p>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-orange font-bold">•</span>
+                    <span>Deschizi Livra, tapezi „Setează locația mea"</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-orange font-bold">•</span>
+                    <span>Pui pin-ul pe ușa ta pe hartă</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-orange font-bold">•</span>
+                    <span>Numești locația (Acasă, Birou, la Bunica)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-brand-orange font-bold">•</span>
+                    <span>Gata. Toate livrările ajung direct acolo.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-bold mb-2">FĂ Ră LIVRA</p>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <p className="flex items-start gap-2">
+                      <span className="text-red-500">✗</span>
+                      <span>Curierul nu găsește adresa</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-red-500">✗</span>
+                      <span>Sună tu de 3 ori</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-red-500">✗</span>
+                      <span>Pierde 20 de minute</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-red-500">✗</span>
+                      <span>Livrare ratată</span>
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-brand-orange font-bold mb-2">CU LIVRA</p>
+                  <div className="bg-emerald-50 dark:bg-emerald-900/30 rounded-lg p-4 space-y-2 text-sm text-emerald-700 dark:text-emerald-300">
+                    <p className="flex items-start gap-2">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Pin GPS pe ușa ta</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Curierul navigă direct</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Zero telefoane</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Livrare de prima dată</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features grid */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-4 text-center">Tot ce ai nevoie</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg text-center mb-12 max-w-2xl mx-auto">
+            8 feature-uri care fac din Livra aplicația numarul 1 pentru livrări în Moldova.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {FEATURES.map((f) => {
+              const Icon = f.icon
+              return (
+                <div key={f.title} className={`${f.bg} rounded-2xl p-6`}>
+                  <div className={`w-12 h-12 ${f.bg} ${f.color} rounded-2xl flex items-center justify-center mb-4 bg-opacity-100`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{f.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{f.desc}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Onboarding */}
+      <section className="bg-brand-cream dark:bg-gray-900 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-4 text-center">Cum ajungi de la comandă la hartă în 5 minute</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg text-center mb-12 max-w-2xl mx-auto">
+            Onboarding simplu. Valoare imediată. Nici o durere.
+          </p>
+          <div className="space-y-4">
+            {ONBOARDING.map((step, i) => (
+              <div key={step.num} className="flex gap-6 items-start">
+                <div className="flex-shrink-0 w-12 h-12 bg-brand-orange text-white rounded-full flex items-center justify-center font-bold">
+                  {step.num}
+                </div>
+                <div className="flex-1 py-2">
+                  <h3 className="font-bold text-lg mb-1">{step.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="border-y border-gray-100 dark:border-gray-800 py-16">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {STATS.map((s) => (
             <div key={s.label}>
-              <div className="text-[36px] font-bold text-brand-orange">{s.value}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{s.label}</div>
+              <div className="text-4xl font-bold text-brand-orange">{s.value}</div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Download CTA ───────────────────────────────────────────────────── */}
-      <section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto bg-brand-orange rounded-3xl px-8 py-16 text-center text-white relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 rounded-full" />
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white/10 rounded-full" />
-
-          <div className="relative z-10">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Package className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-[36px] md:text-[48px] font-bold mb-4 leading-tight">
-              Descarcă Livra<br />gratuit acum
-            </h2>
-            <p className="text-white/80 text-lg mb-10 max-w-md mx-auto leading-relaxed">
-              Nu mai pierde livrări. Urmărește-ți coletul live și primește notificări instant pe telefon.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <AppStoreButton large />
-              <GooglePlayButton large />
-            </div>
-
-            <p className="mt-8 text-white/60 text-sm flex items-center justify-center gap-2">
-              <Clock className="w-4 h-4" />
-              Instalare în 30 de secunde. Gratuit pentru totdeauna.
-            </p>
+      {/* Testimonials */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-12 text-center">Recenzii de la utilizatori reali</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div key={t.name} className="bg-brand-cream dark:bg-gray-800 rounded-2xl p-8">
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed italic">
+                  "{t.text}"
+                </p>
+                <p className="font-bold">{t.name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t.location}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-gray-100 dark:border-gray-800 py-10 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
-          <div className="font-bold text-lg text-brand-black dark:text-white">
-            <span className="text-brand-orange">L</span>ivra
+      {/* FAQ */}
+      <section className="bg-brand-cream dark:bg-gray-900 py-20">
+        <div className="max-w-3xl mx-auto px-6">
+          <h2 className="text-4xl font-bold mb-12 text-center">Întrebări frecvente</h2>
+          <div className="space-y-3">
+            {FAQS.map((faq, i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <h3 className="font-bold text-lg text-left">{faq.q}</h3>
+                  {openFaq === i ? (
+                    <ChevronUp className="w-5 h-5 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 flex-shrink-0" />
+                  )}
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-6 pt-2 text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-          <p>© {new Date().getFullYear()} Livra. Toate drepturile rezervate.</p>
+        </div>
+      </section>
+
+      {/* Download CTA */}
+      <section className="bg-brand-orange text-white py-24 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <Package className="w-16 h-16 mx-auto mb-6 opacity-80" />
+          <h2 className="text-5xl font-bold mb-4 leading-tight">
+            Urmărești-ți coletul live<br />
+            acum
+          </h2>
+          <p className="text-lg text-white/90 mb-12 leading-relaxed">
+            Fără așteptări. Fără surprize. Doar GPS-ul curierului către ușa ta. Descarcă Livra azi.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <AppStoreBtn large />
+            <GooglePlayBtn large />
+          </div>
+          <p className="text-sm text-white/70 flex items-center justify-center gap-2">
+            <Clock className="w-4 h-4" />
+            Instalare în 30 de secunde. Gratuit pentru totdeauna.
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-100 dark:border-gray-800 py-12 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2">
+            <Logo size={28} />
+            <span className="text-lg font-bold text-brand-black dark:text-white">Livra</span>
+          </div>
+          <p>© 2026 Livra. Toate drepturile rezervate.</p>
           <div className="flex gap-6">
             <Link to="/" className="hover:text-brand-orange transition-colors">Pentru business</Link>
             <a href="#" className="hover:text-brand-orange transition-colors">Confidențialitate</a>
