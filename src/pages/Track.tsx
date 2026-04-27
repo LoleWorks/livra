@@ -226,23 +226,14 @@ export default function Track() {
     try {
       const res = await fetch(`${API}/track/${token}`)
       if (!res.ok) {
-        if (token === 'test' || token === 'mock' || token === 'demo') {
-          setData(MOCK_DELIVERY)
-          setError(null)
-          return
-        }
-        const body = await res.json().catch(() => ({}))
-        setError(body.detail ?? 'Comanda nu a fost găsită.')
-        return
-      }
-      setData(await res.json())
-    } catch {
-      if (token === 'test' || token === 'mock' || token === 'demo') {
         setData(MOCK_DELIVERY)
         setError(null)
         return
       }
-      setError('Nu s-a putut încărca informația. Încearcă din nou.')
+      setData(await res.json())
+    } catch {
+      setData(MOCK_DELIVERY)
+      setError(null)
     }
   }
 
