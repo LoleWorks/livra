@@ -627,8 +627,9 @@ function ConnectorsVisual() {
       {/* Livra dashboard */}
       <div className="bg-white dark:bg-zinc-800/60 rounded-xl p-4 border border-zinc-100 dark:border-zinc-700/50">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-5 h-5 rounded-md bg-brand-orange flex items-center justify-center">
-            <Truck size={9} className="text-white" />
+          <div className="flex flex-col leading-none mr-0.5">
+            <span className="text-[9px] font-bold text-[#161513] dark:text-white tracking-widest uppercase">Livra</span>
+            <svg width="18" height="2" viewBox="0 0 18 2"><line x1="0" y1="1" x2="14" y2="1" stroke="#ff5c2c" strokeWidth="1"/><polygon points="14,0 18,1 14,2" fill="#ff5c2c"/></svg>
           </div>
           <span className="text-[12px] font-bold text-zinc-900 dark:text-zinc-50">Dashboard Livra</span>
           <span className="ml-auto text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">22 comenzi gata</span>
