@@ -109,6 +109,13 @@ function fmtAgo(iso: string) {
   return `acum ${Math.round(sec / 3600)} h`
 }
 
+function fmtTime(iso: string) {
+  const date = new Date(iso)
+  const h = String(date.getHours()).padStart(2, '0')
+  const m = String(date.getMinutes()).padStart(2, '0')
+  return `${h}:${m}`
+}
+
 // ── Mock data for testing ─────────────────────────────────────────────────────
 
 const MOCK_DELIVERY = {
@@ -364,9 +371,9 @@ export default function Track() {
               <div>
                 <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Interval de livrare</p>
                 <p className="text-[22px] font-bold text-zinc-900 leading-none">
-                  {data.time_window_start}
+                  {fmtTime(data.time_window_start)}
                   <span className="text-zinc-400 font-normal mx-1">–</span>
-                  {data.time_window_end}
+                  {fmtTime(data.time_window_end)}
                 </p>
               </div>
             )}
