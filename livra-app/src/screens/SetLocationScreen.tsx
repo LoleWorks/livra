@@ -77,7 +77,6 @@ export default function SetLocationScreen({ route }: Props) {
         originWhitelist={['*']}
         source={{ html: MAP_HTML }}
         onMessage={onMessage}
-        scrollEnabled={false}
       />
 
       {!pin && (

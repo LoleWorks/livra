@@ -127,7 +127,6 @@ export default function TrackScreen({ route }: Props) {
         style={styles.map}
         originWhitelist={['*']}
         source={{ html: buildMapHtml(dLat, dLng, delivery.destinationLat, delivery.destinationLng) }}
-        scrollEnabled={false}
       />
 
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
