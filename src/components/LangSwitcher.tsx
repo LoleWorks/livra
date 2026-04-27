@@ -1,4 +1,5 @@
-import { useLang, Lang } from '../context/LanguageContext'
+import { useLang } from '../context/LanguageContext'
+import type { Lang } from '../context/LanguageContext'
 
 const LANGS: { code: Lang; label: string }[] = [
   { code: 'ro', label: 'RO' },

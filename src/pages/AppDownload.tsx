@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   Bell, Package, CheckCircle, Star, Navigation, Clock,
   History, MapPin, Zap, AlertCircle, Phone,
-  XCircle, ChevronDown, ChevronUp,
+  XCircle, ChevronDown, ChevronUp, ArrowRight,
 } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
 import { getAppDownloadStrings } from '../locales/appDownload'
@@ -177,18 +177,6 @@ function GooglePlayBtn({ large = false, label }: { large?: boolean; label: strin
   )
 }
 
-const iconMap = {
-  Clock,
-  XCircle,
-  AlertCircle,
-  Navigation,
-  Bell,
-  MapPin,
-  Package,
-  Zap,
-  History,
-  Star,
-}
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 

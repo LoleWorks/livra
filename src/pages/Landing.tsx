@@ -1126,9 +1126,9 @@ export default function Landing() {
       {/* ── FAQ ── */}
       <section className="py-16 bg-zinc-50 dark:bg-zinc-900">
         <div className="max-w-2xl mx-auto px-6">
-          <h2 className="text-[28px] font-bold tracking-tight text-center mb-10">{t.faqs.title || 'Întrebări frecvente'}</h2>
+          <h2 className="text-[28px] font-bold tracking-tight text-center mb-10">Întrebări frecvente</h2>
           <div>
-            {(t.faqs instanceof Array ? t.faqs : []).map(faq => <Faq key={faq.q} {...faq} />)}
+            {t.faqs.map(faq => <Faq key={faq.q} {...faq} />)}
           </div>
         </div>
       </section>

@@ -1,4 +1,4 @@
-import { Lang } from '../context/LanguageContext'
+import type { Lang } from '../context/LanguageContext'
 
 export type LandingStrings = {
   navbar: {
