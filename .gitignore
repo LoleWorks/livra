@@ -35,3 +35,6 @@ docs/superpowers/
 
 # Nested repos
 livra-driver/
+
+# Expo runtime state
+livra-app/.expo/
