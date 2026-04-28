@@ -1,11 +1,11 @@
 import { Helmet } from 'react-helmet-async'
 import { useParams, Navigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import LandingNav from '../../components/LandingNav'
 import {
   Route, Eye, Zap, Users, Bell,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 
 interface UseCaseData {
   slug: string
@@ -27,43 +27,43 @@ const USE_CASES: Record<string, UseCaseData> = {
       title: 'Optimizare Rute Livrare | Software Livra',
       description: 'OR-Tools VRP cu OSRM. Timpi reali de parcurs, rute optimizate în secundă, 40% mai puțin combustibil.',
     },
-    badge: 'Funcționalitate principală',
-    headline: 'Ruta optimă calculată în câteva secunde',
-    subline: 'OR-Tools VRP cu OSRM. Nu distanțe în linie dreaptă — timpi reali pe drumuri reale din Moldova.',
+    badge: 'Inima Livra',
+    headline: 'Ruta optimă în 5 secunde. Nu în 2 ore.',
+    subline: 'Oamenii cu Excel și Google Maps pierd 2 ore zilnic. Livra calculează ruta optimă pentru 200 de livrări în 5 secunde. 30% mai puțin km. Punct. Gata.',
     color: 'blue',
     icon: Route,
     painPoints: [
       {
-        title: 'Planificare manuală a rutelor',
-        desc: 'Logisticienii petrec 1-2 ore zilnic alocând comenzi și trasând rute în Google Maps.',
+        title: 'Planificare manuală = pierdere de timp',
+        desc: 'Logistician stă 2 ore zilnic: «Pe cine trimit pe această rută?» Drag pe Google Maps, calcule pe hârtie, schimbări. Asta se întâmplă zilnic.',
       },
       {
-        title: 'Comenzi livrate în ordine greșită',
-        desc: 'Fără rută optimă, un drum care putea dura 3 ore durează 5.',
+        title: 'Rute haotice = pierdere de bani',
+        desc: 'Ai 10 livrări în aceeași zonă dar le trimit în 3 curse diferite. 3 galoane de benzină în loc de 1. Asta-i bani iroșiți zilnic.',
       },
       {
-        title: 'Imposibil de scalat',
-        desc: 'Cu 5 șoferi merge. Cu 15 și 200 de comenzi pe zi, planificarea devine imposibilă.',
+        title: 'Imposibil să crești',
+        desc: 'La 5 șoferi merge planificare manuală. La 15 șoferi și 200 de comenzi, crezi că un om poate planifica? Nu. Te-ai blocat la creștere.',
       },
     ],
     benefits: [
       {
-        title: 'Un click, toate rutele generate',
-        desc: 'Logistician apasă «Optimizează» și Livra alocă comenzile și calculează ruta optimă.',
+        title: 'Un click, toate rutele gata',
+        desc: 'Tu apesi «Optimizează». Livra calculează ruta optimă pentru toți șoferii. Fiecare șofer știe exact pe cine să viziteze și în ce ordine. Aia e. Nu mai vorbesc cu logistician. Nu mai așteptă comenzi.',
       },
       {
-        title: 'Timpi reali OSRM',
-        desc: 'Algoritmul folosește durate reale de parcurs, nu estimări. Știe unde e trafic.',
+        title: 'Timpi reali, nu estimări',
+        desc: 'Nu distanțe în linie dreaptă. Livra ȘTIE că Ștefan cel Mare e plin de 9-10 dimineața. Că la Centru e trafic. Calculează după durate reale din Moldova. Rutele sunt corecte.',
       },
       {
-        title: 'Scalare imediată',
-        desc: 'Același click funcționează pentru 5 sau 500 de comenzi. Livra gestionează complexitatea.',
+        title: 'Scalare fără limită',
+        desc: 'Ai 5 șoferi? Click. Ai 50 șoferi? Același click. Livra gestionează complexitatea. Tu doar lucrezi. Aia-i business scaling.',
       },
     ],
     stats: [
-      { value: '< 5 sec', label: 'generare rute' },
-      { value: '40%', label: 'reducere km' },
-      { value: '3×', label: 'scalabilitate' },
+      { value: '5 sec', label: 'generare rute 200 comenzi' },
+      { value: '−30%', label: 'kilometri parcurși' },
+      { value: '2h', label: 'timp economisit zilnic' },
     ],
   },
   'tracking-live': {
@@ -73,42 +73,42 @@ const USE_CASES: Record<string, UseCaseData> = {
       description: 'Clienții văd șoferul pe hartă. Link SMS, notificări automate la 30 minute, −80% apeluri «unde e coletul».',
     },
     badge: 'Client experience',
-    headline: 'Clienții văd șoferul pe hartă, în timp real',
-    subline: 'Un link unic trimis prin SMS. Nicio aplicație. Clienții știu exact când ajunge coletul.',
+    headline: '«Unde e coletul?» — răspunsul e în SMS.',
+    subline: 'Clintul primește link și vede șoferul pe hartă ACUM. Nu mai sună. Nu mai așteptă. Nu mai e stres. Tu economisești 100 apeluri pe zi.',
     color: 'green',
     icon: Eye,
     painPoints: [
       {
-        title: '«Unde e comanda mea?»',
-        desc: 'Cel mai frecvent apel. Fiecare răspuns costă timp și bani.',
+        title: '«Unde e comanda mea?» — 100 apeluri zilnic',
+        desc: 'Fiecare apel = 5 minute din ziua ta. 100 apeluri = 8 ore. Tu stai la telefon cu clienții în loc să faci altceva. Si clintul e frustrat că nu știe.',
       },
       {
-        title: 'Clienți care nu sunt acasă',
-        desc: 'Șoferul ajunge, nimeni nu deschide. Returul costă o cursă întreagă.',
+        title: 'Clienți care nu sunt acasă = pierdere dublă',
+        desc: 'Șoferul ajunge, nimeni nu deschide. Returul. Tu pierzi timp, combustibil și încredere clientului. Fără notificare prealabilă, asta se întâmplă constant.',
       },
       {
-        title: 'Ferestre de livrare prea largi',
-        desc: '«Vine undeva azi» nu mai este acceptabil. Clienții vor precizie.',
+        title: 'Clienți care nu se mai întorc',
+        desc: 'Nu știind când vine, clientul comandă de la altcineva care-l notifică. Livra move. Incertitudinea = pierdere de client.',
       },
     ],
     benefits: [
       {
-        title: 'Link de tracking prin SMS',
-        desc: 'Clientul primește SMS cu link unic. Deschide browserul și vede șoferul pe hartă.',
+        title: 'Clientul vede pe hartă. Real-time.',
+        desc: 'SMS cu link. Clientul deschide browserul. Vede pe hartă unde e șoferul ACUM. Vede ETA-ul actualizat la fiecare 60 de secunde. Zero incertitudine. Client calm.',
       },
       {
-        title: 'Notificare la 30 minute',
-        desc: 'SMS automat când șoferul e la 30 minute. Clientul are timp să ajungă acasă.',
+        title: '−80% apeluri inbound',
+        desc: 'Clienții nu mai sună. Vor să știe unde e? Deschid linkul. Nu-ți mai ocupă linia. Nu-ți mai pierzi angajații cu «unde e coletul mea». Tu scapi de 8 ore de telefon zilnic.',
       },
       {
-        title: 'ETA actualizat în timp real',
-        desc: 'Ora estimată se recalculează la fiecare 60 secunde în funcție de trafic.',
+        title: '+25% prim-livrare',
+        desc: 'Notificare la 30 minute: «Șoferul e la 30 de minute distanță». Clientul stie. E acasă când ajunge. Prim-livrare. Asta-i profit.',
       },
     ],
     stats: [
-      { value: '−80%', label: 'apeluri inbound' },
-      { value: '95%', label: 'clienți acasă prima cursă' },
-      { value: '0', label: 'aplicații de instalat' },
+      { value: '−80%', label: 'apeluri «unde e coletul»' },
+      { value: '+25%', label: 'prim-livrare rate' },
+      { value: 'Real-time', label: 'ETA pe hartă' },
     ],
   },
   'integrare-woocommerce': {
@@ -118,42 +118,42 @@ const USE_CASES: Record<string, UseCaseData> = {
       description: 'Plugin WooCommerce gata de instalat. Comenzile ajung direct în Livra. Statusuri sincronizate bidirecțional.',
     },
     badge: 'Integrare e-commerce',
-    headline: 'Comenzile din magazin ajung direct în Livra',
-    subline: 'Plugin WooCommerce și extensie OpenCart. Fiecare comandă nouă apare automat în tabloul de bord.',
+    headline: 'Instaleaza si uita-te cum lucrurile se intampla',
+    subline: 'Nu mai introduci comenzi manual. Plugin-ul Livra se conectează la WooCommerce în 5 minute. Fiecare comandă nouă apare automat. Basta cu Excel.',
     color: 'orange',
     icon: Zap,
     painPoints: [
       {
-        title: 'Copiere manuală a comenzilor',
-        desc: 'Angajații exportă din WooCommerce și introduc în altă parte. Erori, duplicări, timp pierdut.',
+        title: 'Copiere manuală = erori și pierderi',
+        desc: 'Comenzi din WooCommerce trebuie copiate în altă parte. Angajatul se greșeste. Comandă se pierde. Client furious. Asta se întâmplă zilnic.',
       },
       {
-        title: 'Statusuri nesincronizate',
-        desc: 'Comanda e livrată în realitate, dar în WooCommerce apare «în procesare».',
+        title: 'Statusuri nesincronizate = confuzie',
+        desc: 'Comanda e livrată de fapt, dar în WooCommerce apare «în procesare». Client crede că e pierdută. Te sună. Tu zici că e livrată. Cine are dreptate? Nimeni. Chaos.',
       },
       {
-        title: 'Mai multe sisteme, nicio coerență',
-        desc: 'Stoc în WooCommerce, comenzi în Excel, livrări în altă parte. Imposibil de urmărit.',
+        title: 'Mai multe sisteme = mai mult stres',
+        desc: 'Stoc în WooCommerce. Comenzi în altă parte. Livrări în a treia parte. Niciodată nu știi versiunea corectă a adevărului.',
       },
     ],
     benefits: [
       {
-        title: 'Instalare în 5 minute',
-        desc: 'Descarci pluginul, îl activezi, introduci cheia API. Gata. Comenzile apar automat.',
+        title: '5 minute setup, 0 ore munca',
+        desc: 'Download plugin. Apesi activate. Introduci API key. Gata. Fiecare comandă nouă apare automat în Livra. Zero introducere manuală. Zero erori. Zero stres.',
       },
       {
-        title: 'Statusuri sincronizate bidirecțional',
-        desc: 'Când șoferul marchează livrare, statusul se actualizează automat în WooCommerce.',
+        title: 'Statusuri sincronizate automat',
+        desc: 'Șoferul marchează comanda ca livrată. Statusul se actualizează automat în WooCommerce. Clintul vede că e livrată. WooCommerce vede că e livrată. Un adevăr.',
       },
       {
-        title: 'Un singur loc pentru toate',
-        desc: 'Indiferent de câte magazine ai, toate comenzile ajung în același tablou Livra.',
+        title: 'Un sistem, adevărul singular',
+        desc: 'Tot ce conteaza e în Livra. Stoc, comenzi, livrări. Oamenii te vor cere statusul comenzii? Link tracking. Aia e. Nu mai zile cu 3 sisteme conflictuale.',
       },
     ],
     stats: [
-      { value: '5 min', label: 'timp integrare' },
+      { value: '5 min', label: 'timp setup total' },
       { value: '0', label: 'introducere manuală' },
-      { value: 'Live', label: 'sincronizare statusuri' },
+      { value: '100%', label: 'sincronizare automata' },
     ],
   },
   'gestionare-soferi': {
@@ -162,42 +162,42 @@ const USE_CASES: Record<string, UseCaseData> = {
       title: 'Gestionare Șoferi & Flotă | Management Livra',
       description: 'Hartă live cu localizarea fiecărui șofer. POD digital cu foto + semnătură. Rapoarte automate de performanță.',
     },
-    badge: 'Managementul flotei',
-    headline: 'Știi unde e fiecare șofer, la orice moment',
-    subline: 'Localizare live, status livrare în timp real, rapoarte automate. Tot ce trebuie pentru gestionarea unei flote moderne.',
+    badge: 'Management',
+    headline: 'Vrei să știi unde e fiecare șofer? Privesc pe hartă.',
+    subline: 'O hartă cu toți șoferii. Unde sunt, ce livrări au, cum merg. Deschizi telefonul și-i vezi pe toți. Aia-i control real.',
     color: 'purple',
     icon: Users,
     painPoints: [
       {
-        title: 'Nu știi unde e niciun șofer',
-        desc: 'Suni fiecare șofer pentru a afla statusul. Imposibil de scalat.',
+        title: 'Nicio vizibilitate = nicio control',
+        desc: 'Ai 10 șoferi pe rute. Tu nu știi unde sunt. Clientul îți zice «Unde e livrare mea?» și tu suni șoferul. Asta e sistem primitiv.',
       },
       {
-        title: 'Nicio dovadă de livrare',
-        desc: '«Am lăsat la ușă» nu e o dovadă. Fără confirmare, disputele cu clienții sunt greu de rezolvat.',
+        title: 'Nicio dovadă = dispute permanente',
+        desc: 'Șoferul zice: «Am lăsat la ușă». Clientul zice: «Nu mi-a dat nimeni nimic». Tu ești în mijloc, neputincios. Fără dovadă, pierzi.',
       },
       {
-        title: 'Performanța șoferilor e un mister',
-        desc: 'Nu știi care șofer e eficient, care pierde timp și unde apar problemele.',
+        title: 'Care șofer e eficient? Nu știi',
+        desc: 'Ai 5 șoferi. Care e mai rapid? Care pierde timp? Care are probleme? Fără date, nu poți face nimic.',
       },
     ],
     benefits: [
       {
-        title: 'Hartă live cu toți șoferii',
-        desc: 'O singură pagină cu locația fiecărui șofer, comenzile active și statusul, în timp real.',
+        title: 'Hartă live = control total',
+        desc: 'Deschizi appul. Vezi toți șoferii pe hartă ACUM. Unde sunt, ce livrări au, pana cand. ETA se actualizează live. Client te sună: «Unde-i șoferul?». Tu privești pe hartă și dai veste exactă.',
       },
       {
-        title: 'Confirmare cu foto + semnătură',
-        desc: 'Șoferul fotografiază și obține semnătura pe telefon. Dovada se salvează automat.',
+        title: 'POD digital = zero dispute',
+        desc: 'Șoferul fotografiază comanda și obține semnătură pe telefon. Dovada se salvează. Clientul nu mai poate spune «Nu mi-a dat nimic». Tu ești protejat.',
       },
       {
-        title: 'Rapoarte de performanță',
-        desc: 'Livra calculează automat: livrări/zi, durata/oprire, deviații de rută, probleme.',
+        title: 'Rapoarte automate = management cu date',
+        desc: 'La finalul zilei: care șofer a livrat cât, în cât timp, pe câți km. Care a avut probleme. Tu poți vedea perfor-anta pe numere, nu pe simțiri.',
       },
     ],
     stats: [
-      { value: 'Live', label: 'localizare flotă' },
-      { value: '100%', label: 'livrări cu POD' },
+      { value: 'Live', label: 'hartă flotă 24/7' },
+      { value: '100%', label: 'POD digital' },
       { value: 'Automat', label: 'rapoarte zilnice' },
     ],
   },
@@ -207,43 +207,43 @@ const USE_CASES: Record<string, UseCaseData> = {
       title: 'Notificări SMS Automate | Livra Livrare',
       description: '4 SMS-uri automate per comandă. Confirmație, plecare șofer, ETA 30 min, livrare. Branding personalizat.',
     },
-    badge: 'Comunicare automată',
-    headline: 'Clientul știe tot, fără să sune',
-    subline: 'SMS automat la confirmație, plecare, ETA și livrare. Zero intervenție manuală. Branding personalizat.',
+    badge: 'Comunicare',
+    headline: 'Clientul știe TOT. Tu nu mai răspunzi la telefon.',
+    subline: '4 SMS-uri automate: comanda confirmată → șofer pe drum → sosire în 30 min → livrat. Clintul e liniștit. Tu ești liber.',
     color: 'blue',
     icon: Bell,
     painPoints: [
       {
-        title: 'Clienții sună tot timpul',
-        desc: 'Fiecare client vrea să știe unde e comanda. Costul acestor apeluri e enorm.',
+        title: 'Clienți care sună tot ziua',
+        desc: 'Fiecare client vrea să știe status-ul. Fiecare apel = 5 minute. 100 apeluri = 8 ore din ziua ta la telefon. Nu mai e productiv.',
       },
       {
-        title: 'Clienți care nu sunt acasă',
-        desc: 'Fără notificare prealabilă, șoferul ajunge și nu găsește pe nimeni.',
+        title: 'Clientul nu e acasă = livrare pierdută',
+        desc: 'Fără notificare, clientul nu știe că vine. Șoferul ajunge, nimeni nu deschide. Returul. Pierdere dublă.',
       },
       {
-        title: 'Comunicare inconsistentă',
-        desc: 'Unii clienți primesc apel, alții SMS manual, alții nimic. Fără standard.',
+        title: 'Comunicare inconsistenta = confuzie',
+        desc: 'Unii clienți primesc apel, alții SMS manual, alții nimic. Fără standard, clientul e confuz si frustrat.',
       },
     ],
     benefits: [
       {
-        title: '4 SMS-uri automate per comandă',
-        desc: 'Confirmare → Șofer plecat → 30 min ETA → Livrat. Totul automat.',
+        title: '4 SMS automate = 0 apeluri',
+        desc: 'Comandă confirmată → SMS. Șofer pe drum → SMS. Sosire în 30 min → SMS. Livrat → SMS. Clientul stie pe fiecare pas. Nu-ți sună. Tu nu mai stai la telefon.',
       },
       {
-        title: 'Rata de prim-livrare',
-        desc: 'Notificarea la 30 min înainte reduce dramatic cazurile în care clientul nu e acasă.',
+        title: '+25% prim-livrare rate',
+        desc: 'Notificare la 30 minute: clientul e alertat. E acasă când vine șoferul. Prim-livrare. Asta-i success. Asta-i profit.',
       },
       {
-        title: 'Branding personalizat',
-        desc: 'SMS-urile ies cu numele magazinului tău, nu «Livra». Clientul asociază cu brandul tău.',
+        title: 'SMS cu brandul tău, nu cu Livra',
+        desc: 'SMS-ul sună ca din parte ta: «Comanda ta de la [magazinul tău] e pe drum». Nu vede Livra. Vede brandul tău. Client vede profesionalism.',
       },
     ],
     stats: [
-      { value: '4', label: 'SMS-uri per comandă' },
-      { value: '+25%', label: 'rată prim-livrare' },
-      { value: '0', label: 'apeluri manuale' },
+      { value: '4', label: 'SMS automate per comandă' },
+      { value: '−100', label: 'apeluri zilnic' },
+      { value: '+25%', label: 'prim-livrare' },
     ],
   },
 }
@@ -281,7 +281,7 @@ export default function UseCasePage() {
         <h1 className="text-[48px] md:text-[56px] font-bold text-zinc-900 dark:text-zinc-50 mb-4 leading-tight">
           {useCase.headline}
         </h1>
-        <p className="text-[18px] text-zinc-600 dark:text-zinc-400 mb-8 max-w-2xl">
+        <p className="text-[18px] text-zinc-600 dark:text-zinc-400 mb-8 max-w-2xl leading-relaxed">
           {useCase.subline}
         </p>
         <div className="flex gap-4">
@@ -295,21 +295,21 @@ export default function UseCasePage() {
             href="#contact"
             className="inline-flex items-center gap-2 px-6 py-3 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 text-[15px] font-medium rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
           >
-            Contactează vânzări
+            Contactează echipa
           </a>
         </div>
       </section>
 
       {/* Pain points */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
-        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Provocări comune</h2>
+        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Problemele pe care le-ai acum</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {useCase.painPoints.map(point => (
-            <div key={point.title} className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6">
+            <div key={point.title} className="bg-red-50 dark:bg-red-950/20 rounded-xl p-6 border border-red-100 dark:border-red-900/30">
               <h3 className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                 {point.title}
               </h3>
-              <p className="text-[14px] text-zinc-600 dark:text-zinc-400">
+              <p className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed">
                 {point.desc}
               </p>
             </div>
@@ -319,14 +319,14 @@ export default function UseCasePage() {
 
       {/* Benefits */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
-        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Beneficii Livra</h2>
+        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Cum Livra schimbă jocul</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {useCase.benefits.map(benefit => (
-            <div key={benefit.title} className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+            <div key={benefit.title} className={`rounded-xl p-6 border ${colorClass[colorKey]} bg-white/50 dark:bg-zinc-950/50`}>
               <h3 className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                 {benefit.title}
               </h3>
-              <p className="text-[14px] text-zinc-600 dark:text-zinc-400">
+              <p className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed">
                 {benefit.desc}
               </p>
             </div>
@@ -349,16 +349,16 @@ export default function UseCasePage() {
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800 text-center">
         <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">
-          Gata să începi?
+          Vrei asta pentru afacerea ta?
         </h2>
         <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-8">
-          Configurează-ți Livra în 5 minute. Nu este nevoie de card de credit.
+          Încarcă azi. Fără card. Fără contract. Doar solutia care merge.
         </p>
         <a
           href="#contact"
           className="inline-flex items-center gap-2 px-8 py-4 bg-[#ff5c2c] hover:bg-[#e04a1f] text-white text-[16px] font-medium rounded-xl transition-colors"
         >
-          Solicită demo <ArrowRight size={18} />
+          Încearcă acum <ArrowRight size={18} />
         </a>
       </section>
 
