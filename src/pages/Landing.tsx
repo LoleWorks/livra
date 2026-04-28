@@ -1,11 +1,11 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, Fragment } from 'react'
-import { Link } from 'react-router-dom'
 import {
   Smartphone, Package, Users, User, Bell,
   CheckCircle, ArrowRight, Star, Globe, ChevronDown, ChevronUp,
   Route, Gift, TrendingUp, Mail, MapPin, Clock, Zap,
 } from 'lucide-react'
+import LandingNav from '../components/LandingNav'
 
 // ── Workflow diagram ───────────────────────────────────────────────────────────
 
@@ -1018,29 +1018,7 @@ export default function Landing() {
         <link rel="canonical" href="https://livra.delivery" />
       </Helmet>
 
-      {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex flex-col leading-none">
-            <span className="text-[15px] font-bold text-[#161513] dark:text-white tracking-widest uppercase">Livra</span>
-            <svg width="36" height="4" viewBox="0 0 36 4"><line x1="0" y1="2" x2="28" y2="2" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="28,0 36,2 28,4" fill="#ff5c2c"/></svg>
-          </div>
-          <div className="hidden md:flex items-center gap-6 text-[13px] text-zinc-500 dark:text-zinc-400">
-            <a href="#cum-functioneaza" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Cum funcționează</a>
-            <a href="#functionalitati" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Funcționalități</a>
-            <a href="#retea" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Rețeaua Livra</a>
-            <a href="#preturi" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Prețuri</a>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/login" className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 transition-colors">
-              Autentificare
-            </Link>
-            <a href="#contact" className="text-[13px] font-medium bg-brand-orange hover:bg-brand-orange-hover text-white px-4 py-1.5 rounded-lg transition-colors">
-              Solicită demo
-            </a>
-          </div>
-        </div>
-      </nav>
+      <LandingNav />
 
       {/* ── Hero ── */}
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">

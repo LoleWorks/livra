@@ -18,6 +18,8 @@ import SalesDashboard from './pages/sales/SalesDashboard'
 import SalesOrders from './pages/sales/SalesOrders'
 import SalesNewOrder from './pages/sales/SalesNewOrder'
 import SalesReturns from './pages/sales/SalesReturns'
+import IndustryPage from './pages/industrii/IndustryPage'
+import UseCasePage from './pages/cazuri/UseCasePage'
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/t/:token" element={<Track />} />
+          <Route path="/industrii/:slug" element={<IndustryPage />} />
+          <Route path="/cazuri/:slug" element={<UseCasePage />} />
           {/* Legacy redirects */}
           <Route path="/sales/login" element={<Navigate to="/login" replace />} />
           <Route path="/sales/change-password" element={<Navigate to="/change-password" replace />} />
