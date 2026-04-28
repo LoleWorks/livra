@@ -244,6 +244,7 @@ const NETWORK_BENEFITS = [
     icon: Smartphone,
     title: 'Reclame pe pagina de tracking',
     desc: 'Când un client așteaptă o livrare de la alt partener, magazinul tău apare pe ecranul lui. 10 minute de atenție pură, inclus în prețul creditelor, fără costuri extra.',
+    comingSoon: true,
   },
   {
     icon: Gift,
@@ -1165,13 +1166,20 @@ export default function Landing() {
 
           {/* 5 feature cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {NETWORK_BENEFITS.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-5 flex gap-4">
+            {NETWORK_BENEFITS.map(({ icon: Icon, title, desc, comingSoon }) => (
+              <div key={title} className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-5 flex gap-4 relative overflow-hidden">
                 <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
                   <Icon size={18} className="text-white" />
                 </div>
                 <div>
-                  <div className="text-[14px] font-semibold text-white mb-1.5">{title}</div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[14px] font-semibold text-white">{title}</span>
+                    {comingSoon && (
+                      <span className="text-[10px] font-bold uppercase tracking-wide bg-white/20 text-white px-2 py-0.5 rounded-full border border-white/30">
+                        Coming soon
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[12px] text-blue-100 leading-relaxed">{desc}</div>
                 </div>
               </div>
