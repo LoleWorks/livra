@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -10,10 +11,8 @@ import {
 
 function Logo() {
   return (
-    <svg viewBox="0 0 460 120" width="140" height="36" className="flex-shrink-0">
-      {/* LIVRA text */}
-      <text x="10" y="85" fontFamily="Georgia, serif" fontSize="90" fontWeight="700" fill="#161513" letterSpacing="-2">LIVRA</text>
-      {/* Orange line with arrow */}
+    <svg viewBox="0 0 460 120" width="140" height="36" className="flex-shrink-0 text-[#161513] dark:text-white">
+      <text x="10" y="85" fontFamily="Georgia, serif" fontSize="90" fontWeight="700" fill="currentColor" letterSpacing="-2">LIVRA</text>
       <line x1="10" y1="105" x2="380" y2="105" stroke="#ff5c2c" strokeWidth="8" strokeLinecap="round"/>
       <polygon points="390,105 370,95 375,115" fill="#ff5c2c"/>
     </svg>
@@ -332,6 +331,16 @@ export default function AppDownload() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-brand-black text-brand-black dark:text-white">
+      <Helmet>
+        <title>Livra | Urmărești curierul live pe hartă | App Moldova</title>
+        <meta name="description" content="Descarcă Livra și urmărește fiecare colet pe hartă în timp real. Notificare cu 10 minute înainte. Pin GPS pentru orice adresă din Moldova. Gratuit." />
+        <meta name="keywords" content="aplicatie livrare Moldova, urmarire colet live, GPS curier, tracking livraare, livra app, descarca livra" />
+        <meta property="og:title" content="Livra | Urmărești curierul live pe hartă" />
+        <meta property="og:description" content="GPS live, notificare cu 10 minute înainte, pin GPS pentru orice adresă. Nicio livrare ratată. Descarcă gratuit." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://livra.delivery/app" />
+        <link rel="canonical" href="https://livra.delivery/app" />
+      </Helmet>
 
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/90 dark:bg-brand-black/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
@@ -683,8 +692,8 @@ export default function AppDownload() {
       <footer className="border-t border-gray-100 dark:border-gray-800 py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center">
-            <svg viewBox="0 0 460 120" width="120" height="32" className="flex-shrink-0">
-              <text x="10" y="85" fontFamily="Georgia, serif" fontSize="90" fontWeight="700" fill="#161513" letterSpacing="-2">LIVRA</text>
+            <svg viewBox="0 0 460 120" width="120" height="32" className="flex-shrink-0 text-[#161513] dark:text-white">
+              <text x="10" y="85" fontFamily="Georgia, serif" fontSize="90" fontWeight="700" fill="currentColor" letterSpacing="-2">LIVRA</text>
               <line x1="10" y1="105" x2="380" y2="105" stroke="#ff5c2c" strokeWidth="8" strokeLinecap="round"/>
               <polygon points="390,105 370,95 375,115" fill="#ff5c2c"/>
             </svg>
