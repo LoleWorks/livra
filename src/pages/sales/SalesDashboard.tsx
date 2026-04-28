@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Package, RotateCcw, CheckCircle, Clock, Plus, ArrowRight, Phone, AlertTriangle } from 'lucide-react'
@@ -38,7 +39,7 @@ function fmtTime(t: string | null) {
 }
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  upcoming:   { label: 'Nou',         cls: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' },
+  upcoming:   { label: 'Nou',         cls: 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' },
   dispatched: { label: 'Expediat',    cls: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' },
   delivered:  { label: 'Livrat',      cls: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' },
   failed:     { label: 'Eșuat',       cls: 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300' },
@@ -93,6 +94,10 @@ export default function SalesDashboard() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <Helmet>
+        <title>Prezentare | Livra Sales</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -114,7 +119,7 @@ export default function SalesDashboard() {
       {/* KPI row */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'De livrat azi', value: pending,    icon: Package,      color: 'text-blue-600 dark:text-blue-400',    bg: 'bg-blue-50 dark:bg-blue-950/40' },
+          { label: 'De livrat azi', value: pending,    icon: Package,      color: 'text-brand-orange dark:text-orange-400',    bg: 'bg-orange-50 dark:bg-orange-950/40' },
           { label: 'În curs',       value: dispatched, icon: Clock,        color: 'text-amber-600 dark:text-amber-400',  bg: 'bg-amber-50 dark:bg-amber-950/40' },
           { label: 'Livrate azi',   value: delivered,  icon: CheckCircle,  color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40' },
           { label: 'Retururi',      value: returns,    icon: RotateCcw,    color: 'text-red-600 dark:text-red-400',      bg: 'bg-red-50 dark:bg-red-950/40' },

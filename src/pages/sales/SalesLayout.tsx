@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { NavLink, Outlet, Link, Navigate } from 'react-router-dom'
-import { LayoutDashboard, Plus, Package, RotateCcw, Sun, Moon, Truck, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
+import { LayoutDashboard, Plus, Package, RotateCcw, Sun, Moon, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
-import { getUser, clearUser } from '../../lib/auth'
+import { getUser, signOut } from '../../lib/auth'
 
 const nav = [
   { to: '/sales',          icon: LayoutDashboard, label: 'Prezentare',   end: true },
@@ -27,13 +27,18 @@ export default function SalesLayout() {
         {/* Logo */}
         <div className={`flex items-center h-12 border-b border-zinc-100 dark:border-zinc-800 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center flex-shrink-0">
-              <Truck size={12} className="text-white" />
-            </div>
-            {!collapsed && (
-              <div className="min-w-0">
-                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">Livra</span>
-                <span className="ml-1.5 text-[10px] font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/50 px-1.5 py-0.5 rounded-full">Sales</span>
+            {collapsed ? (
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-bold text-[#161513] dark:text-white tracking-widest uppercase leading-none">L</span>
+                <svg width="10" height="3" viewBox="0 0 10 3"><line x1="0" y1="1.5" x2="7" y2="1.5" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="7,0 10,1.5 7,3" fill="#ff5c2c"/></svg>
+              </div>
+            ) : (
+              <div className="flex flex-col leading-none">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-bold text-[#161513] dark:text-white tracking-widest uppercase">Livra</span>
+                  <span className="text-[10px] font-medium text-brand-orange bg-orange-50 dark:bg-orange-950/20 px-1.5 py-0.5 rounded-full">Sales</span>
+                </div>
+                <svg width="32" height="4" viewBox="0 0 32 4"><line x1="0" y1="2" x2="25" y2="2" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="25,0 32,2 25,4" fill="#ff5c2c"/></svg>
               </div>
             )}
           </div>
@@ -89,13 +94,13 @@ export default function SalesLayout() {
           {/* User identity */}
           {collapsed ? (
             <div className="flex justify-center py-2" title={user.name}>
-              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-brand-orange flex items-center justify-center flex-shrink-0">
                 <span className="text-[10px] font-bold text-white">{user.initials}</span>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg">
-              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-brand-orange flex items-center justify-center flex-shrink-0">
                 <span className="text-[10px] font-bold text-white">{user.initials}</span>
               </div>
               <div className="min-w-0 flex-1">
@@ -103,7 +108,7 @@ export default function SalesLayout() {
                 <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{user.email}</div>
               </div>
               <button
-                onClick={() => { clearUser(); window.location.href = '/login' }}
+                onClick={() => signOut().then(() => { window.location.href = '/login' })}
                 title="Deconectare"
                 className="w-6 h-6 flex items-center justify-center rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex-shrink-0"
               >

@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useRef, Fragment, useEffect } from 'react'
 import { MapContainer, Polyline, Marker, Tooltip } from 'react-leaflet'
 import { YandexMapLayer, YandexTrafficLayer } from '../components/YandexLayer'
@@ -169,7 +170,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   )
 }
 
-// 24h time picker — guaranteed no AM/PM regardless of OS locale.
+// 24h time picker | guaranteed no AM/PM regardless of OS locale.
 // Click the field to open a dropdown with two scrollable columns: hours (00-23)
 // and minutes (5-minute steps). Selected value populates the input as HH:MM.
 function TimeInput24({ value, onChange, placeholder, className }: {
@@ -229,7 +230,7 @@ function TimeInput24({ value, onChange, placeholder, className }: {
                 key={hh} type="button" data-v={hh}
                 onClick={() => setHour(hh)}
                 className={`block w-12 px-3 py-1 text-[12px] text-center font-mono transition-colors ${
-                  hh === h ? 'bg-blue-600 text-white' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  hh === h ? 'bg-brand-orange text-white' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
               >
                 {hh}
@@ -242,7 +243,7 @@ function TimeInput24({ value, onChange, placeholder, className }: {
                 key={mm} type="button" data-v={mm}
                 onClick={() => setMinute(mm)}
                 className={`block w-12 px-3 py-1 text-[12px] text-center font-mono transition-colors ${
-                  mm === m ? 'bg-blue-600 text-white' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  mm === m ? 'bg-brand-orange text-white' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
               >
                 {mm}
@@ -292,7 +293,7 @@ const LOAD_STEPS = [
 
 // Nodes: depot centre + scatter of stops (Moldova-ish layout)
 const NODES = [
-  { x: 160, y: 110 }, // depot / centre — Chișinău
+  { x: 160, y: 110 }, // depot / centre | Chișinău
   { x: 88,  y: 52  }, // north-west
   { x: 200, y: 38  }, // north-east
   { x: 58,  y: 130 }, // west
@@ -326,7 +327,7 @@ function OptimizeLoadingScreen() {
   const [fade, setFade]         = useState(true)
   const [drawn, setDrawn]       = useState<number[]>([0, 0, 0]) // dashoffset per route
 
-  // Progress bar — logarithmic, caps at ~92
+  // Progress bar | logarithmic, caps at ~92
   useEffect(() => {
     const t0 = Date.now()
     const iv = setInterval(() => {
@@ -412,7 +413,7 @@ function OptimizeLoadingScreen() {
             </defs>
             <rect width={svgW} height={svgH} fill="url(#grid)" />
 
-            {/* Route polylines — drawn via stroke-dashoffset */}
+            {/* Route polylines | drawn via stroke-dashoffset */}
             {ROUTE_GROUPS.map((group, ri) => {
               const pts = group.map(i => NODES[i])
               const d = pts.map((p, j) => `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
@@ -569,7 +570,7 @@ export default function RoutesPage() {
         })))
       })
 
-    // Finished deliveries (delivered + failed) — loaded for the "Livrate" tab.
+    // Finished deliveries (delivered + failed) | loaded for the "Livrate" tab.
     // Last 30 days only so the list doesn't grow unbounded.
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10)
     supabase.from('livra_route_stops')
@@ -758,7 +759,7 @@ export default function RoutesPage() {
   // ── Optimize ────────────────────────────────────────────────────────────────
 
   async function handleOptimize() {
-    // Optimize for the selected date — defaults to today, but the manager can
+    // Optimize for the selected date | defaults to today, but the manager can
     // build tomorrow's routes the evening before by switching the date.
     const todayDeliveries = deliveries.filter(d => d.delivery_date === optimizeDate)
     if (!todayDeliveries.length) {
@@ -849,7 +850,7 @@ export default function RoutesPage() {
     try {
       // Save the route with the date the manager optimized for. The driver
       // app loads only today's routes, so tomorrow-routes are invisible to
-      // drivers until the day arrives — exactly what we want.
+      // drivers until the day arrives | exactly what we want.
       const dispatchedDriverIds: string[] = []
       for (const route of result.routes) {
         const { data: routeRow, error } = await supabase
@@ -869,7 +870,7 @@ export default function RoutesPage() {
         await supabase.from('livra_route_stops').insert(
           // Send all stops (deliveries AND breaks) so the driver sees their
           // lunch/fuel stops in the route. Breaks are info-only rows on the
-          // driver's side — no Done/Failed actions, just a heads-up.
+          // driver's side | no Done/Failed actions, just a heads-up.
           route.stops.map(s => {
             // For deliveries, look up the original Delivery row to copy package
             // info, time window, and notes (denormalised so the driver doesn't
@@ -985,7 +986,7 @@ export default function RoutesPage() {
                       })}
                     >
                       <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-                        <span style={{ fontSize: 11 }}>{route.driver_name} — start</span>
+                        <span style={{ fontSize: 11 }}>{route.driver_name} | start</span>
                       </Tooltip>
                     </Marker>
                     {route.stops.map(stop => {
@@ -998,7 +999,7 @@ export default function RoutesPage() {
                           >
                             <Tooltip direction="top" offset={[0, -14]} opacity={1}>
                               <span style={{ fontSize: 11 }}>
-                                {stop.customer}{stop.arrival_time ? ` · ${stop.arrival_time}` : ''} — {stop.address}
+                                {stop.customer}{stop.arrival_time ? ` · ${stop.arrival_time}` : ''} | {stop.address}
                               </span>
                             </Tooltip>
                           </Marker>
@@ -1007,7 +1008,7 @@ export default function RoutesPage() {
                       return (
                         <Marker key={stop.delivery_id} position={[stop.lat, stop.lng]} icon={stopIcon(stop.order, route.color)}>
                           <Tooltip direction="top" offset={[0, -13]} opacity={1}>
-                            <span style={{ fontSize: 11 }}>{stop.customer} — {stop.address}</span>
+                            <span style={{ fontSize: 11 }}>{stop.customer} | {stop.address}</span>
                           </Tooltip>
                         </Marker>
                       )
@@ -1057,7 +1058,7 @@ export default function RoutesPage() {
                   <div className="space-y-0.5 max-h-24 overflow-y-auto">
                     {result.deferred.map(d => (
                       <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
-                        • {d.customer} — {d.address}
+                        • {d.customer} | {d.address}
                       </div>
                     ))}
                   </div>
@@ -1111,7 +1112,7 @@ export default function RoutesPage() {
                             {stop.arrival_time && <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">{stop.arrival_time}</span>}
                           </div>
                           <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{stop.address}</div>
-                          {stop.package_description && <div className="text-[11px] text-blue-600 dark:text-blue-400 truncate mt-0.5">📦 {stop.package_description}</div>}
+                          {stop.package_description && <div className="text-[11px] text-brand-orange dark:text-orange-400 truncate mt-0.5">📦 {stop.package_description}</div>}
                           {stop.phone && <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{stop.phone}</div>}
                         </div>
                       </div>
@@ -1130,6 +1131,10 @@ export default function RoutesPage() {
 
   return (
     <>
+      <Helmet>
+        <title>Rute | Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
 
       {/* Hidden CSV input */}
@@ -1214,7 +1219,7 @@ export default function RoutesPage() {
                       onClick={() => setActiveTab('new')}
                       className={`flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-t-lg transition-colors ${
                         activeTab === 'new'
-                          ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 -mb-px'
+                          ? 'text-brand-orange dark:text-orange-400 border-b-2 border-brand-orange -mb-px'
                           : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
                       }`}
                     >
@@ -1222,7 +1227,7 @@ export default function RoutesPage() {
                       {newOrders.length > 0 && (
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                           activeTab === 'new'
-                            ? 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300'
+                            ? 'bg-orange-100 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300'
                             : 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
                         }`}>
                           {newOrders.length}
@@ -1233,7 +1238,7 @@ export default function RoutesPage() {
                       onClick={() => setActiveTab('scheduled')}
                       className={`flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-t-lg transition-colors ${
                         activeTab === 'scheduled'
-                          ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 -mb-px'
+                          ? 'text-brand-orange dark:text-orange-400 border-b-2 border-brand-orange -mb-px'
                           : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
                       }`}
                     >
@@ -1246,7 +1251,7 @@ export default function RoutesPage() {
                       onClick={() => setActiveTab('finished')}
                       className={`flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-t-lg transition-colors ${
                         activeTab === 'finished'
-                          ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 -mb-px'
+                          ? 'text-brand-orange dark:text-orange-400 border-b-2 border-brand-orange -mb-px'
                           : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
                       }`}
                     >
@@ -1259,7 +1264,7 @@ export default function RoutesPage() {
                     </button>
                     <button
                       onClick={() => setShowAddForm(v => !v)}
-                      className="ml-auto flex items-center gap-1 text-[12px] text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors px-3 py-2"
+                      className="ml-auto flex items-center gap-1 text-[12px] text-brand-orange dark:text-orange-400 hover:text-blue-500 transition-colors px-3 py-2"
                     >
                       <Plus size={12} /> Adaugă
                     </button>
@@ -1269,7 +1274,7 @@ export default function RoutesPage() {
 
               {/* Inline add form */}
               {showAddForm && (
-                <div className="px-4 py-3 border-b border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 space-y-2">
+                <div className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/50 dark:bg-orange-950/20 space-y-2">
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       autoFocus
@@ -1300,10 +1305,10 @@ export default function RoutesPage() {
                   <input
                     value={newDel.package_description}
                     onChange={e => setNewDel(p => ({ ...p, package_description: e.target.value }))}
-                    placeholder="Pachet — ce conține (opțional)"
+                    placeholder="Pachet | ce conține (opțional)"
                     className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
                   />
-                  {/* Delivery date picker — defaults based on address (Chișinău = +1d, else +3d) */}
+                  {/* Delivery date picker | defaults based on address (Chișinău = +1d, else +3d) */}
                   {(() => {
                     const date = newDel.delivery_date || defaultDateForAddress(newDel.address)
                     const numDrivers = activeDrivers.length || 1
@@ -1370,7 +1375,7 @@ export default function RoutesPage() {
                     <button
                       onClick={handleAddDelivery}
                       disabled={!newDel.customer.trim() || !newDel.address.trim()}
-                      className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-4 py-1.5 rounded-lg transition-colors"
+                      className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-4 py-1.5 rounded-lg transition-colors"
                     >
                       <Check size={12} /> Adaugă
                     </button>
@@ -1431,7 +1436,7 @@ export default function RoutesPage() {
                           </button>
                         </div>
                         {editingId === d.id && (
-                          <div className="px-4 py-3 border-b border-blue-100 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 space-y-2" onClick={e => e.stopPropagation()}>
+                          <div className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20 space-y-2" onClick={e => e.stopPropagation()}>
                             <div>
                               <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Data livrării</label>
                               <input
@@ -1462,14 +1467,14 @@ export default function RoutesPage() {
                             <input
                               value={editDraft.package_description}
                               onChange={e => setEditDraft(p => ({ ...p, package_description: e.target.value }))}
-                              placeholder="Pachet — ce conține (opțional)"
+                              placeholder="Pachet | ce conține (opțional)"
                               className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
                             />
                             <div className="flex gap-2 pt-1">
                               <button
                                 onClick={async () => { await saveEditDelivery(); setActiveTab('scheduled') }}
                                 disabled={!editDraft.delivery_date}
-                                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-3 py-1 rounded-lg transition-colors"
+                                className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-3 py-1 rounded-lg transition-colors"
                               >
                                 <Check size={11} /> Programează
                               </button>
@@ -1556,7 +1561,7 @@ export default function RoutesPage() {
                           </span>
                         )}
                         {(d.time_window_start && d.time_window_end) && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-brand-orange dark:text-orange-400">
                             {d.time_window_start}–{d.time_window_end}
                           </span>
                         )}
@@ -1564,7 +1569,7 @@ export default function RoutesPage() {
                       <div className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
                         <MapPin size={9} />{d.address}
                       </div>
-                      {d.package_description && <div className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5">📦 {d.package_description}</div>}
+                      {d.package_description && <div className="text-[11px] text-brand-orange dark:text-orange-400 mt-0.5">📦 {d.package_description}</div>}
                       {d.notes && <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 italic">{d.notes}</div>}
                     </div>
                     <span className="text-[11px] text-zinc-400 dark:text-zinc-500 flex-shrink-0">{d.phone}</span>
@@ -1580,7 +1585,7 @@ export default function RoutesPage() {
                     </button>
                   </div>
                   {editingId === d.id && (
-                    <div className="px-4 py-3 border-b border-blue-100 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 space-y-2" onClick={e => e.stopPropagation()}>
+                    <div className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20 space-y-2" onClick={e => e.stopPropagation()}>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil de la</label>
@@ -1602,7 +1607,7 @@ export default function RoutesPage() {
                       <input
                         value={editDraft.package_description}
                         onChange={e => setEditDraft(p => ({ ...p, package_description: e.target.value }))}
-                        placeholder="Pachet — ce conține (opțional)"
+                        placeholder="Pachet | ce conține (opțional)"
                         className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
                       />
                       <div>
@@ -1617,7 +1622,7 @@ export default function RoutesPage() {
                       <div className="flex gap-2 pt-1">
                         <button
                           onClick={saveEditDelivery}
-                          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-semibold px-3 py-1 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-semibold px-3 py-1 rounded-lg transition-colors"
                         >
                           <Check size={11} /> Salvează
                         </button>
@@ -1642,7 +1647,7 @@ export default function RoutesPage() {
                 })
               })()}
 
-              {/* "Livrate" tab — completed + failed deliveries from the last 30 days */}
+              {/* "Livrate" tab | completed + failed deliveries from the last 30 days */}
               {activeTab === 'finished' && (() => {
                 if (finishedStops.length === 0) {
                   return (
@@ -1709,7 +1714,7 @@ export default function RoutesPage() {
                                     <span className="text-[10px] text-zinc-400 dark:text-zinc-500">· {s.driver_name}</span>
                                   </div>
                                   <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{s.address}</div>
-                                  {s.package_description && <div className="text-[11px] text-blue-600 dark:text-blue-400 truncate mt-0.5">📦 {s.package_description}</div>}
+                                  {s.package_description && <div className="text-[11px] text-brand-orange dark:text-orange-400 truncate mt-0.5">📦 {s.package_description}</div>}
                                   {!isDone && s.fail_reason && (
                                     <div className="text-[11px] text-red-600 dark:text-red-400 mt-0.5 italic">
                                       Motiv: {s.fail_reason}
@@ -1796,7 +1801,7 @@ export default function RoutesPage() {
             <button
               onClick={handleOptimize}
               disabled={!deliveries.filter(d => d.delivery_date === optimizeDate).length || !activeDrivers.length}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors"
             >
               <Wand2 size={13} /> Optimizează
             </button>

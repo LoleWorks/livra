@@ -1,43 +1,241 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
+import { useState, useEffect, Fragment } from 'react'
 import {
-  Truck, Smartphone, Plug, Radio, Users,
+  Smartphone, Package, Users, User, Bell,
   CheckCircle, ArrowRight, Star, Globe, ChevronDown, ChevronUp,
   Route, Gift, TrendingUp, Mail, MapPin, Clock, Zap,
 } from 'lucide-react'
+import LandingNav from '../components/LandingNav'
 
-// ── How it works ──────────────────────────────────────────────────────────────
+// ── Workflow diagram ───────────────────────────────────────────────────────────
 
-const STEPS = [
+const DIAGRAM_NODES = [
   {
-    step: '01',
-    title: 'Conectează magazinul',
-    desc: 'Integrează WooCommerce, OpenCart sau adaugă comenzi manual. Toate comenzile ajung automat în Livra, gata de procesare.',
-    icon: Plug,
-    color: 'bg-blue-500',
+    num: '01', icon: Package,    title: 'Magazin online', role: 'WooCommerce / OpenCart',
+    dotColor: '#ff5c2c',
+    bg: 'bg-orange-100 dark:bg-orange-950/40', iconCls: 'text-orange-500', borderCls: 'border-orange-300 dark:border-orange-700',
   },
   {
-    step: '02',
-    title: 'Optimizăm rutele',
-    desc: 'Algoritmul nostru calculează traseele optime pentru toți șoferii tăi, ținând cont de ferestre orare, distanțe și capacitate.',
-    icon: Route,
-    color: 'bg-violet-500',
+    num: '02', icon: Users,      title: 'Agent vânzări',  role: 'Livra Sales',
+    dotColor: '#7c3aed',
+    bg: 'bg-violet-100 dark:bg-violet-950/40', iconCls: 'text-violet-600', borderCls: 'border-violet-300 dark:border-violet-700',
   },
   {
-    step: '03',
-    title: 'Șoferii livrează',
-    desc: 'Aplicația mobilă Livra ghidează șoferii pas cu pas. Semnătură digitală, foto la livrare, raport în timp real.',
-    icon: Smartphone,
-    color: 'bg-emerald-500',
+    num: '03', icon: Route,      title: 'Logistician',    role: 'Livra Admin',
+    dotColor: '#059669',
+    bg: 'bg-emerald-100 dark:bg-emerald-950/40', iconCls: 'text-emerald-600', borderCls: 'border-emerald-300 dark:border-emerald-700',
   },
   {
-    step: '04',
-    title: 'Clienții urmăresc live',
-    desc: 'Fiecare client primește un link de urmărire. Vede pe hartă unde e coletul și ETA actualizat la fiecare câteva secunde.',
-    icon: Radio,
-    color: 'bg-amber-500',
+    num: '04', icon: Smartphone, title: 'Șofer',           role: 'Livra Driver',
+    dotColor: '#d97706',
+    bg: 'bg-amber-100 dark:bg-amber-950/40', iconCls: 'text-amber-600', borderCls: 'border-amber-300 dark:border-amber-700',
+  },
+  {
+    num: '05', icon: User,       title: 'Client',          role: 'App Livra / SMS',
+    dotColor: '#2563eb',
+    bg: 'bg-blue-100 dark:bg-blue-950/40', iconCls: 'text-blue-600', borderCls: 'border-blue-300 dark:border-blue-700',
   },
 ]
+
+const CONNECTORS = [
+  { label: 'Comandă plasată' },
+  { label: 'Comanda confirmată' },
+  { label: 'Rută trimisă la șofer' },
+  { label: 'Livrare la ușă' },
+]
+
+const STEP_MS = 2600
+
+function WorkflowDiagram() {
+  const [step, setStep] = useState(0)
+
+  useEffect(() => {
+    const t = setTimeout(() => setStep(s => (s + 1) % DIAGRAM_NODES.length), STEP_MS)
+    return () => clearTimeout(t)
+  }, [step])
+
+  return (
+    <>
+      <style>{`
+        @keyframes wf-pkg-h {
+          0%   { left: -12px; opacity: 0; }
+          6%   { opacity: 1; }
+          90%  { left: calc(100% + 12px); opacity: 1; }
+          100% { left: calc(100% + 12px); opacity: 0; }
+        }
+        @keyframes wf-sms-h {
+          0%   { left: -10px; opacity: 0; }
+          10%  { opacity: 1; }
+          85%  { left: calc(100% + 10px); opacity: 1; }
+          100% { left: calc(100% + 10px); opacity: 0; }
+        }
+        @keyframes wf-pkg-v {
+          0%   { top: -12px; opacity: 0; }
+          6%   { opacity: 1; }
+          90%  { top: calc(100% + 12px); opacity: 1; }
+          100% { top: calc(100% + 12px); opacity: 0; }
+        }
+      `}</style>
+
+      {/* ── Desktop horizontal ── */}
+      <div className="hidden lg:flex items-start">
+        {DIAGRAM_NODES.map((node, i) => {
+          const Icon = node.icon
+          const isActive = step === i
+          const clientDelivered = i === 4 && step === 4
+          return (
+            <Fragment key={i}>
+              {/* Node */}
+              <button
+                onClick={() => setStep(i)}
+                className="flex flex-col items-center flex-shrink-0 w-28 xl:w-32"
+              >
+                <div className="text-[10px] font-bold tracking-widest text-zinc-300 dark:text-zinc-600 mb-3">{node.num}</div>
+                <div
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 border-2 transition-all duration-300 ${node.bg} ${node.borderCls}`}
+                  style={isActive ? { boxShadow: `0 0 0 5px ${node.dotColor}22, 0 0 18px ${node.dotColor}35`, transform: 'scale(1.08)' } : undefined}
+                >
+                  <Icon size={22} className={node.iconCls} />
+                </div>
+                <div className="text-[12px] font-semibold text-zinc-900 dark:text-zinc-50 text-center leading-tight">{node.title}</div>
+                <div className="text-[10px] text-zinc-400 dark:text-zinc-500 text-center mt-0.5">{node.role}</div>
+
+                {/* Driver: en-route badge */}
+                {i === 3 && step === 3 && (
+                  <div className="mt-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                    <MapPin size={8} /> En route
+                  </div>
+                )}
+
+                {/* Client: notified / delivered badge */}
+                {i === 4 && step >= 3 && (
+                  <div className={`mt-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-all duration-500 ${
+                    clientDelivered
+                      ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                  }`}>
+                    {clientDelivered ? <><CheckCircle size={8} /> Livrat!</> : <><Bell size={8} /> Notificat</>}
+                  </div>
+                )}
+              </button>
+
+              {/* Connector */}
+              {i < DIAGRAM_NODES.length - 1 && (
+                <div className="flex-1 flex flex-col items-center min-w-0 px-1 pt-[50px]">
+                  <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap mb-2">
+                    {CONNECTORS[i].label}
+                  </span>
+                  <div className="relative w-full h-px bg-zinc-200 dark:bg-zinc-700">
+                    {/* Arrowhead */}
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0"
+                      style={{ borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '5px solid #d4d4d8' }}
+                    />
+                    {/* Traveling package */}
+                    {step === i && (
+                      <div
+                        key={`pkg-${step}`}
+                        className="absolute top-0 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 border-2 shadow-md"
+                        style={{ borderColor: node.dotColor, animation: `wf-pkg-h ${STEP_MS}ms ease-in-out forwards` }}
+                      >
+                        <Package size={11} style={{ color: node.dotColor }} />
+                      </div>
+                    )}
+                    {/* SMS notification sliding to client simultaneously when logistician fires (step 2) */}
+                    {i === 3 && step === 2 && (
+                      <div
+                        key="sms-notif"
+                        className="absolute top-0 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-700 shadow-sm"
+                        style={{ animation: `wf-sms-h ${STEP_MS * 1.15}ms ease-in-out forwards`, animationDelay: `${STEP_MS * 0.04}ms` }}
+                      >
+                        <Bell size={9} className="text-blue-500" />
+                      </div>
+                    )}
+                  </div>
+                  {/* SMS sub-label */}
+                  {i === 2 && (
+                    <div className="flex items-center gap-1 text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5 whitespace-nowrap">
+                      <Bell size={8} /> SMS notificare → client
+                    </div>
+                  )}
+                  {/* GPS sub-label */}
+                  {i === 3 && (
+                    <div className="flex items-center gap-1 text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5 whitespace-nowrap">
+                      <MapPin size={8} /> GPS live tracking
+                    </div>
+                  )}
+                </div>
+              )}
+            </Fragment>
+          )
+        })}
+      </div>
+
+      {/* ── Mobile vertical ── */}
+      <div className="flex lg:hidden flex-col items-start max-w-xs mx-auto w-full">
+        {DIAGRAM_NODES.map((node, i) => {
+          const Icon = node.icon
+          const isActive = step === i
+          const clientDelivered = i === 4 && step === 4
+          return (
+            <Fragment key={i}>
+              <button onClick={() => setStep(i)} className="flex items-center gap-4 w-full py-1">
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-2 transition-all duration-300 ${node.bg} ${node.borderCls}`}
+                  style={isActive ? { boxShadow: `0 0 0 4px ${node.dotColor}22`, transform: 'scale(1.06)' } : undefined}
+                >
+                  <Icon size={20} className={node.iconCls} />
+                </div>
+                <div className="text-left">
+                  <div className="text-[10px] font-bold tracking-widest text-zinc-300 dark:text-zinc-600 mb-0.5">{node.num}</div>
+                  <div className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-50">{node.title}</div>
+                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{node.role}</div>
+                  {i === 4 && step >= 3 && (
+                    <div className={`mt-0.5 text-[10px] font-medium ${clientDelivered ? 'text-emerald-600' : 'text-blue-500'}`}>
+                      {clientDelivered ? '✓ Livrat!' : '🔔 Notificat · GPS live'}
+                    </div>
+                  )}
+                </div>
+              </button>
+
+              {i < DIAGRAM_NODES.length - 1 && (
+                <div className="flex items-start gap-3 pl-5 my-1">
+                  <div className="relative w-px flex-shrink-0 overflow-visible bg-zinc-200 dark:bg-zinc-700" style={{ height: i === 2 ? 52 : 36 }}>
+                    {step === i && (
+                      <div
+                        key={`v-${step}`}
+                        className="absolute left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 border-2 shadow-sm"
+                        style={{ borderColor: node.dotColor, animation: `wf-pkg-v ${STEP_MS}ms ease-in-out forwards` }}
+                      >
+                        <Package size={9} style={{ color: node.dotColor }} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="pt-1">
+                    <div className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{CONNECTORS[i].label}</div>
+                    {i === 2 && <div className="text-[10px] text-zinc-400 mt-0.5 flex items-center gap-1"><Bell size={8} /> SMS → client</div>}
+                    {i === 3 && <div className="text-[10px] text-zinc-400 mt-0.5 flex items-center gap-1"><MapPin size={8} /> GPS live</div>}
+                  </div>
+                </div>
+              )}
+            </Fragment>
+          )
+        })}
+      </div>
+
+      {/* ── Step dots ── */}
+      <div className="flex justify-center gap-2.5 mt-10">
+        {DIAGRAM_NODES.map((node, i) => (
+          <button
+            key={i}
+            onClick={() => setStep(i)}
+            className={`rounded-full transition-all duration-300 ${step === i ? 'w-5 h-2' : 'w-2 h-2 bg-zinc-200 dark:bg-zinc-700'}`}
+            style={step === i ? { backgroundColor: node.dotColor } : undefined}
+          />
+        ))}
+      </div>
+    </>
+  )
+}
 
 // ── Network ───────────────────────────────────────────────────────────────────
 
@@ -46,6 +244,7 @@ const NETWORK_BENEFITS = [
     icon: Smartphone,
     title: 'Reclame pe pagina de tracking',
     desc: 'Când un client așteaptă o livrare de la alt partener, magazinul tău apare pe ecranul lui. 10 minute de atenție pură, inclus în prețul creditelor, fără costuri extra.',
+    comingSoon: true,
   },
   {
     icon: Gift,
@@ -56,6 +255,7 @@ const NETWORK_BENEFITS = [
     icon: MapPin,
     title: 'Promovare pe zone',
     desc: 'Vrei să crești în Botanica sau Ciocana? Targetezi clienții din zona respectivă care au comandat produse similare. Livra știe exact cine și unde.',
+    comingSoon: true,
   },
   {
     icon: TrendingUp,
@@ -247,19 +447,19 @@ const FEATURE_SECTIONS = [
 function RoutesVisual() {
   return (
     <div className="relative">
-      <div className="bg-blue-50 dark:bg-blue-950/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-900/30">
+      <div className="bg-orange-50 dark:bg-orange-950/20 rounded-2xl p-6 border border-orange-100 dark:border-orange-900/30">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <div className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mb-0.5">Azi, 07:42</div>
+            <div className="text-[11px] font-semibold text-orange-400 uppercase tracking-wider mb-0.5">Azi, 07:42</div>
             <div className="text-[18px] font-bold text-zinc-900 dark:text-zinc-50">3 șoferi · 47 livrări</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-brand-orange flex items-center justify-center">
             <Route size={18} className="text-white" />
           </div>
         </div>
         <div className="space-y-3">
           {[
-            { name: 'Alexandru M.', stops: 16, km: '34 km', color: 'bg-blue-500', w: 'w-full' },
+            { name: 'Alexandru M.', stops: 16, km: '34 km', color: 'bg-orange-500', w: 'w-full' },
             { name: 'Ion P.',        stops: 14, km: '28 km', color: 'bg-violet-500', w: 'w-4/5' },
             { name: 'Vadim T.',      stops: 17, km: '31 km', color: 'bg-emerald-500', w: 'w-11/12' },
           ].map(d => (
@@ -282,10 +482,10 @@ function RoutesVisual() {
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             Rute calculate în 4 secunde
           </span>
-          <span className="text-blue-600 dark:text-blue-400 font-semibold">-31% combustibil</span>
+          <span className="text-brand-orange dark:text-orange-400 font-semibold">-31% combustibil</span>
         </div>
       </div>
-      <div className="absolute -top-3 -right-3 bg-blue-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
+      <div className="absolute -top-3 -right-3 bg-brand-orange text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-lg">
         Optimizat ✓
       </div>
     </div>
@@ -400,11 +600,9 @@ function TrackingVisual() {
             </div>
             {/* Header */}
             <div className="flex items-center justify-between px-4 pt-1 pb-2.5 border-b border-zinc-100">
-              <div className="flex items-center gap-1.5">
-                <div className="w-5 h-5 rounded-md bg-violet-600 flex items-center justify-center">
-                  <Truck size={9} className="text-white" />
-                </div>
-                <span className="text-[11px] font-bold text-zinc-900 tracking-tight">Livra</span>
+              <div className="flex flex-col leading-none">
+                <span className="text-[10px] font-bold text-[#161513] tracking-widest uppercase">Livra</span>
+                <svg width="22" height="3" viewBox="0 0 22 3"><line x1="0" y1="1.5" x2="16" y2="1.5" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="16,0 22,1.5 16,3" fill="#ff5c2c"/></svg>
               </div>
             </div>
             {/* Body */}
@@ -514,16 +712,27 @@ function DriverVisual() {
 }
 
 function ReportsVisual() {
-  const bars = [
-    { day: 'Lu', h: 78 }, { day: 'Ma', h: 92 }, { day: 'Mi', h: 85 },
-    { day: 'Jo', h: 96 }, { day: 'Vi', h: 88 }, { day: 'Sa', h: 94 }, { day: 'Du', h: 71 },
+  const weeks = [
+    { label: 'S1', v: 45 }, { label: 'S2', v: 52 }, { label: 'S3', v: 61 },
+    { label: 'S4', v: 58 }, { label: 'S5', v: 74 }, { label: 'S6', v: 83 },
+    { label: 'S7', v: 79 }, { label: 'S8', v: 95 }, { label: 'S9', v: 108 },
+    { label: 'S10', v: 127 },
   ]
+  const W = 260, H = 56, min = 36, max = 136
+  const pts = weeks.map((w, i) => ({
+    x: parseFloat(((i / (weeks.length - 1)) * W).toFixed(1)),
+    y: parseFloat((H - ((w.v - min) / (max - min)) * H).toFixed(1)),
+    ...w,
+  }))
+  const line = pts.map(p => `${p.x},${p.y}`).join(' ')
+  const area = `${line} ${W},${H} 0,${H}`
+
   return (
     <div className="bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-6 border border-amber-100 dark:border-amber-900/30">
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { value: '94%', label: 'Rată succes',  color: 'text-emerald-500' },
-          { value: '127', label: 'Livrări ieri', color: 'text-amber-500' },
+          { value: '127', label: 'Livrări ieri', color: 'text-brand-orange' },
           { value: '3',   label: 'Eșecuri',      color: 'text-red-400' },
         ].map(s => (
           <div key={s.label} className="bg-white dark:bg-zinc-800/60 rounded-xl p-3 text-center border border-zinc-100 dark:border-zinc-700/50">
@@ -532,23 +741,44 @@ function ReportsVisual() {
           </div>
         ))}
       </div>
+
       <div className="bg-white dark:bg-zinc-800/60 rounded-xl p-4 border border-zinc-100 dark:border-zinc-700/50">
-        <div className="text-[11px] font-semibold text-zinc-400 mb-4">Livrări reușite · ultimele 7 zile</div>
-        <div className="flex items-end gap-2 h-20">
-          {bars.map(b => (
-            <div key={b.day} className="flex-1 flex flex-col items-center gap-1.5">
-              <div
-                className="w-full bg-amber-400 rounded-t-md"
-                style={{ height: `${b.h * 0.75}%` }}
-              />
-              <span className="text-[9px] text-zinc-400">{b.day}</span>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-semibold text-zinc-400">Livrări · ultimele 10 săptămâni</span>
+          <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
+            <TrendingUp size={11} />+182%
+          </span>
         </div>
-      </div>
-      <div className="mt-4 flex items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-        <TrendingUp size={12} className="text-emerald-500" />
-        <span>+8% față de săptămâna trecută</span>
+        <svg viewBox={`0 0 ${W} ${H + 14}`} className="w-full" height={70}>
+          <defs>
+            <linearGradient id="lineAreaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff5c2c" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#ff5c2c" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {/* horizontal grid lines */}
+          {[0.25, 0.5, 0.75].map(t => (
+            <line key={t} x1="0" y1={H * (1 - t)} x2={W} y2={H * (1 - t)}
+              stroke="#e5e7eb" strokeWidth="0.5" strokeDasharray="3 3" />
+          ))}
+          {/* area fill */}
+          <polygon points={area} fill="url(#lineAreaFill)" />
+          {/* line */}
+          <polyline points={line} fill="none" stroke="#ff5c2c"
+            strokeWidth="1.75" strokeLinejoin="round" strokeLinecap="round" />
+          {/* dots */}
+          {pts.map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y}
+              r={i === pts.length - 1 ? 3.5 : 2.5}
+              fill={i === pts.length - 1 ? '#ff5c2c' : '#fff'}
+              stroke="#ff5c2c" strokeWidth="1.5" />
+          ))}
+          {/* x-axis labels */}
+          {pts.filter((_, i) => i === 0 || i === 3 || i === 6 || i === 9).map(p => (
+            <text key={p.label} x={p.x} y={H + 11}
+              textAnchor="middle" fontSize="7.5" fill="#9ca3af">{p.label}</text>
+          ))}
+        </svg>
       </div>
     </div>
   )
@@ -598,13 +828,13 @@ function ActivityVisual() {
 function ConnectorsVisual() {
   const sources = [
     { name: 'WooCommerce', badge: '14 comenzi', color: 'bg-purple-100 dark:bg-purple-950/40', text: 'text-purple-700 dark:text-purple-400', dot: 'bg-purple-500' },
-    { name: 'OpenCart',    badge: '8 comenzi',  color: 'bg-blue-100 dark:bg-blue-950/40',    text: 'text-blue-700 dark:text-blue-400',   dot: 'bg-blue-500' },
+    { name: 'OpenCart',    badge: '8 comenzi',  color: 'bg-orange-100 dark:bg-orange-950/40',    text: 'text-orange-700 dark:text-orange-400',   dot: 'bg-orange-500' },
     { name: 'Webhook',     badge: 'API propriu', color: 'bg-zinc-100 dark:bg-zinc-800',       text: 'text-zinc-600 dark:text-zinc-400',   dot: 'bg-zinc-400' },
     { name: 'Manual',      badge: '+ Adaugă',   color: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-400' },
   ]
   return (
-    <div className="bg-blue-50 dark:bg-blue-950/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-900/30">
-      <div className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mb-4">De oriunde vine comanda</div>
+    <div className="bg-orange-50 dark:bg-orange-950/20 rounded-2xl p-6 border border-orange-100 dark:border-orange-900/30">
+      <div className="text-[11px] font-semibold text-orange-400 uppercase tracking-wider mb-4">De oriunde vine comanda</div>
       <div className="grid grid-cols-2 gap-2 mb-5">
         {sources.map(s => (
           <div key={s.name} className={`${s.color} rounded-xl px-3 py-2.5`}>
@@ -621,7 +851,7 @@ function ConnectorsVisual() {
         <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
         <div className="flex flex-col items-center gap-0.5">
           <div className="w-px h-3 bg-blue-300" />
-          <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[13px] font-bold shadow-md">↓</div>
+          <div className="w-7 h-7 rounded-full bg-brand-orange flex items-center justify-center text-white text-[13px] font-bold shadow-md">↓</div>
           <div className="w-px h-3 bg-blue-300" />
         </div>
         <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
@@ -629,8 +859,9 @@ function ConnectorsVisual() {
       {/* Livra dashboard */}
       <div className="bg-white dark:bg-zinc-800/60 rounded-xl p-4 border border-zinc-100 dark:border-zinc-700/50">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-5 h-5 rounded-md bg-blue-600 flex items-center justify-center">
-            <Truck size={9} className="text-white" />
+          <div className="flex flex-col leading-none mr-0.5">
+            <span className="text-[9px] font-bold text-[#161513] dark:text-white tracking-widest uppercase">Livra</span>
+            <svg width="18" height="2" viewBox="0 0 18 2"><line x1="0" y1="1" x2="14" y2="1" stroke="#ff5c2c" strokeWidth="1"/><polygon points="14,0 18,1 14,2" fill="#ff5c2c"/></svg>
           </div>
           <span className="text-[12px] font-bold text-zinc-900 dark:text-zinc-50">Dashboard Livra</span>
           <span className="ml-auto text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">22 comenzi gata</span>
@@ -642,7 +873,7 @@ function ConnectorsVisual() {
             { addr: 'Calea Orheiului 55',      src: 'Manual' },
           ].map((o, i) => (
             <div key={i} className="flex items-center gap-2 text-[11px]">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
               <span className="text-zinc-600 dark:text-zinc-400 flex-1 truncate">{o.addr}</span>
               <span className="text-zinc-300 dark:text-zinc-600 text-[9px]">{o.src}</span>
             </div>
@@ -776,48 +1007,34 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
+      <Helmet>
+        <title>Livra | Livrări mai rapide, costuri mai mici | Software livrare Moldova</title>
+        <meta name="description" content="Livra optimizează rutele de livrare pentru companii din Moldova. Integrare WooCommerce și OpenCart, tracking live, șoferi monitorizați în timp real. Încearcă gratuit." />
+        <meta name="keywords" content="optimizare rute livrare Moldova, software livrare Chisinau, WooCommerce livrare, OpenCart livrare, last-mile delivery Moldova, tracking soferi timp real, livrare rapida Moldova" />
+        <meta property="og:title" content="Livra | Software livrare pentru companii din Moldova" />
+        <meta property="og:description" content="Optimizare rute, tracking live, integrare WooCommerce & OpenCart. Livrări mai rapide cu mai puțin combustibil." />
+        <meta property="og:url" content="https://livra.delivery" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://livra.delivery" />
+      </Helmet>
 
-      {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
-              <Truck size={14} className="text-white" />
-            </div>
-            <span className="text-[15px] font-bold tracking-tight">Livra</span>
-          </div>
-          <div className="hidden md:flex items-center gap-6 text-[13px] text-zinc-500 dark:text-zinc-400">
-            <a href="#cum-functioneaza" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Cum funcționează</a>
-            <a href="#functionalitati" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Funcționalități</a>
-            <a href="#retea" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Rețeaua Livra</a>
-            <a href="#preturi" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Prețuri</a>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/login" className="text-[13px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 px-3 py-1.5 transition-colors">
-              Autentificare
-            </Link>
-            <a href="#contact" className="text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition-colors">
-              Solicită demo
-            </a>
-          </div>
-        </div>
-      </nav>
+      <LandingNav />
 
       {/* ── Hero ── */}
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[12px] font-medium text-blue-700 dark:text-blue-400 mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/50 text-[12px] font-medium text-orange-700 dark:text-orange-400 mb-6">
           <Star size={11} className="fill-current" />
           Construit pentru companii din Moldova
         </div>
         <h1 className="text-[48px] md:text-[60px] font-bold tracking-tight leading-[1.1] text-zinc-900 dark:text-zinc-50 mb-6">
-          <span className="text-blue-600">Livra</span>ează mai rapid.<br />
+          <span className="text-brand-orange">Livra</span>za mai rapid.<br />
           Crești mai mult.
         </h1>
         <p className="text-[18px] text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
           Livra optimizează rutele de livrare, urmărește șoferii în timp real și îți arată exact ce se întâmplă cu fiecare comandă.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <a href="#contact" className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-medium rounded-xl transition-colors">
+          <a href="#contact" className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange hover:bg-brand-orange-hover text-white text-[15px] font-medium rounded-xl transition-colors">
             Începe gratuit <ArrowRight size={16} />
           </a>
           <a href="#cum-functioneaza" className="inline-flex items-center gap-2 px-6 py-3 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 text-[15px] font-medium rounded-xl transition-colors">
@@ -831,7 +1048,7 @@ export default function Landing() {
             { value: '98%', label: 'satisfacție clienți' },
           ].map(({ value, label }) => (
             <div key={label} className="text-center">
-              <div className="text-[32px] font-bold text-blue-600">{value}</div>
+              <div className="text-[32px] font-bold text-brand-orange">{value}</div>
               <div className="text-[13px] text-zinc-400 mt-0.5">{label}</div>
             </div>
           ))}
@@ -841,30 +1058,11 @@ export default function Landing() {
       {/* ── How it works ── */}
       <section id="cum-functioneaza" className="bg-zinc-50 dark:bg-zinc-900 py-20">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-[32px] font-bold tracking-tight mb-3">Cum funcționează Livra</h2>
-            <p className="text-[16px] text-zinc-500 dark:text-zinc-400">De la comandă la livrare, totul automatizat în 4 pași.</p>
+          <div className="text-center mb-12">
+            <h2 className="text-[32px] font-bold tracking-tight mb-3">De la comandă la livrare</h2>
+            <p className="text-[16px] text-zinc-500 dark:text-zinc-400">Cum circulă o comandă prin Livra, de la magazin până la șofer.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon
-              return (
-                <div key={s.step} className="relative">
-                  {i < STEPS.length - 1 && (
-                    <div className="hidden md:block absolute top-8 left-1/2 w-full h-px bg-zinc-200 dark:bg-zinc-700" />
-                  )}
-                  <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 relative z-10 h-full">
-                    <div className={`w-14 h-14 rounded-xl ${s.color} flex items-center justify-center mb-4`}>
-                      <Icon size={24} className="text-white" />
-                    </div>
-                    <div className="text-[11px] font-bold text-zinc-300 dark:text-zinc-600 tracking-widest mb-2">Pas {s.step}</div>
-                    <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-50 mb-2">{s.title}</h3>
-                    <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{s.desc}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <WorkflowDiagram />
         </div>
       </section>
 
@@ -929,7 +1127,7 @@ export default function Landing() {
       })}
 
       {/* ── Livra Network ── */}
-      <section id="retea" className="py-20 bg-gradient-to-br from-blue-600 to-violet-700">
+      <section id="retea" className="py-20 bg-gradient-to-br from-brand-orange to-violet-700">
         <div className="max-w-6xl mx-auto px-6">
           {/* Header */}
           <div className="text-center mb-12">
@@ -947,13 +1145,20 @@ export default function Landing() {
 
           {/* 5 feature cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {NETWORK_BENEFITS.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-5 flex gap-4">
+            {NETWORK_BENEFITS.map(({ icon: Icon, title, desc, comingSoon }) => (
+              <div key={title} className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-5 flex gap-4 relative overflow-hidden">
                 <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
                   <Icon size={18} className="text-white" />
                 </div>
                 <div>
-                  <div className="text-[14px] font-semibold text-white mb-1.5">{title}</div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[14px] font-semibold text-white">{title}</span>
+                    {comingSoon && (
+                      <span className="text-[10px] font-bold uppercase tracking-wide bg-white/20 text-white px-2 py-0.5 rounded-full border border-white/30">
+                        Coming soon
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[12px] text-blue-100 leading-relaxed">{desc}</div>
                 </div>
               </div>
@@ -973,7 +1178,7 @@ export default function Landing() {
 
         <div className="max-w-3xl mx-auto">
           {/* Hero price */}
-          <div className="bg-blue-600 rounded-3xl p-10 text-center mb-6">
+          <div className="bg-brand-orange rounded-3xl p-10 text-center mb-6">
             <p className="text-blue-200 text-[14px] font-medium mb-2">De la</p>
             <div className="flex items-end justify-center gap-2 mb-2">
               <span className="text-[72px] font-bold text-white leading-none">10</span>
@@ -982,7 +1187,7 @@ export default function Landing() {
             <p className="text-blue-100 text-[18px] font-medium mb-6">per livrare</p>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-blue-600 text-[15px] font-semibold rounded-xl hover:bg-blue-50 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-brand-orange text-[15px] font-semibold rounded-xl hover:bg-orange-50 transition-colors"
             >
               Solicită ofertă <ArrowRight size={16} />
             </a>
@@ -1010,7 +1215,7 @@ export default function Landing() {
                 },
               ].map(item => (
                 <div key={item.num} className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[14px] font-bold flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/40 text-brand-orange dark:text-orange-400 text-[14px] font-bold flex items-center justify-center flex-shrink-0">
                     {item.num}
                   </div>
                   <div>
@@ -1035,7 +1240,7 @@ export default function Landing() {
               </div>
               <a
                 href="#contact"
-                className="flex-shrink-0 px-5 py-2.5 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 text-[13px] font-medium rounded-xl hover:border-blue-400 hover:text-blue-600 transition-colors"
+                className="flex-shrink-0 px-5 py-2.5 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 text-[13px] font-medium rounded-xl hover:border-orange-400 hover:text-brand-orange transition-colors"
               >
                 Contactează-ne pentru ofertă
               </a>
@@ -1048,7 +1253,7 @@ export default function Landing() {
       <section className="py-20 bg-zinc-50 dark:bg-zinc-900">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-[12px] font-medium text-blue-600 dark:text-blue-400 mb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-900/50 text-[12px] font-medium text-brand-orange dark:text-orange-400 mb-5">
               Onboarding inclus
             </div>
             <h2 className="text-[32px] md:text-[40px] font-bold tracking-tight text-zinc-900 dark:text-zinc-50 mb-4">
@@ -1066,7 +1271,7 @@ export default function Landing() {
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               {ONBOARDING_STEPS.map((s, i) => (
                 <div key={s.num} className="relative flex flex-col items-start lg:items-center">
-                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center mb-5 flex-shrink-0">
+                  <div className="relative z-10 w-16 h-16 rounded-2xl bg-brand-orange flex items-center justify-center mb-5 flex-shrink-0">
                     <span className="text-white text-[13px] font-bold tracking-wider">{s.num}</span>
                   </div>
                   {i < ONBOARDING_STEPS.length - 1 && (
@@ -1089,7 +1294,7 @@ export default function Landing() {
             </div>
             <a
               href="#contact"
-              className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium rounded-xl transition-colors"
+              className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-brand-orange hover:bg-brand-orange-hover text-white text-[14px] font-medium rounded-xl transition-colors"
             >
               Solicită demo <ArrowRight size={15} />
             </a>
@@ -1134,12 +1339,12 @@ export default function Landing() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="email@compania.md"
-                  className="w-full pl-9 pr-4 py-3 bg-zinc-800 dark:bg-zinc-700 border border-zinc-700 dark:border-zinc-600 rounded-xl text-white placeholder:text-zinc-500 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                  className="w-full pl-9 pr-4 py-3 bg-zinc-800 dark:bg-zinc-700 border border-zinc-700 dark:border-zinc-600 rounded-xl text-white placeholder:text-zinc-500 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-orange-500"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-medium rounded-xl transition-colors whitespace-nowrap"
+                className="w-full sm:w-auto px-6 py-3 bg-brand-orange hover:bg-brand-orange-hover text-white text-[14px] font-medium rounded-xl transition-colors whitespace-nowrap"
               >
                 Solicită demo
               </button>
@@ -1151,11 +1356,9 @@ export default function Landing() {
       {/* ── Footer ── */}
       <footer className="border-t border-zinc-100 dark:border-zinc-800 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center">
-              <Truck size={12} className="text-white" />
-            </div>
-            <span className="text-[14px] font-bold">Livra</span>
+          <div className="flex flex-col leading-none">
+            <span className="text-[14px] font-bold text-[#161513] dark:text-white tracking-widest uppercase">Livra</span>
+            <svg width="32" height="4" viewBox="0 0 32 4"><line x1="0" y1="2" x2="25" y2="2" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="25,0 32,2 25,4" fill="#ff5c2c"/></svg>
           </div>
           <p className="text-[12px] text-zinc-400">© {new Date().getFullYear()} Livra. Toate drepturile rezervate.</p>
           <div className="flex items-center gap-4 text-[12px] text-zinc-400">

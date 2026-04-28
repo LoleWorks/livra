@@ -1,7 +1,8 @@
+import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Truck, Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
-import { API, setSalesUser } from '../../lib/salesAuth'
+import { Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
+import { signIn } from '../../lib/auth'
 
 export default function SalesLogin() {
   const navigate = useNavigate()
@@ -16,24 +17,14 @@ export default function SalesLogin() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${API}/auth/sales/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.detail ?? 'Autentificare eșuată')
-        return
-      }
-      setSalesUser(data)
-      if (data.must_change_password) {
+      const user = await signIn(email, password)
+      if (user.must_change_password) {
         navigate('/sales/change-password', { replace: true })
       } else {
         navigate('/sales', { replace: true })
       }
-    } catch {
-      setError('Nu s-a putut contacta serverul. Încearcă din nou.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Autentificare eșuată')
     } finally {
       setLoading(false)
     }
@@ -43,15 +34,24 @@ export default function SalesLogin() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+      <Helmet>
+        <title>Autentificare | Livra Sales</title>
+        <meta name="description" content="Intră în contul tău Livra Sales pentru a gestiona comenzile." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="w-full max-w-sm">
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-violet-600 flex items-center justify-center mb-3 shadow-lg shadow-violet-500/25">
-            <Truck size={22} className="text-white" />
+          <div className="flex flex-col items-center mb-3">
+            <span className="text-[32px] font-bold text-[#161513] dark:text-white tracking-widest uppercase font-serif leading-none">LIVRA</span>
+            <svg width="72" height="5" viewBox="0 0 72 5">
+              <line x1="0" y1="2.5" x2="58" y2="2.5" stroke="#ff5c2c" strokeWidth="2"/>
+              <polygon points="58,0.5 72,2.5 58,4.5" fill="#ff5c2c"/>
+            </svg>
           </div>
-          <h1 className="text-[20px] font-bold text-zinc-900 dark:text-zinc-50">Livra Sales</h1>
-          <p className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-1">Autentifică-te în contul tău</p>
+          <span className="text-[11px] font-medium text-brand-orange bg-orange-50 dark:bg-orange-950/20 px-2 py-0.5 rounded-full mt-2">Sales</span>
+          <p className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-2">Autentifică-te în contul tău</p>
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">

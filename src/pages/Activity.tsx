@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Activity as ActivityIcon,
@@ -41,8 +42,8 @@ type EvVisual = { icon: typeof LogIn; label: string; ring: string; bg: string; t
 const EV: Record<EventType, EvVisual> = {
   login:                { icon: LogIn,       label: 'S-a autentificat',   ring: 'ring-emerald-200', bg: 'bg-emerald-50 dark:bg-emerald-950/40', text: 'text-emerald-700 dark:text-emerald-400' },
   logout:               { icon: LogOut,      label: 'S-a deconectat',     ring: 'ring-zinc-200',    bg: 'bg-zinc-50 dark:bg-zinc-800/50',       text: 'text-zinc-600 dark:text-zinc-400' },
-  route_opened:         { icon: Play,        label: 'A pornit ruta',      ring: 'ring-blue-200',    bg: 'bg-blue-50 dark:bg-blue-950/40',       text: 'text-blue-700 dark:text-blue-400' },
-  route_completed:      { icon: Flag,        label: 'A terminat ruta',    ring: 'ring-blue-200',    bg: 'bg-blue-50 dark:bg-blue-950/40',       text: 'text-blue-700 dark:text-blue-400' },
+  route_opened:         { icon: Play,        label: 'A pornit ruta',      ring: 'ring-orange-200',    bg: 'bg-orange-50 dark:bg-orange-950/40',       text: 'text-orange-700 dark:text-orange-400' },
+  route_completed:      { icon: Flag,        label: 'A terminat ruta',    ring: 'ring-orange-200',    bg: 'bg-orange-50 dark:bg-orange-950/40',       text: 'text-orange-700 dark:text-orange-400' },
   stop_completed:       { icon: CheckCircle, label: 'Livrare reușită',    ring: 'ring-emerald-200', bg: 'bg-emerald-50 dark:bg-emerald-950/40', text: 'text-emerald-700 dark:text-emerald-400' },
   stop_failed:          { icon: XCircle,     label: 'Livrare eșuată',     ring: 'ring-red-200',     bg: 'bg-red-50 dark:bg-red-950/40',         text: 'text-red-700 dark:text-red-400' },
   break_started:        { icon: Coffee,      label: 'Pauză începută',     ring: 'ring-amber-200',   bg: 'bg-amber-50 dark:bg-amber-950/40',     text: 'text-amber-700 dark:text-amber-400' },
@@ -50,7 +51,7 @@ const EV: Record<EventType, EvVisual> = {
   idle_started:         { icon: Pause,       label: 'Staționar',          ring: 'ring-zinc-200',    bg: 'bg-zinc-100 dark:bg-zinc-800/60',      text: 'text-zinc-600 dark:text-zinc-400' },
   idle_ended:           { icon: Pause,       label: 'A pornit din nou',   ring: 'ring-zinc-200',    bg: 'bg-zinc-50 dark:bg-zinc-800/40',       text: 'text-zinc-500 dark:text-zinc-400' },
   geofence_bypass_used: { icon: Unlock,      label: 'Bypass locație',     ring: 'ring-amber-200',   bg: 'bg-amber-50 dark:bg-amber-950/40',     text: 'text-amber-700 dark:text-amber-400' },
-  nav_app_opened:       { icon: Navigation,  label: 'A deschis navigarea',ring: 'ring-blue-200',    bg: 'bg-blue-50 dark:bg-blue-950/40',       text: 'text-blue-700 dark:text-blue-400' },
+  nav_app_opened:       { icon: Navigation,  label: 'A deschis navigarea',ring: 'ring-orange-200',    bg: 'bg-orange-50 dark:bg-orange-950/40',       text: 'text-orange-700 dark:text-orange-400' },
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -152,7 +153,7 @@ export default function Activity() {
       case 'stop_completed': {
         const dist = md.distance_to_address_m as number | undefined
         const distStr = dist !== undefined && dist >= 0 ? ` (la ${dist} m)` : ''
-        return `${md.customer ?? ''} — ${md.address ?? ''}${distStr}`
+        return `${md.customer ?? ''} | ${md.address ?? ''}${distStr}`
       }
       case 'stop_failed':
         return `${md.customer ?? ''} · ${md.fail_reason ?? '—'}`
@@ -196,6 +197,10 @@ export default function Activity() {
 
   return (
     <div className="flex flex-col h-full">
+      <Helmet>
+        <title>Activitate | Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
         <div className="flex items-center gap-2">
           <ActivityIcon size={14} className="text-zinc-500" />
@@ -216,7 +221,7 @@ export default function Activity() {
             onClick={() => setSelectedDriverId('all')}
             className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
               selectedDriverId === 'all'
-                ? 'bg-blue-50 dark:bg-blue-950/40 border-l-2 border-blue-500'
+                ? 'bg-orange-50 dark:bg-orange-950/40 border-l-2 border-orange-500'
                 : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/40 border-l-2 border-transparent'
             }`}
           >
@@ -231,11 +236,11 @@ export default function Activity() {
               onClick={() => setSelectedDriverId(d.id)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                 selectedDriverId === d.id
-                  ? 'bg-blue-50 dark:bg-blue-950/40 border-l-2 border-blue-500'
+                  ? 'bg-orange-50 dark:bg-orange-950/40 border-l-2 border-orange-500'
                   : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/40 border-l-2 border-transparent'
               }`}
             >
-              <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 flex items-center justify-center text-[11px] font-bold">
+              <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 text-brand-orange dark:text-orange-300 flex items-center justify-center text-[11px] font-bold">
                 {d.initials}
               </div>
               <span className="text-[13px] text-zinc-800 dark:text-zinc-200 truncate">{d.name}</span>
@@ -253,7 +258,7 @@ export default function Activity() {
                 onClick={() => setTypeFilter(f.key)}
                 className={`text-[11px] font-semibold px-3 py-1 rounded-full transition-colors ${
                   typeFilter === f.key
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-brand-orange text-white'
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                 }`}
               >

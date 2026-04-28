@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { Package, Phone, Search, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -18,7 +19,7 @@ type Delivery = {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
-  upcoming:   { label: 'Nou',      dot: 'bg-blue-500',    badge: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' },
+  upcoming:   { label: 'Nou',      dot: 'bg-orange-500',    badge: 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' },
   dispatched: { label: 'Expediat', dot: 'bg-amber-500',   badge: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' },
   delivered:  { label: 'Livrat',   dot: 'bg-emerald-500', badge: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' },
   failed:     { label: 'Eșuat',    dot: 'bg-red-500',     badge: 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300' },
@@ -76,6 +77,10 @@ export default function SalesOrders() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <Helmet>
+        <title>Comenzi | Livra Sales</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       {/* Header */}
       <div className="flex items-center justify-between">

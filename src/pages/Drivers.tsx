@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -39,7 +40,7 @@ type DriverLocation = {
   updated_at: string
 }
 
-// "12s ago" / "3m ago" / "1h ago" — short human-readable elapsed time
+// "12s ago" / "3m ago" / "1h ago" | short human-readable elapsed time
 function fmtAgo(iso: string): string {
   const sec = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000)
   if (sec < 60)    return `acum ${Math.round(sec)}s`
@@ -50,7 +51,7 @@ function fmtAgo(iso: string): string {
 
 const COLORS = [
   'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400',
-  'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+  'bg-orange-100 dark:bg-orange-900/30 text-brand-orange dark:text-orange-400',
   'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
   'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
   'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400',
@@ -72,7 +73,7 @@ const statusDot: Record<string, string> = {
   active:      'bg-emerald-500',
   lunch_break: 'bg-amber-500',
   fuel_break:  'bg-amber-500',
-  done:        'bg-blue-500',
+  done:        'bg-orange-500',
   offline:     'bg-zinc-300 dark:bg-zinc-600',
 }
 const statusLabel: Record<string, string> = {
@@ -86,7 +87,7 @@ const statusBadge: Record<string, string> = {
   active:      'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50',
   lunch_break: 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50',
   fuel_break:  'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50',
-  done:        'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50',
+  done:        'text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50',
   offline:     'text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800',
 }
 
@@ -235,7 +236,7 @@ export default function Drivers() {
       .channel('drivers-page')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_drivers' }, fetchAll)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_driver_locations' }, () => {
-        // Just refetch locations — driver rows are unchanged
+        // Just refetch locations | driver rows are unchanged
         supabase.from('livra_driver_locations').select('driver_id, lat, lng, updated_at')
           .then(({ data }) => {
             if (!data) return
@@ -409,6 +410,10 @@ export default function Drivers() {
 
   return (
     <>
+      <Helmet>
+        <title>Utilizatori | Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Add / Edit modal */}
       {showModal && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center">
@@ -431,7 +436,7 @@ export default function Drivers() {
                   onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && handleSave()}
                   placeholder="Ion Popescu"
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                 />
               </div>
               <div>
@@ -441,7 +446,7 @@ export default function Drivers() {
                   onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && handleSave()}
                   placeholder="069 000 000"
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                 />
               </div>
               <div>
@@ -454,7 +459,7 @@ export default function Drivers() {
                   onKeyDown={e => e.key === 'Enter' && handleSave()}
                   placeholder="ex: 1234"
                   inputMode="numeric"
-                  className={`w-full bg-zinc-50 dark:bg-zinc-800 border text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 placeholder:text-zinc-400 transition-colors tracking-widest ${pinError ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-zinc-200 dark:border-zinc-700 focus:ring-blue-500 focus:border-blue-500'}`}
+                  className={`w-full bg-zinc-50 dark:bg-zinc-800 border text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 placeholder:text-zinc-400 transition-colors tracking-widest ${pinError ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : 'border-zinc-200 dark:border-zinc-700 focus:ring-blue-500 focus:border-orange-500'}`}
                 />
                 {pinError && <p className="text-[11px] text-red-500 mt-1">{pinError}</p>}
               </div>
@@ -470,7 +475,7 @@ export default function Drivers() {
                 <button
                   onClick={handleSave}
                   disabled={!form.name.trim()}
-                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors"
                 >
                   <Check size={13} /> {editTarget ? 'Salvează' : 'Adaugă'}
                 </button>
@@ -505,7 +510,7 @@ export default function Drivers() {
                   onChange={e => setMgrForm(p => ({ ...p, name: e.target.value }))}
                   onKeyDown={e => e.key === 'Enter' && handleSaveMgr()}
                   placeholder="Maria Popescu"
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                 />
               </div>
               <div>
@@ -514,7 +519,7 @@ export default function Drivers() {
                   value={mgrForm.phone}
                   onChange={e => setMgrForm(p => ({ ...p, phone: e.target.value }))}
                   placeholder="069 000 000"
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                 />
               </div>
               <div>
@@ -525,12 +530,12 @@ export default function Drivers() {
                   onChange={e => setMgrForm(p => ({ ...p, email: e.target.value }))}
                   placeholder="agent@companie.md"
                   disabled={!!editMgr}
-                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 {editMgr && <p className="text-[10px] text-zinc-400 mt-1">Emailul nu poate fi modificat după creare.</p>}
               </div>
 
-              {/* Password — only on create */}
+              {/* Password | only on create */}
               {!editMgr && (
                 <div>
                   <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">Parolă inițială *</label>
@@ -539,7 +544,7 @@ export default function Drivers() {
                     value={mgrForm.password}
                     onChange={e => setMgrForm(p => ({ ...p, password: e.target.value }))}
                     placeholder="Cel puțin 6 caractere"
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors"
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                   />
                   <p className="text-[10px] text-zinc-400 mt-1">Agentul va fi rugat să o schimbe la prima autentificare.</p>
                 </div>
@@ -567,7 +572,7 @@ export default function Drivers() {
                 </div>
               </div>
 
-              {/* Temp password reset — only on edit */}
+              {/* Temp password reset | only on edit */}
               {editMgr && (
                 <div className="pt-1 border-t border-zinc-100 dark:border-zinc-800">
                   <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
@@ -584,7 +589,7 @@ export default function Drivers() {
                         value={tempPw}
                         onChange={e => setTempPw(e.target.value)}
                         placeholder="Parolă temporară"
-                        className="flex-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder:text-zinc-400 transition-colors"
+                        className="flex-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                       />
                       <button
                         type="button"
@@ -613,7 +618,7 @@ export default function Drivers() {
                 <button
                   onClick={handleSaveMgr}
                   disabled={mgrSaving || !mgrForm.name.trim() || !mgrForm.email.trim()}
-                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors"
                 >
                   <Check size={13} /> {editMgr ? 'Salvează' : 'Adaugă'}
                 </button>
@@ -646,14 +651,14 @@ export default function Drivers() {
           {tab === 'soferi' ? (
             <button
               onClick={openAdd}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors"
             >
               <Plus size={12} /> Adaugă șofer
             </button>
           ) : (
             <button
               onClick={openAddMgr}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors"
             >
               <Plus size={12} /> Adaugă agent
             </button>
@@ -669,7 +674,7 @@ export default function Drivers() {
                 <div className="flex flex-col items-center justify-center h-64 gap-3 text-zinc-400 dark:text-zinc-600">
                   <ShoppingBag size={32} className="text-zinc-300 dark:text-zinc-700" />
                   <p className="text-[13px]">Niciun agent adăugat încă</p>
-                  <button onClick={openAddMgr} className="flex items-center gap-1.5 text-[12px] text-blue-600 dark:text-blue-400 hover:underline">
+                  <button onClick={openAddMgr} className="flex items-center gap-1.5 text-[12px] text-brand-orange dark:text-orange-400 hover:underline">
                     <Plus size={12} /> Adaugă primul agent
                   </button>
                 </div>
@@ -687,12 +692,12 @@ export default function Drivers() {
                     </div>
                     <div className="flex items-center gap-4 mt-0.5">
                       {m.phone && (
-                        <a href={`tel:${m.phone}`} className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        <a href={`tel:${m.phone}`} className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 hover:text-brand-orange dark:hover:text-orange-400 transition-colors">
                           <Phone size={9} /> {m.phone}
                         </a>
                       )}
                       {m.email && (
-                        <a href={`mailto:${m.email}`} className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        <a href={`mailto:${m.email}`} className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 hover:text-brand-orange dark:hover:text-orange-400 transition-colors">
                           <Mail size={9} /> {m.email}
                         </a>
                       )}
@@ -709,7 +714,7 @@ export default function Drivers() {
             <div className="flex flex-col items-center justify-center h-full gap-3 text-zinc-400 dark:text-zinc-600">
               <div className="text-4xl">🚚</div>
               <p className="text-[13px]">Niciun șofer adăugat încă</p>
-              <button onClick={openAdd} className="flex items-center gap-1.5 text-[12px] text-blue-600 dark:text-blue-400 hover:underline">
+              <button onClick={openAdd} className="flex items-center gap-1.5 text-[12px] text-brand-orange dark:text-orange-400 hover:underline">
                 <Plus size={12} /> Adaugă primul șofer
               </button>
             </div>
@@ -761,13 +766,13 @@ export default function Drivers() {
                           <span>Progres</span><span>{pct}%</span>
                         </div>
                         <div className="h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-blue-500' : 'bg-emerald-500'}`} style={{ width: `${pct}%` }} />
+                          <div className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-orange-500' : 'bg-emerald-500'}`} style={{ width: `${pct}%` }} />
                         </div>
                       </div>
                     )}
 
                     <div className="flex items-center gap-1 text-[10px] text-zinc-400 dark:text-zinc-500 mt-2.5">
-                      <Smartphone size={9} className={d.device_model ? 'text-blue-400' : 'text-zinc-300 dark:text-zinc-600'} />
+                      <Smartphone size={9} className={d.device_model ? 'text-orange-400' : 'text-zinc-300 dark:text-zinc-600'} />
                       {d.device_model
                         ? <span>{d.device_name ? `${d.device_name} · ` : ''}{d.device_model}</span>
                         : <span className="italic">Niciun dispozitiv conectat</span>
@@ -796,7 +801,7 @@ export default function Drivers() {
                       )
                     })()}
 
-                    {/* PIN reveal — admin can recover the driver's login code if they forget it */}
+                    {/* PIN reveal | admin can recover the driver's login code if they forget it */}
                     <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                       <span className="text-[10px] text-zinc-400 dark:text-zinc-500">PIN:</span>
                       <span className="text-[11px] font-mono font-semibold text-zinc-700 dark:text-zinc-300 tracking-wider select-all">

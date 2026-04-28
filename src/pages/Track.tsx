@@ -1,9 +1,10 @@
+import { Helmet } from 'react-helmet-async'
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { MapContainer, Marker, useMap } from 'react-leaflet'
 import { YandexMapLayer } from '../components/YandexLayer'
 import L from 'leaflet'
-import { MapPin, Truck, Package, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { MapPin, Package, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
 import { API } from '../lib/auth'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -21,6 +22,7 @@ type TrackData = {
   time_window_end: string | null
   notes: string
   driver_location: { lat: number; lng: number; updated_at: string } | null
+  ad?: { image_url: string; click_url: string } | null
 }
 
 // ── Easter egg messages ───────────────────────────────────────────────────────
@@ -43,7 +45,7 @@ const DRIVER_MESSAGES = [
   "Ocolesc un câine care se uită la mine mai amenințător decât șeful meu 🐕",
   "Merg cu 40 km/h și mă simt invincibil 💨",
   "Tu ești ultima livrare. Asta te face specială/special ⭐",
-  "Am refuzat să parchez și să caut cu piciorul — vin direct la tine 🚗",
+  "Am refuzat să parchez și să caut cu piciorul | vin direct la tine 🚗",
   "Coletul zumzăie. Nu știu de ce. Dar pare fericit. 📦✨",
   "Dacă nu deschizi la ușă, stau și cânt până deschizi 🎤",
   "Mă gândesc la bacșiș. Nu pentru mine, pentru motivație 🤑",
@@ -108,6 +110,35 @@ function fmtAgo(iso: string) {
   if (sec < 60) return `acum ${Math.round(sec)}s`
   if (sec < 3600) return `acum ${Math.round(sec / 60)} min`
   return `acum ${Math.round(sec / 3600)} h`
+}
+
+function fmtTime(iso: string) {
+  const date = new Date(iso)
+  const h = String(date.getHours()).padStart(2, '0')
+  const m = String(date.getMinutes()).padStart(2, '0')
+  return `${h}:${m}`
+}
+
+// ── Mock data for testing ─────────────────────────────────────────────────────
+
+const MOCK_DELIVERY = {
+  id: 'cmd_' + Date.now(),
+  customer: 'Andrei Popescu',
+  address: 'Str. Lev Tolstoi 15, Chișinău',
+  lat: 47.026,
+  lng: 28.838,
+  status: 'dispatched',
+  stop_order: 1,
+  total_stops: 3,
+  time_window_start: new Date(Date.now() - 5 * 60000).toISOString(),
+  time_window_end: new Date(Date.now() + 25 * 60000).toISOString(),
+  notes: 'Etajul 3, codul 1234',
+  driver_location: {
+    lat: 47.024,
+    lng: 28.835,
+    updated_at: new Date(Date.now() - 30000).toISOString(),
+  },
+  ad: null,
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -201,7 +232,15 @@ export default function Track() {
     snapTo(sheet === 'peek' ? 'partial' : 'peek')
   }
 
+  const DEMO_TOKENS = ['test', 'mock', 'demo']
+
   async function load() {
+    if (!token) return
+    if (DEMO_TOKENS.includes(token)) {
+      setData(MOCK_DELIVERY)
+      setError('')
+      return
+    }
     try {
       const res = await fetch(`${API}/track/${token}`)
       if (!res.ok) {
@@ -259,6 +298,11 @@ export default function Track() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
+      <Helmet>
+        <title>{data ? `Livrare pentru ${data.customer} | Livra` : 'Urmărire livrare | Livra'}</title>
+        <meta name="description" content="Urmărește în timp real unde este coletul tău și când ajunge la ușa ta." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       {/* Full-screen map */}
       <MapContainer
@@ -280,7 +324,7 @@ export default function Track() {
         {destPos && <Marker position={destPos} icon={destIcon} />}
       </MapContainer>
 
-      {/* Speech bubble — floats above the van */}
+      {/* Speech bubble | floats above the van */}
       {bubble && bubblePos && (
         <div
           className="absolute z-[1001] pointer-events-none"
@@ -296,7 +340,7 @@ export default function Track() {
         </div>
       )}
 
-      {/* Card — bottom sheet on mobile, floating card top-left on desktop */}
+      {/* Card | bottom sheet on mobile, floating card top-left on desktop */}
       <div
         ref={sheetRef}
         className="fixed bottom-0 left-0 right-0 z-[1000] md:absolute md:bottom-auto md:top-4 md:left-4 md:right-auto md:w-72 h-[85vh] md:h-auto md:transform-none bg-white/95 backdrop-blur-md rounded-t-2xl md:rounded-2xl border-t border-zinc-100 md:border shadow-[0_-4px_24px_rgba(0,0,0,0.08)] md:shadow-xl overflow-hidden will-change-transform"
@@ -304,7 +348,7 @@ export default function Track() {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {/* Drag handle — mobile only */}
+        {/* Drag handle | mobile only */}
         <div
           className="flex justify-center pt-3 pb-1 md:hidden cursor-grab active:cursor-grabbing"
           onClick={onHandleTap}
@@ -317,11 +361,9 @@ export default function Track() {
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-2 pb-3 md:pt-4 border-b border-zinc-100">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-violet-600 flex items-center justify-center">
-              <Truck size={11} className="text-white" />
-            </div>
-            <span className="text-[13px] font-bold text-zinc-900 tracking-tight">Livra</span>
+          <div className="flex flex-col leading-none">
+            <span className="text-[12px] font-bold text-[#161513] tracking-widest uppercase">Livra</span>
+            <svg width="28" height="3" viewBox="0 0 28 3"><line x1="0" y1="1.5" x2="22" y2="1.5" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="22,0 28,1.5 22,3" fill="#ff5c2c"/></svg>
           </div>
           <button
             onClick={() => setSheet(s => s === 'peek' ? 'partial' : 'peek')}
@@ -354,9 +396,9 @@ export default function Track() {
               <div>
                 <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-0.5">Interval de livrare</p>
                 <p className="text-[22px] font-bold text-zinc-900 leading-none">
-                  {data.time_window_start}
+                  {fmtTime(data.time_window_start)}
                   <span className="text-zinc-400 font-normal mx-1">–</span>
-                  {data.time_window_end}
+                  {fmtTime(data.time_window_end)}
                 </p>
               </div>
             )}
@@ -412,6 +454,24 @@ export default function Track() {
               <div className="flex items-center gap-1.5 text-[10px] text-zinc-300">
                 <Clock size={9} />
                 <span>Actualizat {fmtAgo(data.driver_location.updated_at)}</span>
+              </div>
+            )}
+
+            {/* Partner Ad Space - only show if ad exists */}
+            {data.ad && (
+              <div className="mt-4 pt-4 border-t border-zinc-200">
+                <a
+                  href={data.ad.click_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full h-24 bg-zinc-100 rounded-xl overflow-hidden hover:opacity-90 transition-opacity"
+                >
+                  <img
+                    src={data.ad.image_url}
+                    alt="Partner ad"
+                    className="w-full h-full object-cover"
+                  />
+                </a>
               </div>
             )}
           </div>
