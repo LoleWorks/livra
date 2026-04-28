@@ -60,7 +60,7 @@ export default function ChangePassword() {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
       <Helmet>
-        <title>Schimbă parola — Livra</title>
+        <title>Schimbă parola | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="w-full max-w-sm">

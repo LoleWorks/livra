@@ -40,7 +40,7 @@ type DriverLocation = {
   updated_at: string
 }
 
-// "12s ago" / "3m ago" / "1h ago" — short human-readable elapsed time
+// "12s ago" / "3m ago" / "1h ago" | short human-readable elapsed time
 function fmtAgo(iso: string): string {
   const sec = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000)
   if (sec < 60)    return `acum ${Math.round(sec)}s`
@@ -236,7 +236,7 @@ export default function Drivers() {
       .channel('drivers-page')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_drivers' }, fetchAll)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_driver_locations' }, () => {
-        // Just refetch locations — driver rows are unchanged
+        // Just refetch locations | driver rows are unchanged
         supabase.from('livra_driver_locations').select('driver_id, lat, lng, updated_at')
           .then(({ data }) => {
             if (!data) return
@@ -411,7 +411,7 @@ export default function Drivers() {
   return (
     <>
       <Helmet>
-        <title>Utilizatori — Livra</title>
+        <title>Utilizatori | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       {/* Add / Edit modal */}
@@ -535,7 +535,7 @@ export default function Drivers() {
                 {editMgr && <p className="text-[10px] text-zinc-400 mt-1">Emailul nu poate fi modificat după creare.</p>}
               </div>
 
-              {/* Password — only on create */}
+              {/* Password | only on create */}
               {!editMgr && (
                 <div>
                   <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">Parolă inițială *</label>
@@ -572,7 +572,7 @@ export default function Drivers() {
                 </div>
               </div>
 
-              {/* Temp password reset — only on edit */}
+              {/* Temp password reset | only on edit */}
               {editMgr && (
                 <div className="pt-1 border-t border-zinc-100 dark:border-zinc-800">
                   <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
@@ -801,7 +801,7 @@ export default function Drivers() {
                       )
                     })()}
 
-                    {/* PIN reveal — admin can recover the driver's login code if they forget it */}
+                    {/* PIN reveal | admin can recover the driver's login code if they forget it */}
                     <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                       <span className="text-[10px] text-zinc-400 dark:text-zinc-500">PIN:</span>
                       <span className="text-[11px] font-mono font-semibold text-zinc-700 dark:text-zinc-300 tracking-wider select-all">

@@ -170,7 +170,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   )
 }
 
-// 24h time picker — guaranteed no AM/PM regardless of OS locale.
+// 24h time picker | guaranteed no AM/PM regardless of OS locale.
 // Click the field to open a dropdown with two scrollable columns: hours (00-23)
 // and minutes (5-minute steps). Selected value populates the input as HH:MM.
 function TimeInput24({ value, onChange, placeholder, className }: {
@@ -293,7 +293,7 @@ const LOAD_STEPS = [
 
 // Nodes: depot centre + scatter of stops (Moldova-ish layout)
 const NODES = [
-  { x: 160, y: 110 }, // depot / centre — Chișinău
+  { x: 160, y: 110 }, // depot / centre | Chișinău
   { x: 88,  y: 52  }, // north-west
   { x: 200, y: 38  }, // north-east
   { x: 58,  y: 130 }, // west
@@ -327,7 +327,7 @@ function OptimizeLoadingScreen() {
   const [fade, setFade]         = useState(true)
   const [drawn, setDrawn]       = useState<number[]>([0, 0, 0]) // dashoffset per route
 
-  // Progress bar — logarithmic, caps at ~92
+  // Progress bar | logarithmic, caps at ~92
   useEffect(() => {
     const t0 = Date.now()
     const iv = setInterval(() => {
@@ -413,7 +413,7 @@ function OptimizeLoadingScreen() {
             </defs>
             <rect width={svgW} height={svgH} fill="url(#grid)" />
 
-            {/* Route polylines — drawn via stroke-dashoffset */}
+            {/* Route polylines | drawn via stroke-dashoffset */}
             {ROUTE_GROUPS.map((group, ri) => {
               const pts = group.map(i => NODES[i])
               const d = pts.map((p, j) => `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
@@ -570,7 +570,7 @@ export default function RoutesPage() {
         })))
       })
 
-    // Finished deliveries (delivered + failed) — loaded for the "Livrate" tab.
+    // Finished deliveries (delivered + failed) | loaded for the "Livrate" tab.
     // Last 30 days only so the list doesn't grow unbounded.
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10)
     supabase.from('livra_route_stops')
@@ -759,7 +759,7 @@ export default function RoutesPage() {
   // ── Optimize ────────────────────────────────────────────────────────────────
 
   async function handleOptimize() {
-    // Optimize for the selected date — defaults to today, but the manager can
+    // Optimize for the selected date | defaults to today, but the manager can
     // build tomorrow's routes the evening before by switching the date.
     const todayDeliveries = deliveries.filter(d => d.delivery_date === optimizeDate)
     if (!todayDeliveries.length) {
@@ -850,7 +850,7 @@ export default function RoutesPage() {
     try {
       // Save the route with the date the manager optimized for. The driver
       // app loads only today's routes, so tomorrow-routes are invisible to
-      // drivers until the day arrives — exactly what we want.
+      // drivers until the day arrives | exactly what we want.
       const dispatchedDriverIds: string[] = []
       for (const route of result.routes) {
         const { data: routeRow, error } = await supabase
@@ -870,7 +870,7 @@ export default function RoutesPage() {
         await supabase.from('livra_route_stops').insert(
           // Send all stops (deliveries AND breaks) so the driver sees their
           // lunch/fuel stops in the route. Breaks are info-only rows on the
-          // driver's side — no Done/Failed actions, just a heads-up.
+          // driver's side | no Done/Failed actions, just a heads-up.
           route.stops.map(s => {
             // For deliveries, look up the original Delivery row to copy package
             // info, time window, and notes (denormalised so the driver doesn't
@@ -986,7 +986,7 @@ export default function RoutesPage() {
                       })}
                     >
                       <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-                        <span style={{ fontSize: 11 }}>{route.driver_name} — start</span>
+                        <span style={{ fontSize: 11 }}>{route.driver_name} | start</span>
                       </Tooltip>
                     </Marker>
                     {route.stops.map(stop => {
@@ -999,7 +999,7 @@ export default function RoutesPage() {
                           >
                             <Tooltip direction="top" offset={[0, -14]} opacity={1}>
                               <span style={{ fontSize: 11 }}>
-                                {stop.customer}{stop.arrival_time ? ` · ${stop.arrival_time}` : ''} — {stop.address}
+                                {stop.customer}{stop.arrival_time ? ` · ${stop.arrival_time}` : ''} | {stop.address}
                               </span>
                             </Tooltip>
                           </Marker>
@@ -1008,7 +1008,7 @@ export default function RoutesPage() {
                       return (
                         <Marker key={stop.delivery_id} position={[stop.lat, stop.lng]} icon={stopIcon(stop.order, route.color)}>
                           <Tooltip direction="top" offset={[0, -13]} opacity={1}>
-                            <span style={{ fontSize: 11 }}>{stop.customer} — {stop.address}</span>
+                            <span style={{ fontSize: 11 }}>{stop.customer} | {stop.address}</span>
                           </Tooltip>
                         </Marker>
                       )
@@ -1058,7 +1058,7 @@ export default function RoutesPage() {
                   <div className="space-y-0.5 max-h-24 overflow-y-auto">
                     {result.deferred.map(d => (
                       <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
-                        • {d.customer} — {d.address}
+                        • {d.customer} | {d.address}
                       </div>
                     ))}
                   </div>
@@ -1132,7 +1132,7 @@ export default function RoutesPage() {
   return (
     <>
       <Helmet>
-        <title>Rute — Livra</title>
+        <title>Rute | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
@@ -1305,10 +1305,10 @@ export default function RoutesPage() {
                   <input
                     value={newDel.package_description}
                     onChange={e => setNewDel(p => ({ ...p, package_description: e.target.value }))}
-                    placeholder="Pachet — ce conține (opțional)"
+                    placeholder="Pachet | ce conține (opțional)"
                     className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
                   />
-                  {/* Delivery date picker — defaults based on address (Chișinău = +1d, else +3d) */}
+                  {/* Delivery date picker | defaults based on address (Chișinău = +1d, else +3d) */}
                   {(() => {
                     const date = newDel.delivery_date || defaultDateForAddress(newDel.address)
                     const numDrivers = activeDrivers.length || 1
@@ -1467,7 +1467,7 @@ export default function RoutesPage() {
                             <input
                               value={editDraft.package_description}
                               onChange={e => setEditDraft(p => ({ ...p, package_description: e.target.value }))}
-                              placeholder="Pachet — ce conține (opțional)"
+                              placeholder="Pachet | ce conține (opțional)"
                               className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
                             />
                             <div className="flex gap-2 pt-1">
@@ -1607,7 +1607,7 @@ export default function RoutesPage() {
                       <input
                         value={editDraft.package_description}
                         onChange={e => setEditDraft(p => ({ ...p, package_description: e.target.value }))}
-                        placeholder="Pachet — ce conține (opțional)"
+                        placeholder="Pachet | ce conține (opțional)"
                         className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
                       />
                       <div>
@@ -1647,7 +1647,7 @@ export default function RoutesPage() {
                 })
               })()}
 
-              {/* "Livrate" tab — completed + failed deliveries from the last 30 days */}
+              {/* "Livrate" tab | completed + failed deliveries from the last 30 days */}
               {activeTab === 'finished' && (() => {
                 if (finishedStops.length === 0) {
                   return (

@@ -45,7 +45,7 @@ export default function SalesLogin() {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
       <Helmet>
-        <title>Autentificare — Livra Sales</title>
+        <title>Autentificare | Livra Sales</title>
         <meta name="description" content="Intră în contul tău Livra Sales pentru a gestiona comenzile." />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>

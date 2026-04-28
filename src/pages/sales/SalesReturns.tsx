@@ -101,7 +101,7 @@ export default function SalesReturns() {
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
       <Helmet>
-        <title>Retururi — Livra Sales</title>
+        <title>Retururi | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

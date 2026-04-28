@@ -45,7 +45,7 @@ const DRIVER_MESSAGES = [
   "Ocolesc un câine care se uită la mine mai amenințător decât șeful meu 🐕",
   "Merg cu 40 km/h și mă simt invincibil 💨",
   "Tu ești ultima livrare. Asta te face specială/special ⭐",
-  "Am refuzat să parchez și să caut cu piciorul — vin direct la tine 🚗",
+  "Am refuzat să parchez și să caut cu piciorul | vin direct la tine 🚗",
   "Coletul zumzăie. Nu știu de ce. Dar pare fericit. 📦✨",
   "Dacă nu deschizi la ușă, stau și cânt până deschizi 🎤",
   "Mă gândesc la bacșiș. Nu pentru mine, pentru motivație 🤑",
@@ -299,7 +299,7 @@ export default function Track() {
   return (
     <div className="relative w-screen h-screen overflow-hidden">
       <Helmet>
-        <title>{data ? `Livrare pentru ${data.customer} — Livra` : 'Urmărire livrare — Livra'}</title>
+        <title>{data ? `Livrare pentru ${data.customer} | Livra` : 'Urmărire livrare | Livra'}</title>
         <meta name="description" content="Urmărește în timp real unde este coletul tău și când ajunge la ușa ta." />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
@@ -324,7 +324,7 @@ export default function Track() {
         {destPos && <Marker position={destPos} icon={destIcon} />}
       </MapContainer>
 
-      {/* Speech bubble — floats above the van */}
+      {/* Speech bubble | floats above the van */}
       {bubble && bubblePos && (
         <div
           className="absolute z-[1001] pointer-events-none"
@@ -340,7 +340,7 @@ export default function Track() {
         </div>
       )}
 
-      {/* Card — bottom sheet on mobile, floating card top-left on desktop */}
+      {/* Card | bottom sheet on mobile, floating card top-left on desktop */}
       <div
         ref={sheetRef}
         className="fixed bottom-0 left-0 right-0 z-[1000] md:absolute md:bottom-auto md:top-4 md:left-4 md:right-auto md:w-72 h-[85vh] md:h-auto md:transform-none bg-white/95 backdrop-blur-md rounded-t-2xl md:rounded-2xl border-t border-zinc-100 md:border shadow-[0_-4px_24px_rgba(0,0,0,0.08)] md:shadow-xl overflow-hidden will-change-transform"
@@ -348,7 +348,7 @@ export default function Track() {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {/* Drag handle — mobile only */}
+        {/* Drag handle | mobile only */}
         <div
           className="flex justify-center pt-3 pb-1 md:hidden cursor-grab active:cursor-grabbing"
           onClick={onHandleTap}

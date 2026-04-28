@@ -78,7 +78,7 @@ export default function SalesOrders() {
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
       <Helmet>
-        <title>Comenzi — Livra Sales</title>
+        <title>Comenzi | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

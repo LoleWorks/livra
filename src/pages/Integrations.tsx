@@ -175,7 +175,7 @@ export default function Integrations() {
   return (
     <>
       <Helmet>
-        <title>Integrări — Livra</title>
+        <title>Integrări | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       {showModal && (

@@ -171,7 +171,7 @@ export default function SalesNewOrder() {
   return (
     <div className="flex-1 overflow-y-auto p-6">
       <Helmet>
-        <title>Comandă nouă — Livra Sales</title>
+        <title>Comandă nouă | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="max-w-xl mx-auto">

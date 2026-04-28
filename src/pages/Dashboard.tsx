@@ -431,7 +431,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full">
       <Helmet>
-        <title>Dashboard — Livra</title>
+        <title>Dashboard | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       {/* Top bar */}
@@ -816,14 +816,14 @@ export default function Dashboard() {
             {selected && (() => {
               return (
                 <>
-                  {/* Completed route — road-following gray line */}
+                  {/* Completed route | road-following gray line */}
                   {routePaths.completed && routePaths.completed.length >= 2 && (
                     <Polyline
                       positions={routePaths.completed}
                       pathOptions={{ color: '#a1a1aa', weight: 4, opacity: 0.6 }}
                     />
                   )}
-                  {/* Upcoming route — road-following blue dashed */}
+                  {/* Upcoming route | road-following blue dashed */}
                   {routePaths.upcoming && routePaths.upcoming.length >= 2 && (
                     <Polyline
                       positions={routePaths.upcoming}
@@ -863,7 +863,7 @@ export default function Dashboard() {
             })()}
           </MapContainer>
 
-          {/* Map controls — top right */}
+          {/* Map controls | top right */}
           <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
             {/* Layer toggle */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden">

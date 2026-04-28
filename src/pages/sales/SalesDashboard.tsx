@@ -95,7 +95,7 @@ export default function SalesDashboard() {
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-6">
       <Helmet>
-        <title>Prezentare — Livra Sales</title>
+        <title>Prezentare | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 

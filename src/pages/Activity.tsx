@@ -153,7 +153,7 @@ export default function Activity() {
       case 'stop_completed': {
         const dist = md.distance_to_address_m as number | undefined
         const distStr = dist !== undefined && dist >= 0 ? ` (la ${dist} m)` : ''
-        return `${md.customer ?? ''} — ${md.address ?? ''}${distStr}`
+        return `${md.customer ?? ''} | ${md.address ?? ''}${distStr}`
       }
       case 'stop_failed':
         return `${md.customer ?? ''} · ${md.fail_reason ?? '—'}`
@@ -198,7 +198,7 @@ export default function Activity() {
   return (
     <div className="flex flex-col h-full">
       <Helmet>
-        <title>Activitate — Livra</title>
+        <title>Activitate | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">

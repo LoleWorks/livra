@@ -91,7 +91,7 @@ export default function Credits() {
   return (
     <>
       <Helmet>
-        <title>Credite — Livra</title>
+        <title>Credite | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       {/* Purchase modal */}
