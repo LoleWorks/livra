@@ -2,7 +2,6 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { API } from '../lib/salesAuth'
 
 // ── Sales Manager types ───────────────────────────────────────────────────────
 
@@ -353,26 +352,16 @@ export default function Drivers() {
         ))
         setShowMgrModal(false)
       } else {
-        // Create new manager via backend (password hashing happens server-side)
+        // Create new manager via Supabase Edge Function
         if (!mgrForm.password || mgrForm.password.length < 6) {
           setMgrError('Parola trebuie să aibă cel puțin 6 caractere')
           return
         }
-        const res = await fetch(`${API}/admin/managers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: mgrForm.name, phone: mgrForm.phone, email: mgrForm.email, status: mgrForm.status, password: mgrForm.password }),
+        const { data, error } = await supabase.functions.invoke('create-manager', {
+          body: { name: mgrForm.name, phone: mgrForm.phone, email: mgrForm.email, status: mgrForm.status, password: mgrForm.password },
         })
-        const data = await res.json()
-        if (!res.ok) { setMgrError(data.detail ?? 'Eroare la creare'); return }
-        const colorKey = COLOR_KEYS[managers.length % COLOR_KEYS.length]
-        setManagers(prev => [...prev, {
-          id: data.id ?? `m-${Date.now()}`,
-          name: mgrForm.name, phone: mgrForm.phone, email: mgrForm.email,
-          status: mgrForm.status, initials: initials(mgrForm.name),
-          color: COLOR_MAP[colorKey] ?? COLORS[0],
-          created_at: new Date().toISOString(),
-        }])
+        if (error || !data) { setMgrError((data as { error?: string })?.error ?? error?.message ?? 'Eroare la creare'); return }
+        setManagers(prev => [...prev, data as SalesManager])
         setShowMgrModal(false)
       }
     } finally {
@@ -384,12 +373,10 @@ export default function Drivers() {
     if (!editMgr || !tempPw || tempPw.length < 6) return
     setTempPwSaving(true)
     try {
-      const res = await fetch(`${API}/admin/managers/${editMgr.id}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ temp_password: tempPw }),
+      const { error } = await supabase.functions.invoke('reset-manager-password', {
+        body: { manager_id: editMgr.id, temp_password: tempPw },
       })
-      if (res.ok) {
+      if (!error) {
         setTempPwDone(true)
         setTempPw('')
       }
