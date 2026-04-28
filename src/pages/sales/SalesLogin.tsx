@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
-import { API, setSalesUser } from '../../lib/salesAuth'
+import { signIn } from '../../lib/auth'
 
 export default function SalesLogin() {
   const navigate = useNavigate()
@@ -17,24 +17,14 @@ export default function SalesLogin() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${API}/auth/sales/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.detail ?? 'Autentificare eșuată')
-        return
-      }
-      setSalesUser(data)
-      if (data.must_change_password) {
+      const user = await signIn(email, password)
+      if (user.must_change_password) {
         navigate('/sales/change-password', { replace: true })
       } else {
         navigate('/sales', { replace: true })
       }
-    } catch {
-      setError('Nu s-a putut contacta serverul. Încearcă din nou.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Autentificare eșuată')
     } finally {
       setLoading(false)
     }

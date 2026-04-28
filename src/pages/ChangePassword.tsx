@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, Loader2, Eye, EyeOff, ShieldCheck, Truck } from 'lucide-react'
-import { API, getUser, setUser } from '../lib/auth'
+import { getUser, updatePassword } from '../lib/auth'
 
 export default function ChangePassword() {
   const navigate = useNavigate()
@@ -32,24 +32,14 @@ export default function ChangePassword() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${API}/auth/change-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user!.id, role: user!.role, new_password: newPw }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.detail ?? 'A apărut o eroare')
-        return
-      }
-      setUser({ ...user!, must_change_password: false })
+      await updatePassword(newPw)
       if (user!.role === 'admin') {
         navigate('/dashboard', { replace: true })
       } else {
         navigate('/sales', { replace: true })
       }
-    } catch {
-      setError('Nu s-a putut contacta serverul.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'A apărut o eroare')
     } finally {
       setLoading(false)
     }

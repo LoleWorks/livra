@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, Loader2, Eye, EyeOff, ShieldCheck, Truck } from 'lucide-react'
-import { API, getSalesUser, setSalesUser } from '../../lib/salesAuth'
+import { getUser, updatePassword } from '../../lib/auth'
 
 export default function SalesChangePassword() {
   const navigate = useNavigate()
-  const user = getSalesUser()
+  const user = getUser()
   const [newPw, setNewPw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
   const [showNew, setShowNew] = useState(false)
@@ -31,20 +31,10 @@ export default function SalesChangePassword() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch(`${API}/auth/sales/change-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ manager_id: user!.id, new_password: newPw }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.detail ?? 'A apărut o eroare')
-        return
-      }
-      setSalesUser({ ...user, must_change_password: false } as import('../../lib/auth').AppUser)
+      await updatePassword(newPw)
       navigate('/sales', { replace: true })
-    } catch {
-      setError('Nu s-a putut contacta serverul.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'A apărut o eroare')
     } finally {
       setLoading(false)
     }
