@@ -30,15 +30,6 @@ const STATUS_LABELS_FILTER: Record<string, string> = {
   toate: 'Toate', upcoming: 'Noi', dispatched: 'Expediate', delivered: 'Livrate', failed: 'Eșuate',
 }
 
-const MOCK: Delivery[] = [
-  { id: '1', customer: 'Maria Ionescu',   phone: '069 123 456', address: 'str. Ismail 12, Chișinău',          notes: 'Interfon 3',      package_description: '2x colete mici',  status: 'upcoming',   delivery_date: new Date().toISOString().slice(0,10), time_window_start: '10:00', time_window_end: '12:00', created_at: new Date().toISOString() },
-  { id: '2', customer: 'Ion Moraru',      phone: '078 234 567', address: 'bd. Ștefan cel Mare 45, Chișinău',  notes: null,              package_description: '1x colet mare',   status: 'upcoming',   delivery_date: new Date().toISOString().slice(0,10), time_window_start: '14:00', time_window_end: '16:00', created_at: new Date(Date.now()-3600000).toISOString() },
-  { id: '3', customer: 'Ana Popescu',     phone: '079 345 678', address: 'str. Columna 7, Chișinău',          notes: 'Etaj 2, ap. 14', package_description: null,              status: 'dispatched', delivery_date: new Date().toISOString().slice(0,10), time_window_start: '09:00', time_window_end: '11:00', created_at: new Date(Date.now()-7200000).toISOString() },
-  { id: '4', customer: 'Dumitru Luca',   phone: '060 456 789', address: 'str. Albișoara 33, Chișinău',       notes: null,              package_description: '3x colete mici',  status: 'delivered',  delivery_date: new Date().toISOString().slice(0,10), time_window_start: null,    time_window_end: null,    created_at: new Date(Date.now()-10800000).toISOString() },
-  { id: '5', customer: 'Elena Vrabie',   phone: '068 567 890', address: 'str. Mihai Eminescu 8, Chișinău',   notes: null,              package_description: '1x plic',         status: 'failed',     delivery_date: new Date(Date.now()-86400000).toISOString().slice(0,10), time_window_start: '13:00', time_window_end: '15:00', created_at: new Date(Date.now()-90000000).toISOString() },
-  { id: '6', customer: 'Vasile Popa',    phone: '079 678 901', address: 'bd. Moscova 12, Chișinău',          notes: 'Sună înainte',   package_description: '2x cutii',        status: 'failed',     delivery_date: new Date(Date.now()-172800000).toISOString().slice(0,10), time_window_start: null,    time_window_end: null,    created_at: new Date(Date.now()-180000000).toISOString() },
-]
-
 function fmtDate(iso: string | null) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('ro-RO', { day: '2-digit', month: 'short', year: '2-digit' })

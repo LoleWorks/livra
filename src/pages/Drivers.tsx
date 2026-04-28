@@ -64,11 +64,6 @@ const COLOR_MAP: Record<string, string> = {
   amber: COLORS[3], rose: COLORS[4], cyan: COLORS[5],
 }
 
-const MOCK_MANAGERS: SalesManager[] = [
-  { id: 'm1', name: 'Elena Rusu',     phone: '069 111 222', email: 'elena@darwin.md',  status: 'activ',  initials: 'ER', color: COLORS[0], created_at: new Date().toISOString() },
-  { id: 'm2', name: 'Andrei Ciobanu', phone: '079 333 444', email: 'andrei@darwin.md', status: 'activ',  initials: 'AC', color: COLORS[1], created_at: new Date().toISOString() },
-]
-
 const statusDot: Record<string, string> = {
   active:      'bg-emerald-500',
   lunch_break: 'bg-amber-500',

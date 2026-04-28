@@ -26,12 +26,6 @@ const TIME_WINDOWS = [
   { label: '18:00 – 20:00', start: '18:00', end: '20:00' },
 ]
 
-const MOCK: Return[] = [
-  { id: 'a1', delivery_id: 'd5', customer: 'Olga Rusu',       address: 'str. Mihai Eminescu 8, Chișinău', phone: '068 567 890', fail_reason: 'Clientul nu a răspuns la ușă',  status: 'open', created_at: new Date(Date.now()-3600000).toISOString() },
-  { id: 'a2', delivery_id: 'd6', customer: 'Vasile Popa',     address: 'bd. Moscova 12, Chișinău',        phone: '079 678 901', fail_reason: 'Adresă incorectă',               status: 'open', created_at: new Date(Date.now()-86400000).toISOString() },
-  { id: 'a3', delivery_id: 'd7', customer: 'Rodica Ciobanu', address: 'str. Columna 7, Chișinău',         phone: '060 789 012', fail_reason: 'Clientul a refuzat coletul',     status: 'open', created_at: new Date(Date.now()-172800000).toISOString() },
-]
-
 function fmtAgo(iso: string) {
   const sec = (Date.now() - new Date(iso).getTime()) / 1000
   if (sec < 3600)  return `acum ${Math.round(sec / 60)} min`

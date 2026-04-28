@@ -45,18 +45,6 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   failed:     { label: 'Eșuat',       cls: 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300' },
 }
 
-const MOCK_DELIVERIES: Delivery[] = [
-  { id: '1', customer: 'Maria Ionescu',    phone: '069 123 456', address: 'str. Ismail 12, Chișinău',         status: 'upcoming',   delivery_date: new Date().toISOString().slice(0,10), time_window_start: '10:00', time_window_end: '12:00', notes: 'Interfon 3',      created_at: new Date().toISOString() },
-  { id: '2', customer: 'Ion Moraru',       phone: '078 234 567', address: 'bd. Ștefan cel Mare 45, Chișinău',  status: 'upcoming',   delivery_date: new Date().toISOString().slice(0,10), time_window_start: '14:00', time_window_end: '16:00', notes: null,              created_at: new Date(Date.now()-3600000).toISOString() },
-  { id: '3', customer: 'Ana Popescu',      phone: '079 345 678', address: 'str. Columna 7, Chișinău',          status: 'dispatched', delivery_date: new Date().toISOString().slice(0,10), time_window_start: '09:00', time_window_end: '11:00', notes: 'Etaj 2, ap. 14', created_at: new Date(Date.now()-7200000).toISOString() },
-  { id: '4', customer: 'Dumitru Luca',    phone: '060 456 789', address: 'str. Albișoara 33, Chișinău',       status: 'delivered',  delivery_date: new Date().toISOString().slice(0,10), time_window_start: null,    time_window_end: null,    notes: null,              created_at: new Date(Date.now()-10800000).toISOString() },
-]
-
-const MOCK_ATTENTION: AttentionItem[] = [
-  { id: 'a1', delivery_id: 'd5', customer: 'Olga Rusu',    address: 'str. Mihai Eminescu 8, Chișinău', phone: '068 567 890', fail_reason: 'Clientul nu a răspuns la ușă',  status: 'open', created_at: new Date(Date.now()-3600000).toISOString() },
-  { id: 'a2', delivery_id: 'd6', customer: 'Vasile Popa',  address: 'bd. Moscova 12, Chișinău',        phone: '079 678 901', fail_reason: 'Adresă incorectă',               status: 'open', created_at: new Date(Date.now()-86400000).toISOString() },
-]
-
 export default function SalesDashboard() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [attention, setAttention] = useState<AttentionItem[]>([])

@@ -119,28 +119,6 @@ function fmtTime(iso: string) {
   return `${h}:${m}`
 }
 
-// ── Mock data for testing ─────────────────────────────────────────────────────
-
-const MOCK_DELIVERY = {
-  id: 'cmd_' + Date.now(),
-  customer: 'Andrei Popescu',
-  address: 'Str. Lev Tolstoi 15, Chișinău',
-  lat: 47.026,
-  lng: 28.838,
-  status: 'dispatched',
-  stop_order: 1,
-  total_stops: 3,
-  time_window_start: new Date(Date.now() - 5 * 60000).toISOString(),
-  time_window_end: new Date(Date.now() + 25 * 60000).toISOString(),
-  notes: 'Etajul 3, codul 1234',
-  driver_location: {
-    lat: 47.024,
-    lng: 28.835,
-    updated_at: new Date(Date.now() - 30000).toISOString(),
-  },
-  ad: null,
-}
-
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 type SheetState = 'peek' | 'partial' | 'full'
@@ -232,15 +210,8 @@ export default function Track() {
     snapTo(sheet === 'peek' ? 'partial' : 'peek')
   }
 
-  const DEMO_TOKENS = ['test', 'mock', 'demo']
-
   async function load() {
     if (!token) return
-    if (DEMO_TOKENS.includes(token)) {
-      setData(MOCK_DELIVERY)
-      setError('')
-      return
-    }
     try {
       const res = await fetch(`${API}/track/${token}`)
       if (!res.ok) {
