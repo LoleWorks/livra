@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Smartphone, Package, Users,
+  Smartphone, Package, Users, User, Bell,
   CheckCircle, ArrowRight, Star, Globe, ChevronDown, ChevronUp,
   Route, Gift, TrendingUp, Mail, MapPin, Clock, Zap,
 } from 'lucide-react'
@@ -11,54 +11,40 @@ import {
 
 const DIAGRAM_NODES = [
   {
-    num: '01',
-    icon: Package,
-    title: 'Magazin online',
-    role: 'WooCommerce / OpenCart',
-    detail: 'Client plasează comanda pe site',
+    num: '01', icon: Package,    title: 'Magazin online', role: 'WooCommerce / OpenCart',
     dotColor: '#ff5c2c',
-    activeBg: 'bg-orange-100 dark:bg-orange-950/40',
-    activeIcon: 'text-orange-500',
-    activeBorder: 'border-orange-300 dark:border-orange-700',
+    bg: 'bg-orange-100 dark:bg-orange-950/40', iconCls: 'text-orange-500', borderCls: 'border-orange-300 dark:border-orange-700',
   },
   {
-    num: '02',
-    icon: Users,
-    title: 'Agent vânzări',
-    role: 'Livra Sales',
-    detail: 'Confirmă comanda și alege fereastra orară',
+    num: '02', icon: Users,      title: 'Agent vânzări',  role: 'Livra Sales',
     dotColor: '#7c3aed',
-    activeBg: 'bg-violet-100 dark:bg-violet-950/40',
-    activeIcon: 'text-violet-600',
-    activeBorder: 'border-violet-300 dark:border-violet-700',
+    bg: 'bg-violet-100 dark:bg-violet-950/40', iconCls: 'text-violet-600', borderCls: 'border-violet-300 dark:border-violet-700',
   },
   {
-    num: '03',
-    icon: Route,
-    title: 'Logistician',
-    role: 'Livra Admin',
-    detail: 'Optimizează rutele cu un singur click',
+    num: '03', icon: Route,      title: 'Logistician',    role: 'Livra Admin',
     dotColor: '#059669',
-    activeBg: 'bg-emerald-100 dark:bg-emerald-950/40',
-    activeIcon: 'text-emerald-600',
-    activeBorder: 'border-emerald-300 dark:border-emerald-700',
+    bg: 'bg-emerald-100 dark:bg-emerald-950/40', iconCls: 'text-emerald-600', borderCls: 'border-emerald-300 dark:border-emerald-700',
   },
   {
-    num: '04',
-    icon: Smartphone,
-    title: 'Șofer',
-    role: 'Livra Driver',
-    detail: 'Primește ruta optimizată pe telefon',
+    num: '04', icon: Smartphone, title: 'Șofer',           role: 'Livra Driver',
     dotColor: '#d97706',
-    activeBg: 'bg-amber-100 dark:bg-amber-950/40',
-    activeIcon: 'text-amber-600',
-    activeBorder: 'border-amber-300 dark:border-amber-700',
+    bg: 'bg-amber-100 dark:bg-amber-950/40', iconCls: 'text-amber-600', borderCls: 'border-amber-300 dark:border-amber-700',
+  },
+  {
+    num: '05', icon: User,       title: 'Client',          role: 'App Livra / SMS',
+    dotColor: '#2563eb',
+    bg: 'bg-blue-100 dark:bg-blue-950/40', iconCls: 'text-blue-600', borderCls: 'border-blue-300 dark:border-blue-700',
   },
 ]
 
-const DIAGRAM_ARROWS = ['Comandă nouă', 'Comanda confirmată', 'Rute optimizate']
+const CONNECTORS = [
+  { label: 'Comandă plasată' },
+  { label: 'Comanda confirmată' },
+  { label: 'Rută trimisă la șofer' },
+  { label: 'Livrare la ușă' },
+]
 
-const STEP_MS = 2400
+const STEP_MS = 2600
 
 function WorkflowDiagram() {
   const [step, setStep] = useState(0)
@@ -71,87 +57,112 @@ function WorkflowDiagram() {
   return (
     <>
       <style>{`
-        @keyframes wf-dot-h {
-          0%   { left: -6px; opacity: 0; }
-          8%   { opacity: 1; }
-          88%  { left: calc(100% + 6px); opacity: 1; }
-          100% { left: calc(100% + 6px); opacity: 0; }
+        @keyframes wf-pkg-h {
+          0%   { left: -12px; opacity: 0; }
+          6%   { opacity: 1; }
+          90%  { left: calc(100% + 12px); opacity: 1; }
+          100% { left: calc(100% + 12px); opacity: 0; }
         }
-        @keyframes wf-dot-v {
-          0%   { top: -6px; opacity: 0; }
-          8%   { opacity: 1; }
-          88%  { top: calc(100% + 6px); opacity: 1; }
-          100% { top: calc(100% + 6px); opacity: 0; }
+        @keyframes wf-sms-h {
+          0%   { left: -10px; opacity: 0; }
+          10%  { opacity: 1; }
+          85%  { left: calc(100% + 10px); opacity: 1; }
+          100% { left: calc(100% + 10px); opacity: 0; }
+        }
+        @keyframes wf-pkg-v {
+          0%   { top: -12px; opacity: 0; }
+          6%   { opacity: 1; }
+          90%  { top: calc(100% + 12px); opacity: 1; }
+          100% { top: calc(100% + 12px); opacity: 0; }
         }
       `}</style>
 
-      {/* ── Desktop: horizontal ── */}
-      <div className="hidden md:flex items-start">
+      {/* ── Desktop horizontal ── */}
+      <div className="hidden lg:flex items-start">
         {DIAGRAM_NODES.map((node, i) => {
           const Icon = node.icon
-          const lit = step >= i
           const isActive = step === i
+          const clientDelivered = i === 4 && step === 4
           return (
             <Fragment key={i}>
               {/* Node */}
               <button
                 onClick={() => setStep(i)}
-                className={`flex flex-col items-center flex-shrink-0 w-44 transition-all duration-500 cursor-pointer group ${lit ? 'opacity-100' : 'opacity-35'}`}
+                className="flex flex-col items-center flex-shrink-0 w-28 xl:w-32"
               >
                 <div className="text-[10px] font-bold tracking-widest text-zinc-300 dark:text-zinc-600 mb-3">{node.num}</div>
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-3 border-2 transition-all duration-500 ${
-                    lit ? `${node.activeBg} ${node.activeBorder}` : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'
-                  }`}
-                  style={isActive ? { boxShadow: `0 0 0 5px ${node.dotColor}18, 0 4px 20px ${node.dotColor}28` } : undefined}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 border-2 transition-all duration-300 ${node.bg} ${node.borderCls}`}
+                  style={isActive ? { boxShadow: `0 0 0 5px ${node.dotColor}22, 0 0 18px ${node.dotColor}35`, transform: 'scale(1.08)' } : undefined}
                 >
-                  <Icon size={24} className={lit ? node.activeIcon : 'text-zinc-400 dark:text-zinc-600'} />
+                  <Icon size={22} className={node.iconCls} />
                 </div>
-                <div className={`text-[13px] font-semibold text-center transition-colors ${lit ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-400 dark:text-zinc-500'}`}>
-                  {node.title}
-                </div>
-                <div className={`text-[11px] font-medium text-center mt-0.5 transition-colors ${lit ? 'text-zinc-400 dark:text-zinc-500' : 'text-zinc-300 dark:text-zinc-600'}`}>
-                  {node.role}
-                </div>
-                <div className={`text-[11px] text-center mt-1.5 leading-snug transition-colors px-2 ${lit ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-600'}`}>
-                  {node.detail}
-                </div>
+                <div className="text-[12px] font-semibold text-zinc-900 dark:text-zinc-50 text-center leading-tight">{node.title}</div>
+                <div className="text-[10px] text-zinc-400 dark:text-zinc-500 text-center mt-0.5">{node.role}</div>
+
+                {/* Driver: en-route badge */}
+                {i === 3 && step === 3 && (
+                  <div className="mt-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                    <MapPin size={8} /> En route
+                  </div>
+                )}
+
+                {/* Client: notified / delivered badge */}
+                {i === 4 && step >= 3 && (
+                  <div className={`mt-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full transition-all duration-500 ${
+                    clientDelivered
+                      ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                  }`}>
+                    {clientDelivered ? <><CheckCircle size={8} /> Livrat!</> : <><Bell size={8} /> Notificat</>}
+                  </div>
+                )}
               </button>
 
               {/* Connector */}
               {i < DIAGRAM_NODES.length - 1 && (
-                <div className="flex-1 flex flex-col items-center gap-2 pt-[52px] min-w-0 px-1">
-                  <span className={`text-[10px] font-medium whitespace-nowrap transition-colors ${step > i ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-600'}`}>
-                    {DIAGRAM_ARROWS[i]}
+                <div className="flex-1 flex flex-col items-center min-w-0 px-1 pt-[50px]">
+                  <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap mb-2">
+                    {CONNECTORS[i].label}
                   </span>
                   <div className="relative w-full h-px bg-zinc-200 dark:bg-zinc-700">
-                    {/* Fill trail */}
-                    <div
-                      className="absolute inset-y-0 left-0 transition-[width] duration-700 ease-out"
-                      style={{ width: step > i ? '100%' : '0%', backgroundColor: node.dotColor, opacity: 0.4 }}
+                    {/* Arrowhead */}
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0"
+                      style={{ borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '5px solid #d4d4d8' }}
                     />
-                    {/* Arrow head */}
-                    <div
-                      className={`absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 transition-opacity duration-500 ${step > i ? 'opacity-60' : 'opacity-0'}`}
-                      style={{
-                        borderTop: '4px solid transparent',
-                        borderBottom: '4px solid transparent',
-                        borderLeft: `6px solid ${node.dotColor}`,
-                      }}
-                    />
-                    {/* Traveling dot */}
+                    {/* Traveling package */}
                     {step === i && (
                       <div
-                        key={`h-${step}`}
-                        className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full"
-                        style={{
-                          backgroundColor: node.dotColor,
-                          boxShadow: `0 0 8px ${node.dotColor}cc`,
-                          animation: `wf-dot-h ${STEP_MS}ms ease-in-out forwards`,
-                        }}
-                      />
+                        key={`pkg-${step}`}
+                        className="absolute top-0 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 border-2 shadow-md"
+                        style={{ borderColor: node.dotColor, animation: `wf-pkg-h ${STEP_MS}ms ease-in-out forwards` }}
+                      >
+                        <Package size={11} style={{ color: node.dotColor }} />
+                      </div>
+                    )}
+                    {/* SMS notification sliding to client simultaneously when logistician fires (step 2) */}
+                    {i === 3 && step === 2 && (
+                      <div
+                        key="sms-notif"
+                        className="absolute top-0 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-700 shadow-sm"
+                        style={{ animation: `wf-sms-h ${STEP_MS * 1.15}ms ease-in-out forwards`, animationDelay: `${STEP_MS * 0.04}ms` }}
+                      >
+                        <Bell size={9} className="text-blue-500" />
+                      </div>
                     )}
                   </div>
+                  {/* SMS sub-label */}
+                  {i === 2 && (
+                    <div className="flex items-center gap-1 text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5 whitespace-nowrap">
+                      <Bell size={8} /> SMS notificare → client
+                    </div>
+                  )}
+                  {/* GPS sub-label */}
+                  {i === 3 && (
+                    <div className="flex items-center gap-1 text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5 whitespace-nowrap">
+                      <MapPin size={8} /> GPS live tracking
+                    </div>
+                  )}
                 </div>
               )}
             </Fragment>
@@ -159,55 +170,51 @@ function WorkflowDiagram() {
         })}
       </div>
 
-      {/* ── Mobile: vertical ── */}
-      <div className="flex md:hidden flex-col items-start gap-0 max-w-xs mx-auto w-full">
+      {/* ── Mobile vertical ── */}
+      <div className="flex lg:hidden flex-col items-start max-w-xs mx-auto w-full">
         {DIAGRAM_NODES.map((node, i) => {
           const Icon = node.icon
-          const lit = step >= i
           const isActive = step === i
+          const clientDelivered = i === 4 && step === 4
           return (
             <Fragment key={i}>
-              <button
-                onClick={() => setStep(i)}
-                className={`flex items-center gap-4 w-full transition-all duration-500 ${lit ? 'opacity-100' : 'opacity-35'}`}
-              >
+              <button onClick={() => setStep(i)} className="flex items-center gap-4 w-full py-1">
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border-2 transition-all duration-500 ${
-                    lit ? `${node.activeBg} ${node.activeBorder}` : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'
-                  }`}
-                  style={isActive ? { boxShadow: `0 0 0 4px ${node.dotColor}20` } : undefined}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 border-2 transition-all duration-300 ${node.bg} ${node.borderCls}`}
+                  style={isActive ? { boxShadow: `0 0 0 4px ${node.dotColor}22`, transform: 'scale(1.06)' } : undefined}
                 >
-                  <Icon size={22} className={lit ? node.activeIcon : 'text-zinc-400 dark:text-zinc-600'} />
+                  <Icon size={20} className={node.iconCls} />
                 </div>
                 <div className="text-left">
                   <div className="text-[10px] font-bold tracking-widest text-zinc-300 dark:text-zinc-600 mb-0.5">{node.num}</div>
-                  <div className={`text-[14px] font-semibold transition-colors ${lit ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-400 dark:text-zinc-500'}`}>{node.title}</div>
-                  <div className={`text-[12px] transition-colors ${lit ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-600'}`}>{node.detail}</div>
+                  <div className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-50">{node.title}</div>
+                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{node.role}</div>
+                  {i === 4 && step >= 3 && (
+                    <div className={`mt-0.5 text-[10px] font-medium ${clientDelivered ? 'text-emerald-600' : 'text-blue-500'}`}>
+                      {clientDelivered ? '✓ Livrat!' : '🔔 Notificat · GPS live'}
+                    </div>
+                  )}
                 </div>
               </button>
 
               {i < DIAGRAM_NODES.length - 1 && (
-                <div className="flex items-center gap-3 pl-[26px] my-1">
-                  <div className="relative w-px h-10 bg-zinc-200 dark:bg-zinc-700 flex-shrink-0 overflow-visible">
-                    <div
-                      className="absolute inset-x-0 top-0 transition-[height] duration-700 ease-out"
-                      style={{ height: step > i ? '100%' : '0%', backgroundColor: node.dotColor, opacity: 0.45 }}
-                    />
+                <div className="flex items-start gap-3 pl-5 my-1">
+                  <div className="relative w-px flex-shrink-0 overflow-visible bg-zinc-200 dark:bg-zinc-700" style={{ height: i === 2 ? 52 : 36 }}>
                     {step === i && (
                       <div
                         key={`v-${step}`}
-                        className="absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full"
-                        style={{
-                          backgroundColor: node.dotColor,
-                          boxShadow: `0 0 8px ${node.dotColor}cc`,
-                          animation: `wf-dot-v ${STEP_MS}ms ease-in-out forwards`,
-                        }}
-                      />
+                        className="absolute left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 border-2 shadow-sm"
+                        style={{ borderColor: node.dotColor, animation: `wf-pkg-v ${STEP_MS}ms ease-in-out forwards` }}
+                      >
+                        <Package size={9} style={{ color: node.dotColor }} />
+                      </div>
                     )}
                   </div>
-                  <span className={`text-[11px] font-medium transition-colors ${step > i ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-600'}`}>
-                    {DIAGRAM_ARROWS[i]}
-                  </span>
+                  <div className="pt-1">
+                    <div className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{CONNECTORS[i].label}</div>
+                    {i === 2 && <div className="text-[10px] text-zinc-400 mt-0.5 flex items-center gap-1"><Bell size={8} /> SMS → client</div>}
+                    {i === 3 && <div className="text-[10px] text-zinc-400 mt-0.5 flex items-center gap-1"><MapPin size={8} /> GPS live</div>}
+                  </div>
                 </div>
               )}
             </Fragment>
@@ -221,8 +228,8 @@ function WorkflowDiagram() {
           <button
             key={i}
             onClick={() => setStep(i)}
-            className={`rounded-full transition-all duration-300 ${step >= i ? 'w-5 h-2' : 'w-2 h-2 bg-zinc-200 dark:bg-zinc-700'}`}
-            style={step >= i ? { backgroundColor: node.dotColor } : undefined}
+            className={`rounded-full transition-all duration-300 ${step === i ? 'w-5 h-2' : 'w-2 h-2 bg-zinc-200 dark:bg-zinc-700'}`}
+            style={step === i ? { backgroundColor: node.dotColor } : undefined}
           />
         ))}
       </div>
