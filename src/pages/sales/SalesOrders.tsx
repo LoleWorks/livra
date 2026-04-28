@@ -50,7 +50,7 @@ function fmtWindow(start: string | null, end: string | null) {
 }
 
 export default function SalesOrders() {
-  const [orders, setOrders] = useState<Delivery[]>(MOCK)
+  const [orders, setOrders] = useState<Delivery[]>([])
   const [filter, setFilter] = useState('toate')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -62,7 +62,7 @@ export default function SalesOrders() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100)
-      if (data && data.length > 0) setOrders(data as Delivery[])
+      if (data) setOrders(data as Delivery[])
       setLoading(false)
     }
     load()

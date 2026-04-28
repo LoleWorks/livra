@@ -144,8 +144,8 @@ export default function SalesNewOrder() {
     setSaving(false)
 
     if (dbErr) {
-      // Offline fallback: show success anyway (mock mode)
-      console.warn('Supabase insert failed, continuing in mock mode:', dbErr.message)
+      setError('Eroare la salvare: ' + dbErr.message)
+      return
     }
 
     setDone(true)

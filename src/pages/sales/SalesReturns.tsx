@@ -42,7 +42,7 @@ function fmtAgo(iso: string) {
 type RescheduleState = { date: string; start: string; end: string }
 
 export default function SalesReturns() {
-  const [items, setItems] = useState<Return[]>(MOCK)
+  const [items, setItems] = useState<Return[]>([])
   const [loading, setLoading] = useState(true)
   const [rescheduleOpen, setRescheduleOpen] = useState<string | null>(null)
   const [reschedule, setReschedule] = useState<RescheduleState>({ date: new Date(Date.now()+86400000).toISOString().slice(0,10), start: '', end: '' })
@@ -55,7 +55,7 @@ export default function SalesReturns() {
         .from('livra_attention_items')
         .select('*')
         .order('created_at', { ascending: false })
-      if (data && data.length > 0) setItems(data as Return[])
+      if (data) setItems(data as Return[])
       setLoading(false)
     }
     load()

@@ -58,8 +58,8 @@ const MOCK_ATTENTION: AttentionItem[] = [
 ]
 
 export default function SalesDashboard() {
-  const [deliveries, setDeliveries] = useState<Delivery[]>(MOCK_DELIVERIES)
-  const [attention, setAttention] = useState<AttentionItem[]>(MOCK_ATTENTION)
+  const [deliveries, setDeliveries] = useState<Delivery[]>([])
+  const [attention, setAttention] = useState<AttentionItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function SalesDashboard() {
         .gte('delivery_date', today)
         .order('created_at', { ascending: false })
         .limit(20)
-      if (del && del.length > 0) setDeliveries(del as Delivery[])
+      if (del) setDeliveries(del as Delivery[])
 
       const { data: att } = await supabase
         .from('livra_attention_items')
