@@ -255,6 +255,7 @@ const NETWORK_BENEFITS = [
     icon: MapPin,
     title: 'Promovare pe zone',
     desc: 'Vrei să crești în Botanica sau Ciocana? Targetezi clienții din zona respectivă care au comandat produse similare. Livra știe exact cine și unde.',
+    comingSoon: true,
   },
   {
     icon: TrendingUp,
