@@ -28,42 +28,42 @@ const INDUSTRIES: Record<string, IndustryData> = {
       description: 'Conectează WooCommerce sau OpenCart la Livra. Comenzile sunt trimise automat, rutele optimizate, și clienții văd urmărirea live.',
     },
     badge: 'Soluție pentru magazine online',
-    headline: 'De la comandă la livrare, fără nicio intervenție manuală',
-    subline: 'Livra se conectează la WooCommerce sau OpenCart și preia fiecare comandă automat. Tu te concentrezi pe vânzări, Livra livrează.',
+    headline: 'Livrări rapide. Clienți loiali. Afaceri care cresc.',
+    subline: 'În Moldova, livrarea rapidă e cea mai bună reclame. Dar doar dacă o faci bine. Livra o automatizează total — comenzile din site direct la șoferi, rutele calculate în secunde, clienții văd unde e coletul lor.',
     color: 'orange',
     icon: Package,
     painPoints: [
       {
-        title: 'Comenzi introduse manual',
-        desc: 'Angajații copiază fiecare comandă din site în Excel sau agende. Erori, timp pierdut și comenzi ratate la ore de vârf.',
+        title: '«Unde e comanda mea?»',
+        desc: 'Fiecare client care sună = 5 minute din ziua ta și o vânzare mai puțin probabil. Clienții care nu primesc răspuns rapid nu se mai întorc. Și spun 10 prieteni că ești lent.',
       },
       {
-        title: 'Clienții sună după colet',
-        desc: '«Unde e comanda mea?» — cel mai frecvent apel. Fiecare răspuns costă 3-5 minute.',
+        title: 'Livrări care ajung târziu = clienți pierduti',
+        desc: 'Ai promis 2 zile, dar șoferul face 4 din cauza rutelor haotice? Clintul nu mai comandă. Merge la competitor mai rapid. Și lasă o recenzie proastă.',
       },
       {
-        title: 'Rute neoptime',
-        desc: 'Șoferii pleacă în ordine aleatorie, consumă mai mult combustibil și fac mai puține livrări pe zi.',
+        title: 'Black Friday = haos total',
+        desc: 'Azi 800 de comenzi și 2 persoane le introduc manual. Erori, comenzi pierdute, clienți furioși, returnuri, pierdeți bani.',
       },
     ],
     solutions: [
       {
-        title: 'Integrare automată',
-        desc: 'Pluginul Livra trimite comenzile direct din WooCommerce în tabloul de bord. Zero copiere manuală.',
+        title: 'Zero introducere manuală',
+        desc: 'Pluginul se conectează la WooCommerce în 5 minute. Fiecare comandă nouă apare automat la șofer. Nu mai există erori din introducere manuală. Nici o dată nu pierzi vreun client din cauza unei greșeli administrative.',
       },
       {
-        title: 'Tracking live pentru clienți',
-        desc: 'Fiecare client primește un link cu șoferul pe hartă și notificări la fiecare etapă.',
+        title: 'Clienți informați = clienți fericiți',
+        desc: 'SMS automat: comandă confirmată → șofer pe drum → sosire în 30 minute → livrat. Clienții nu sună. Tu nu pierzi timp. Nu mai stau la telefon 8 ore pe zi.',
       },
       {
-        title: 'Optimizare AI a rutelor',
-        desc: 'Ruta optimă pentru zeci de livrări în câteva secunde. Șoferii livrează mai mult cu mai puțin.',
+        title: 'Rute optimale în secunde',
+        desc: 'Ai 200 de comenzi? Livra calculează ruta optimă pentru toți șoferii automat. 30% mai puțin km, mai multe livrări pe zi, mai puțin combustibil. Duminică livrezi cât ai livrat luni-vineri.',
       },
     ],
     stats: [
-      { value: '40%', label: 'mai puțin timp risipit' },
-      { value: '3×', label: 'mai multe livrări/șofer' },
-      { value: '0', label: 'apeluri «unde e coletul»' },
+      { value: '−80%', label: 'apeluri «unde e coletul»' },
+      { value: '+3×', label: 'livrări pe șofer pe zi' },
+      { value: '5 min', label: 'timp setup total' },
     ],
   },
   farmacii: {
@@ -73,42 +73,42 @@ const INDUSTRIES: Record<string, IndustryData> = {
       description: 'Livrare rapidă de medicamente cu prioritate, POD digital și notificări automate pentru pacienți.',
     },
     badge: 'Soluție pentru farmacii',
-    headline: 'Livrare medicamentoasă rapidă și urmăribilă',
-    subline: 'Medicamentele nu pot aștepta. Livra prioritizează automat comenzile urgente și asigură dovezi de livrare.',
+    headline: 'Medicamentul ajunge la timp. Întotdeauna.',
+    subline: 'Diabeticul cu ceas care așteaptă insulina, bunica care așteaptă tensionul — vieți depind de livrările tale. Livra prioritizează urgențele, ajung în <2h, și tu ai dovezi digitale complete pentru fiecare.',
     color: 'green',
     icon: Pill,
     painPoints: [
       {
-        title: 'Comenzile urgente nu au prioritate',
-        desc: 'Toate comenzile ajung în aceeași ordine. Riscul de a livra o rețetă urgentă la ora greșită.',
+        title: 'Pacienți furioși = pierdere de reputație',
+        desc: 'O persoană cu diabetul care așteaptă 3 ore = reclamație pe Facebook. O vânzare care nu-și primește medicamentul la timp = problemă medicală + lawsuit potențial. Rating-ul scade, clienții se duc la competitor.',
       },
       {
-        title: 'Nicio dovadă de livrare',
-        desc: 'Nu poți dovedi că medicamentele au ajuns la pacient, la ora și în starea corectă.',
+        title: 'Urgente și rutine în același rând',
+        desc: 'Cum diferențiezi o comandă urgentă (pacient care durează) de una rutină? Fără sistem, toate sunt la fel. Pacienții urgentul ajung ultimii. Asta e neacceptabil medicamentos.',
       },
       {
-        title: 'Pacienții nu știu când vine șoferul',
-        desc: 'Pacienții așteaptă ore întregi fără a ști ora de sosire exactă.',
+        title: 'Nicio dovadă = disputa permanentă',
+        desc: '«Am lăsat la ușă» vs «Nu mi-a dat nimeni nimic». Fără dovadă, pierzi crediblitate. Clientul zice că nu a primit. Tu spui că da. Cine câștigă? Clientul. Și tu refund și piezi medicamentul.',
       },
     ],
     solutions: [
       {
-        title: 'Priorități de livrare',
-        desc: 'Marchezi comenzile urgente iar Livra le include automat primele în ruta șoferului.',
+        title: 'Urgente prioritizate automat',
+        desc: 'Marchezi o comandă ca urgentă → Livra o pune automat pe primul loc în ruta șoferului → pacientul o primește în <2h. Alte comenzi continuă normal. Vieți salvate, clienți mulțumiți.',
       },
       {
-        title: 'POD digital — fotografie + semnătură',
-        desc: 'Șoferul fotografiază predarea și obține semnătura electronică.',
+        title: 'Dovadă digitală pentru fiecare livrare',
+        desc: 'Șoferul fotografiază medicamentul și primește semnătură electronică a pacientului. Dovada se salvează pentru totdeauna. Nicio dispută posibilă. Tu ești protejat legal.',
       },
       {
-        title: 'Notificare 30 min înainte',
-        desc: 'Pacientul primește SMS când șoferul e la 30 minute distanță.',
+        title: 'Compliance complet și transparent',
+        desc: 'Registrul complet al fiecărei livrări: cine, când, unde, foto. Util pentru audit, pentru pacienți, pentru protecție legală. Ești 100% transparent și 100% protejat.',
       },
     ],
     stats: [
-      { value: '< 2h', label: 'livrare urgentă' },
-      { value: '100%', label: 'comenzi cu dovadă' },
-      { value: '30 min', label: 'aviz înainte' },
+      { value: '< 2h', label: 'livrare urgentă garantată' },
+      { value: '0', label: 'dispute de livrare' },
+      { value: '100%', label: 'compliance cu documente' },
     ],
   },
   florarii: {
@@ -118,42 +118,42 @@ const INDUSTRIES: Record<string, IndustryData> = {
       description: 'Livrări de flori la intervalul exact promis. Planificare automată pentru zile de vârf, confirmare cu fotografie.',
     },
     badge: 'Soluție pentru florării',
-    headline: 'Livrări la timp, pentru momente ce nu pot fi ratate',
-    subline: 'O zi de naștere sau aniversare nu se poate reprograma. Livra asigură că aranjamentele ajung exact la ora promisă.',
+    headline: 'Nu lăsa pe nimeni cu mâna goală.',
+    subline: 'O propunere de cununie ratată, o zi de naștere uitată, o aniversare fără flori — asta nu mai se mai întâmplă cu Livra. Livrări exact la ora promisă. Clienți care se întorc pe viață.',
     color: 'pink',
     icon: Flower,
     painPoints: [
       {
-        title: 'Orar de livrare imposibil de respectat',
-        desc: 'Clienții cer livrare «între 14:00 și 15:00» iar tu nu ai vizibilitate asupra respectării intervalului.',
+        title: 'Clienți furioși = clienți pierduti',
+        desc: '«Vrem livrare la 14:00 pentru cina cu soția». Tu zici «între 14 și 17». Șoferul ajunge la 18:00. Omul a făcut cina fără flori. El nu mai comandă de la tine și spune 20 de prieteni că ești neprofesionist.',
       },
       {
-        title: 'Produse fragile fără confirmare',
-        desc: 'Nu știi dacă aranjamentul a ajuns intact și a fost predat persoanei corecte.',
+        title: 'Zile de vârf = imposibil',
+        desc: 'De Valentine, 8 martie, ziua mamei — 500 de comenzi cu ore exacte. Cum planifici manual? Imposibil. Comenzi care se confundă, intervale ratate, clienți care amenință.',
       },
       {
-        title: 'Planificare manuală haotică',
-        desc: 'De Valentine sau 8 Martie, zeci de comenzi cu ore fixe devin imposibil de gestionat.',
+        title: 'Nicio confirmare = nicio siguranță',
+        desc: 'Cliente care spun că nu a sosit nimic. «Am lăsat la ușă» nu e dovadă. Client insistă că nu a venit. Cine se crede? Tu pierzi flori și bani. Asta se întâmplă constant.',
       },
     ],
     solutions: [
       {
-        title: 'Ferestre de livrare cu orar',
-        desc: 'Fiecare comandă poate primi interval orar. Livra planifică ruta respectând toate intervalele.',
+        title: 'Planificare automată pe intervale exacte',
+        desc: 'Client vrea livrare între 18:00 și 19:00 pentru cină? Tu introduci. Livra calculează ruta care respectă TOATE intervalele. Nicio oră ratată. Nicio dispută. Cliente liniștite și fericit.',
       },
       {
-        title: 'Foto la predare',
-        desc: 'Șoferul fotografiază predarea. Clientul primește confirmarea că aranjamentul a ajuns.',
+        title: 'Zile de vârf = ușor',
+        desc: 'Valentine: upload lista cu 500 de comenzi. Livra generează rutele optime în 3 secunde. Fiecare interval respectat. Zero stres. Tu doar urmărești pe hartă. Asta-i profesionism.',
       },
       {
-        title: 'Planificare automată pentru zile de vârf',
-        desc: 'Upload CSV. Livra generează rutele optimizate în câteva secunde.',
+        title: 'Confirmare cu fotografie = zero dispută',
+        desc: 'Șoferul fotografiază floarea cu persoana care o primește. Cliente nu mai pot spune că nu a venit. Tu ai dovada. Reputație protejată. Clienți care se întorc mereu.',
       },
     ],
     stats: [
-      { value: '98%', label: 'livrări la intervalul promis' },
-      { value: '0', label: 'reclamații privind predarea' },
-      { value: '5 sec', label: 'timp de planificare' },
+      { value: '98%', label: 'satisfacție clienți' },
+      { value: '3 sec', label: 'planificare 500 comenzi' },
+      { value: '0', label: 'intervale ratate' },
     ],
   },
   grocery: {
@@ -163,42 +163,42 @@ const INDUSTRIES: Record<string, IndustryData> = {
       description: 'Livrare rapidă în fereastra promisă de 2 ore. Consolidare automată de comenzi, optimizare pentru traficul din Chișinău.',
     },
     badge: 'Soluție pentru grocery',
-    headline: 'Livrare rapidă, în fereastra promisă',
-    subline: 'Clienții se așteaptă la livrare în 2-4 ore. Livra optimizează rutele zilnice și menține clienții informați.',
+    headline: 'Mâncare proaspătă = clienți fideli.',
+    subline: 'Livrare în 2 ore = răcitor freschi. Răcitori freschi = clienți care comandă în fiecare zi. Livra consolidează comenzi din același bloc și optimizează rutele pe trafic real.',
     color: 'blue',
     icon: ShoppingCart,
     painPoints: [
       {
-        title: 'Ferestre de livrare prea largi',
-        desc: 'Clienții nu acceptă să aștepte toată ziua. Fără optimizare, nu poți promite interval mai mic de 6 ore.',
+        title: 'Clienți care comanda o dată și dispar',
+        desc: 'Ai promis 2h dar a venit în 5. Leii caldă, mâncarea improprie. Clintul nu mai comandă. Merge la Jumbo care e mai rapid. Pentru tine e o vânzare pierdută pentru totdeauna.',
       },
       {
-        title: 'Mai multe comenzi pe aceeași adresă',
-        desc: 'Clienți din același bloc comandă separat dar sunt livrate în curse diferite.',
+        title: 'Rute prost planificate = oportunități ratate',
+        desc: 'Blocul din Botanica are 15 clienți zilnici. Dar ai 5 curse separate acolo. Combustibil risipiti, șofer obosit, clienți care nu mai comandă. Și piezi bani de fiecare dată.',
       },
       {
-        title: 'Șoferi ineficienți în zone aglomerate',
-        desc: 'Fără hartă optimizată, șoferii din Centru pierd ore în trafic.',
+        title: 'Ferestre prea largi = clienți care se duc la competitor',
+        desc: 'Clienții nu vor să aștepte 6 ore pentru proaspete. Ei comandă de la Glovo care promite 1h. Tu nu poți competi. Clienți pierduti.',
       },
     ],
     solutions: [
       {
-        title: 'Ferestre de 2 ore garantate',
-        desc: 'Livra grupează comenzile pe zone și calculează ruta pentru fiecare oprire.',
+        title: 'Livrări în 2 ore, consolidate inteligent',
+        desc: 'Livra grupează automat comenzile din același bloc în o singură oprire. Același șofer, o singură oprire, mai ieftin, mai rapid. Clienți din Botanica știu: vor livrare în 2h. Comandă de 3 ori pe săptămână.',
       },
       {
-        title: 'Consolidare automată a adreselor',
-        desc: 'Comenzi pe aceeași adresă sunt grupate automat într-o singură oprire.',
+        title: 'Rute optime pe traficul real',
+        desc: 'Nu distanțe în linie dreaptă — Livra știe că Ștefan cel Mare e plin la 9-10. Calculează rutele după trafic real din Chișinău. Livrări predictibile. Promisiuni ținute.',
       },
       {
-        title: 'Optimizare pentru traficul din Chișinău',
-        desc: 'Algoritmul folosește durate reale OSRM, nu distanțe în linie dreaptă.',
+        title: 'Clienți care comandă de 2 ori pe săptămână',
+        desc: 'Livrare rapidă și consistentă = client loyal. Client loyal = cumpărături mai mari. Cumpărături mai mari = mai mult profit. Asta-i business growth.',
       },
     ],
     stats: [
-      { value: '2h', label: 'fereastră de livrare' },
-      { value: '30%', label: 'mai puțin combustibil' },
-      { value: '2×', label: 'comenzi/zi/șofer' },
+      { value: '2h', label: 'livrare garantată' },
+      { value: '+40%', label: 'comenzi zilnice repeat' },
+      { value: '−25%', label: 'cost combustibil' },
     ],
   },
   b2b: {
@@ -208,42 +208,42 @@ const INDUSTRIES: Record<string, IndustryData> = {
       description: 'Control complet asupra flotei cu localizare live, rapoarte automate și POD digital pentru parteneri.',
     },
     badge: 'Soluție pentru distribuție B2B',
-    headline: 'Flotă mare, control complet',
-    subline: 'Distribui produse la zeci de puncte zilnic. Livra îți oferă vizibilitate asupra flotei și rapoarte automate.',
+    headline: 'De la 5 la 50 de puncte. Livra scalează cu tine.',
+    subline: 'Distribuția manuală merge la 10 puncte. La 50 crapi de administratie. Livra e sistemul care lasă să crești — tu NU trebuie să angajezi 3 persoane cu foi de parcurs și apeluri haotice.',
     color: 'purple',
     icon: Truck,
     painPoints: [
       {
-        title: 'Nicio vizibilitate asupra flotei',
-        desc: 'Nu știi unde e fiecare șofer. Clienții cer ETA-uri precise pe care nu le poți da.',
+        title: 'Nicio vizibilitate = pierdere de parteneri',
+        desc: 'Partenerul întreabă «când ajungi?». Tu suni șoferul și zici «Cred că la 4». ETA-uri aproximative = partener nemulțumit. Partener nemulțumit = el comandă de la competitor. Tu pierzi o relație care ar putea dura ani.',
       },
       {
-        title: 'Rapoarte de livrare manuale',
-        desc: 'La finalul zilei, șoferii completează foi de parcurs. Colectarea durează ore.',
+        title: 'Rapoarte manuale = muncă administrativă idioată',
+        desc: 'La finalul zilei, fiecare șofer completează foi de parcurs. Tu colectezi, introduci în Excel, trimiți partenerilor. 2h pe zi. 400h pe an. Asta e 10 săptămâni de muncă iroșite anual.',
       },
       {
-        title: 'Clienți cer dovezi de livrare',
-        desc: 'Partenerii cer confirmare că marfa a ajuns, cine a semnat și la ce oră.',
+        title: 'Creștere = durere administrativă',
+        desc: 'La 5 șoferi ai 1 culegător date. La 10 șoferi trebuie 2-3 persoane pe administrație. La 20 șoferi e full-time. Asta nu e scalabil. Tu nu poți să crești fără să mori în birocrație.',
       },
     ],
     solutions: [
       {
-        title: 'Hartă live a flotei',
-        desc: 'Fiecare șofer apare pe hartă în timp real. ETA se actualizează automat.',
+        title: 'Hartă live = transparență totală',
+        desc: 'Partenerul vede pe hartă unde e șoferul tău ACUM. ETA se actualizează live. Partenerul e liniștit. Tu arăți profesionism și control. Parteneriatul crește. El vrea să mai colaboreze și mai mult.',
       },
       {
-        title: 'Rapoarte automate',
-        desc: 'Livra generează raport complet: livrări, durate, kilometri, devieri.',
+        title: 'Rapoarte automate = zero muncă manuală',
+        desc: 'La finalul zilei: livrări complete, km parcurși, durate per oprire, probleme reportate. TOATE automate. Tu doar trimiți. Zero introducere manuală. Scapi de 2h de muncă zilnică.',
       },
       {
-        title: 'POD digital pentru fiecare client',
-        desc: 'Semnătură electronică + fotografie, asociate automat la comandă.',
+        title: 'POD digital = zero dispute',
+        desc: 'Semnătură electronică + fotografie pe fiecare livrare. Partenerul vede dovada în timp real că marfa a ajuns. Zero dispute. Zero întrebări. Parteneri fericiți = relații pe termen lung.',
       },
     ],
     stats: [
-      { value: 'Live', label: 'localizare flotă' },
-      { value: '0', label: 'rapoarte manuale' },
-      { value: '100%', label: 'livrări cu POD' },
+      { value: 'Live', label: 'hartă flotă în timp real' },
+      { value: '−2h', label: 'administrație zilnică' },
+      { value: '3×', label: 'capacitate scalare' },
     ],
   },
 }
@@ -282,7 +282,7 @@ export default function IndustryPage() {
         <h1 className="text-[48px] md:text-[56px] font-bold text-zinc-900 dark:text-zinc-50 mb-4 leading-tight">
           {industry.headline}
         </h1>
-        <p className="text-[18px] text-zinc-600 dark:text-zinc-400 mb-8 max-w-2xl">
+        <p className="text-[18px] text-zinc-600 dark:text-zinc-400 mb-8 max-w-2xl leading-relaxed">
           {industry.subline}
         </p>
         <div className="flex gap-4">
@@ -303,14 +303,14 @@ export default function IndustryPage() {
 
       {/* Pain points */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
-        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Provocări comune</h2>
+        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Provocări reale</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {industry.painPoints.map(point => (
-            <div key={point.title} className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6">
+            <div key={point.title} className="bg-red-50 dark:bg-red-950/20 rounded-xl p-6 border border-red-100 dark:border-red-900/30">
               <h3 className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                 {point.title}
               </h3>
-              <p className="text-[14px] text-zinc-600 dark:text-zinc-400">
+              <p className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed">
                 {point.desc}
               </p>
             </div>
@@ -320,14 +320,14 @@ export default function IndustryPage() {
 
       {/* Solutions */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
-        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Cum rezolvă Livra</h2>
+        <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Cum Livra rezolvă</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {industry.solutions.map(sol => (
-            <div key={sol.title} className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+            <div key={sol.title} className={`rounded-xl p-6 border ${colorClass[colorKey]} bg-white/50 dark:bg-zinc-950/50`}>
               <h3 className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                 {sol.title}
               </h3>
-              <p className="text-[14px] text-zinc-600 dark:text-zinc-400">
+              <p className="text-[14px] text-zinc-700 dark:text-zinc-300 leading-relaxed">
                 {sol.desc}
               </p>
             </div>
@@ -350,16 +350,16 @@ export default function IndustryPage() {
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800 text-center">
         <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">
-          Gata să optimizezi livrările?
+          Gata să lucruri să se schimbe?
         </h2>
         <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-8">
-          Încearcă Livra gratuit pentru 7 zile. Nu este nevoie de card de credit.
+          Sute de companii din Moldova folosesc deja Livra. Tu poți începe azi, gratuit pentru 7 zile.
         </p>
         <a
           href="#contact"
           className="inline-flex items-center gap-2 px-8 py-4 bg-[#ff5c2c] hover:bg-[#e04a1f] text-white text-[16px] font-medium rounded-xl transition-colors"
         >
-          Solicită demo <ArrowRight size={18} />
+          Solicită demo gratuit <ArrowRight size={18} />
         </a>
       </section>
 
