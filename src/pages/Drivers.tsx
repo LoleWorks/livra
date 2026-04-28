@@ -169,7 +169,7 @@ export default function Drivers() {
   const [pinError, setPinError] = useState('')
 
   // ── Sales managers state ───────────────────────────────────────────────────
-  const [managers, setManagers] = useState<SalesManager[]>(MOCK_MANAGERS)
+  const [managers, setManagers] = useState<SalesManager[]>([])
   const [showMgrModal, setShowMgrModal] = useState(false)
   const [editMgr, setEditMgr] = useState<SalesManager | null>(null)
   const [mgrForm, setMgrForm] = useState({ name: '', phone: '', email: '', status: 'activ' as 'activ' | 'inactiv', password: '' })
@@ -224,7 +224,7 @@ export default function Drivers() {
 
     // Load sales managers
     supabase.from('livra_sales_managers').select('*').order('created_at')
-      .then(({ data }) => { if (data && data.length > 0) setManagers(data as SalesManager[]) })
+      .then(({ data }) => { if (data) setManagers(data as SalesManager[]) })
 
     const refresh = setInterval(fetchAll, 30_000)
 
