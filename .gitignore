@@ -36,3 +36,8 @@ docs/superpowers/
 # Nested repos
 livra-driver/
 livra-app/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
