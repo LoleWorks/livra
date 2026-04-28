@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet, Link, Navigate } from 'react-router-dom'
+import { NavLink, Outlet, Navigate } from 'react-router-dom'
 import { LayoutDashboard, Plus, Package, RotateCcw, Sun, Moon, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 import { getUser, signOut } from '../../lib/auth'
@@ -80,17 +80,6 @@ export default function SalesLayout() {
 
         {/* Footer */}
         <div className="p-2 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
-          {/* Switch to admin */}
-          {!collapsed && (
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-[12px] text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-            >
-              <LayoutDashboard size={13} />
-              Panou Admin
-            </Link>
-          )}
-
           {/* User identity */}
           {collapsed ? (
             <div className="flex justify-center py-2" title={user.name}>
