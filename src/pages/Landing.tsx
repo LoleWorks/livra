@@ -1,44 +1,288 @@
 import { Helmet } from 'react-helmet-async'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Smartphone, Plug, Radio, Users,
+  Smartphone, Package, Users,
   CheckCircle, ArrowRight, Star, Globe, ChevronDown, ChevronUp,
   Route, Gift, TrendingUp, Mail, MapPin, Clock, Zap,
 } from 'lucide-react'
 
-// ── How it works ──────────────────────────────────────────────────────────────
+// ── Workflow animation ─────────────────────────────────────────────────────────
 
-const STEPS = [
+const WORKFLOW = [
   {
-    step: '01',
-    title: 'Conectează magazinul',
-    desc: 'Integrează WooCommerce, OpenCart sau adaugă comenzi manual. Toate comenzile ajung automat în Livra, gata de procesare.',
-    icon: Plug,
-    color: 'bg-orange-500',
+    num: '01',
+    role: 'Agent vânzări',
+    roleColor: 'bg-orange-100 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400',
+    title: 'Comandă de pe site',
+    desc: 'WooCommerce trimite comanda automat. Agentul de vânzări o vede instant cu toate detaliile clientului.',
+    bar: 'bg-orange-500',
   },
   {
-    step: '02',
-    title: 'Optimizăm rutele',
-    desc: 'Algoritmul nostru calculează traseele optime pentru toți șoferii tăi, ținând cont de ferestre orare, distanțe și capacitate.',
-    icon: Route,
-    color: 'bg-violet-500',
+    num: '02',
+    role: 'Agent vânzări',
+    roleColor: 'bg-violet-100 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400',
+    title: 'Confirmă și programează',
+    desc: 'Agentul verifică detaliile, alege fereastra orară preferată și trimite comanda cu un singur click.',
+    bar: 'bg-violet-500',
   },
   {
-    step: '03',
-    title: 'Șoferii livrează',
-    desc: 'Aplicația mobilă Livra ghidează șoferii pas cu pas. Semnătură digitală, foto la livrare, raport în timp real.',
-    icon: Smartphone,
-    color: 'bg-emerald-500',
+    num: '03',
+    role: 'Logistician',
+    roleColor: 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400',
+    title: 'Apare în dashboard',
+    desc: 'Comanda ajunge instant la logistician, alăturată celorlalte comenzi din ziua respectivă.',
+    bar: 'bg-emerald-500',
   },
   {
-    step: '04',
-    title: 'Clienții urmăresc live',
-    desc: 'Fiecare client primește un link de urmărire. Vede pe hartă unde e coletul și ETA actualizat la fiecare câteva secunde.',
-    icon: Radio,
-    color: 'bg-amber-500',
+    num: '04',
+    role: 'Logistician → Șofer',
+    roleColor: 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400',
+    title: 'Rute trimise cu un click',
+    desc: 'Logisticianul apasă „Optimizează" — rutele sunt calculate și trimise la șoferi în câteva secunde.',
+    bar: 'bg-amber-500',
   },
 ]
+
+const BROWSER_CHROME = ({ url }: { url: string }) => (
+  <div className="bg-zinc-100 dark:bg-zinc-800 px-4 py-2.5 flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-700 flex-shrink-0">
+    <div className="flex gap-1.5">
+      {['bg-red-400', 'bg-yellow-400', 'bg-green-400'].map(c => (
+        <div key={c} className={`w-2.5 h-2.5 rounded-full ${c} opacity-60`} />
+      ))}
+    </div>
+    <div className="flex-1 bg-white dark:bg-zinc-700 rounded-md px-3 py-1 text-[11px] text-zinc-400 dark:text-zinc-500 text-center truncate">{url}</div>
+  </div>
+)
+
+function WFPanel0() {
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+      <BROWSER_CHROME url="app.livra.delivery/sales" />
+      <div className="p-5 space-y-3">
+        <div className="flex items-start gap-3 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 rounded-xl p-3">
+          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Package size={14} className="text-white" />
+          </div>
+          <div>
+            <div className="text-[12px] font-bold text-orange-800 dark:text-orange-300">Comandă nouă de pe site!</div>
+            <div className="text-[11px] text-orange-600 dark:text-orange-400 mt-0.5">MarketX Shop · acum 3 secunde</div>
+          </div>
+        </div>
+        <div className="border border-zinc-100 dark:border-zinc-800 rounded-xl p-3.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-50">Maria Ionescu</span>
+            <span className="text-[11px] bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full font-medium">Nou</span>
+          </div>
+          <div className="text-[12px] text-zinc-500 dark:text-zinc-400">str. Ismail 12, Chișinău</div>
+          <div className="flex items-center gap-4 text-[12px] text-zinc-400">
+            <span className="flex items-center gap-1.5"><Package size={10} /> 2 colete medii</span>
+            <span className="flex items-center gap-1.5"><Clock size={10} /> 10:00 – 12:00</span>
+          </div>
+        </div>
+        <button className="w-full py-2.5 bg-orange-500 text-white text-[13px] font-semibold rounded-xl flex items-center justify-center gap-2">
+          <CheckCircle size={14} /> Confirmă comanda
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function WFPanel1() {
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+      <BROWSER_CHROME url="app.livra.delivery/sales/nou" />
+      <div className="p-5 space-y-3">
+        <div className="text-[13px] font-semibold text-zinc-700 dark:text-zinc-300">Comandă nouă</div>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 space-y-3">
+          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Informații client</div>
+          {[
+            { label: 'Nume client', value: 'Maria Ionescu' },
+            { label: 'Telefon', value: '069 123 456' },
+            { label: 'Adresa de livrare', value: 'str. Ismail 12, Chișinău' },
+          ].map(f => (
+            <div key={f.label}>
+              <div className="text-[10px] text-zinc-400 mb-1">{f.label}</div>
+              <div className="px-3 py-1.5 text-[12px] rounded-lg border border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/20 text-zinc-800 dark:text-zinc-200">
+                {f.value}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <div className="flex-1 px-3 py-2 text-[12px] rounded-lg border border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-950/20 text-zinc-700 dark:text-zinc-300 text-center">29 apr 2026</div>
+          <div className="flex-1 px-3 py-2 text-[12px] rounded-lg border border-violet-600 bg-violet-600 text-white font-medium text-center">10:00 – 12:00</div>
+        </div>
+        <button className="w-full py-2.5 bg-violet-600 text-white text-[13px] font-semibold rounded-xl flex items-center justify-center gap-2">
+          <CheckCircle size={14} /> Adaugă comanda
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function WFPanel2() {
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+      <BROWSER_CHROME url="app.livra.delivery/dashboard" />
+      <div className="p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[13px] font-semibold text-zinc-700 dark:text-zinc-300">De livrat azi</span>
+          <span className="flex items-center gap-1.5 text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            1 comandă nouă
+          </span>
+        </div>
+        <div className="space-y-1.5">
+          {[
+            { name: 'Ion Moraru',    addr: 'bd. Ștefan cel Mare 45', time: '08:30', isNew: false },
+            { name: 'Ana Popescu',   addr: 'str. Columna 7',         time: '10:00', isNew: false },
+            { name: 'Maria Ionescu', addr: 'str. Ismail 12',         time: '10:00', isNew: true  },
+          ].map(o => (
+            <div
+              key={o.name}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12px] transition-all ${
+                o.isNew
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50'
+                  : 'bg-zinc-50 dark:bg-zinc-800'
+              }`}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200 truncate">{o.name}</span>
+                  {o.isNew && <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">nou ✦</span>}
+                </div>
+                <div className="text-zinc-400 truncate">{o.addr}</div>
+              </div>
+              <span className="text-zinc-400 flex-shrink-0 font-medium">{o.time}</span>
+            </div>
+          ))}
+        </div>
+        <button className="w-full py-2.5 bg-emerald-600 text-white text-[13px] font-semibold rounded-xl flex items-center justify-center gap-2">
+          <Route size={14} /> Optimizează rutele (8 comenzi)
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function WFPanel3() {
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+      <BROWSER_CHROME url="app.livra.delivery/rute" />
+      <div className="p-5 space-y-3">
+        <div className="rounded-xl overflow-hidden" style={{ height: 120 }}>
+          <svg className="w-full h-full" viewBox="0 0 320 120" fill="none">
+            <rect width="320" height="120" className="fill-zinc-50 dark:fill-zinc-800" />
+            <line x1="70" y1="0" x2="70" y2="120" className="stroke-zinc-200 dark:stroke-zinc-700" strokeWidth="5" />
+            <line x1="160" y1="0" x2="160" y2="120" className="stroke-zinc-200 dark:stroke-zinc-700" strokeWidth="5" />
+            <line x1="250" y1="0" x2="250" y2="120" className="stroke-zinc-200 dark:stroke-zinc-700" strokeWidth="5" />
+            <line x1="0" y1="45" x2="320" y2="45" className="stroke-zinc-200 dark:stroke-zinc-700" strokeWidth="5" />
+            <line x1="0" y1="90" x2="320" y2="90" className="stroke-zinc-200 dark:stroke-zinc-700" strokeWidth="5" />
+            {/* Route orange */}
+            <path d="M 35,108 L 35,45 L 160,45 L 160,20 L 250,20" stroke="#ff5c2c" strokeWidth="2.5" strokeDasharray="7,4" strokeLinecap="round" fill="none" />
+            {/* Route violet */}
+            <path d="M 35,108 L 70,108 L 70,90 L 250,90" stroke="#7c3aed" strokeWidth="2.5" strokeDasharray="7,4" strokeLinecap="round" fill="none" />
+            {/* Depot */}
+            <circle cx="35" cy="108" r="7" fill="#ff5c2c" />
+            <circle cx="35" cy="108" r="3" fill="white" />
+            {/* Stops orange */}
+            <circle cx="160" cy="20" r="5" fill="#ff5c2c" opacity="0.85" />
+            <circle cx="250" cy="20" r="5" fill="#ff5c2c" opacity="0.85" />
+            {/* Stops violet */}
+            <circle cx="160" cy="90" r="5" fill="#7c3aed" opacity="0.85" />
+            <circle cx="250" cy="90" r="5" fill="#7c3aed" opacity="0.85" />
+          </svg>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { driver: 'Andrei M.', stops: 5, km: '28 km', dot: 'bg-orange-500' },
+            { driver: 'Ion D.',    stops: 3, km: '19 km', dot: 'bg-violet-500' },
+          ].map(r => (
+            <div key={r.driver} className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className={`w-2.5 h-2.5 rounded-full ${r.dot}`} />
+                <span className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-200">{r.driver}</span>
+              </div>
+              <div className="text-[11px] text-zinc-500 dark:text-zinc-400">{r.stops} opriri · {r.km}</div>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-center gap-2 py-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl">
+          <CheckCircle size={14} className="text-amber-600 dark:text-amber-400" />
+          <span className="text-[13px] font-semibold text-amber-700 dark:text-amber-400">2 rute trimise la șoferi</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const WF_PANELS = [WFPanel0, WFPanel1, WFPanel2, WFPanel3]
+
+function WorkflowDemo() {
+  const [step, setStep] = useState(0)
+  const DURATION = 3200
+
+  useEffect(() => {
+    const t = setTimeout(() => setStep(s => (s + 1) % WORKFLOW.length), DURATION)
+    return () => clearTimeout(t)
+  }, [step])
+
+  const Panel = WF_PANELS[step]
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 items-start">
+      <style>{`
+        @keyframes wf-progress { from { width: 0% } to { width: 100% } }
+        @keyframes wf-fade { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+      `}</style>
+
+      {/* Step selector */}
+      <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible w-full lg:w-72 flex-shrink-0 pb-1 lg:pb-0">
+        {WORKFLOW.map((ws, i) => (
+          <button
+            key={i}
+            onClick={() => setStep(i)}
+            className={`flex-shrink-0 lg:flex-shrink text-left rounded-xl px-3 py-3 lg:px-4 lg:py-4 transition-all border ${
+              step === i
+                ? 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 shadow-sm'
+                : 'border-transparent hover:bg-white/70 dark:hover:bg-zinc-800/60'
+            }`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`text-[10px] font-bold tracking-widest ${step === i ? 'text-zinc-400 dark:text-zinc-500' : 'text-zinc-300 dark:text-zinc-600'}`}>{ws.num}</span>
+              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${step === i ? ws.roleColor : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600'}`}>
+                {ws.role}
+              </span>
+            </div>
+            <div className={`text-[13px] font-semibold transition-colors ${step === i ? 'text-zinc-900 dark:text-zinc-50' : 'text-zinc-400 dark:text-zinc-500'}`}>
+              {ws.title}
+            </div>
+            {step === i && (
+              <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-1 leading-relaxed hidden lg:block">{ws.desc}</p>
+            )}
+            {step === i && (
+              <div className="mt-3 h-0.5 bg-zinc-100 dark:bg-zinc-700 rounded-full overflow-hidden hidden lg:block">
+                <div
+                  key={`bar-${step}`}
+                  className={`h-full ${ws.bar} rounded-full`}
+                  style={{ animation: `wf-progress ${DURATION}ms linear forwards` }}
+                />
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Animated panel */}
+      <div className="flex-1 min-w-0 w-full">
+        <div key={step} style={{ animation: 'wf-fade 0.3s ease-out' }}>
+          <Panel />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // ── Network ───────────────────────────────────────────────────────────────────
 
@@ -881,30 +1125,11 @@ export default function Landing() {
       {/* ── How it works ── */}
       <section id="cum-functioneaza" className="bg-zinc-50 dark:bg-zinc-900 py-20">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-[32px] font-bold tracking-tight mb-3">Cum funcționează Livra</h2>
-            <p className="text-[16px] text-zinc-500 dark:text-zinc-400">De la comandă la livrare, totul automatizat în 4 pași.</p>
+          <div className="text-center mb-12">
+            <h2 className="text-[32px] font-bold tracking-tight mb-3">De la comandă la livrare</h2>
+            <p className="text-[16px] text-zinc-500 dark:text-zinc-400">Cum circulă o comandă prin Livra, de la magazin până la șofer.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon
-              return (
-                <div key={s.step} className="relative">
-                  {i < STEPS.length - 1 && (
-                    <div className="hidden md:block absolute top-8 left-1/2 w-full h-px bg-zinc-200 dark:bg-zinc-700" />
-                  )}
-                  <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 relative z-10 h-full">
-                    <div className={`w-14 h-14 rounded-xl ${s.color} flex items-center justify-center mb-4`}>
-                      <Icon size={24} className="text-white" />
-                    </div>
-                    <div className="text-[11px] font-bold text-zinc-300 dark:text-zinc-600 tracking-widest mb-2">Pas {s.step}</div>
-                    <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-50 mb-2">{s.title}</h3>
-                    <p className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{s.desc}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <WorkflowDemo />
         </div>
       </section>
 
