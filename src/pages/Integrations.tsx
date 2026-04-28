@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -173,6 +174,10 @@ export default function Integrations() {
 
   return (
     <>
+      <Helmet>
+        <title>Integrări — Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {showModal && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={step !== 'testing' ? closeModal : undefined} />

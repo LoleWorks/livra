@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react'
@@ -45,6 +46,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+      <Helmet>
+        <title>Autentificare — Livra</title>
+        <meta name="description" content="Intră în contul tău Livra pentru a gestiona livrările și rutele echipei tale." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="w-full max-w-sm">
 
         <div className="flex flex-col items-center mb-8">

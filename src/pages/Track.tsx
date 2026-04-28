@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { MapContainer, Marker, useMap } from 'react-leaflet'
@@ -297,6 +298,11 @@ export default function Track() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
+      <Helmet>
+        <title>{data ? `Livrare pentru ${data.customer} — Livra` : 'Urmărire livrare — Livra'}</title>
+        <meta name="description" content="Urmărește în timp real unde este coletul tău și când ajunge la ușa ta." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       {/* Full-screen map */}
       <MapContainer

@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, useRef } from 'react'
 import { MapContainer, Tooltip, Polyline, Marker, useMap } from 'react-leaflet'
 import { YandexMapLayer, YandexSatLayer, YandexTrafficLayer } from '../components/YandexLayer'
@@ -429,6 +430,10 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full">
+      <Helmet>
+        <title>Dashboard — Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
         <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Dashboard</span>

@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { Package, Phone, Search, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -76,6 +77,10 @@ export default function SalesOrders() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <Helmet>
+        <title>Comenzi — Livra Sales</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       {/* Header */}
       <div className="flex items-center justify-between">

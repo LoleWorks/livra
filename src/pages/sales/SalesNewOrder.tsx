@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle, MapPin, Phone, User, FileText, Package, Clock, Calendar, Loader2 } from 'lucide-react'
@@ -169,6 +170,10 @@ export default function SalesNewOrder() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
+      <Helmet>
+        <title>Comandă nouă — Livra Sales</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="max-w-xl mx-auto">
 
         {/* Header */}

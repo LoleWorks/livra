@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import { ThemeProvider } from './context/ThemeContext'
 import Dashboard from './pages/Dashboard'
 import RoutesPage from './pages/Routes'
@@ -20,6 +21,7 @@ import SalesReturns from './pages/sales/SalesReturns'
 
 export default function App() {
   return (
+    <HelmetProvider>
     <ThemeProvider>
       <BrowserRouter>
         <Routes>
@@ -48,5 +50,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
+    </HelmetProvider>
   )
 }

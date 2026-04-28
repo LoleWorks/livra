@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { Plus, ArrowDownLeft, ArrowUpRight, Zap, X, Check, CreditCard } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -89,6 +90,10 @@ export default function Credits() {
 
   return (
     <>
+      <Helmet>
+        <title>Credite — Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Purchase modal */}
       {showConfirm && selectedPkg && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center">

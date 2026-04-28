@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, Loader2, Eye, EyeOff, ShieldCheck, Truck } from 'lucide-react'
@@ -58,6 +59,10 @@ export default function ChangePassword() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+      <Helmet>
+        <title>Schimbă parola — Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="w-full max-w-sm">
 
         <div className="flex flex-col items-center mb-8">

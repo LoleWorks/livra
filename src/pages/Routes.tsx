@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useRef, Fragment, useEffect } from 'react'
 import { MapContainer, Polyline, Marker, Tooltip } from 'react-leaflet'
 import { YandexMapLayer, YandexTrafficLayer } from '../components/YandexLayer'
@@ -1130,6 +1131,10 @@ export default function RoutesPage() {
 
   return (
     <>
+      <Helmet>
+        <title>Rute — Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
 
       {/* Hidden CSV input */}

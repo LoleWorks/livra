@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -807,6 +808,16 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
+      <Helmet>
+        <title>Livra — Livrări mai rapide, costuri mai mici | Software livrare Moldova</title>
+        <meta name="description" content="Livra optimizează rutele de livrare pentru companii din Moldova. Integrare WooCommerce și OpenCart, tracking live, șoferi monitorizați în timp real. Încearcă gratuit." />
+        <meta name="keywords" content="optimizare rute livrare Moldova, software livrare Chisinau, WooCommerce livrare, OpenCart livrare, last-mile delivery Moldova, tracking soferi timp real, livrare rapida Moldova" />
+        <meta property="og:title" content="Livra — Software livrare pentru companii din Moldova" />
+        <meta property="og:description" content="Optimizare rute, tracking live, integrare WooCommerce & OpenCart. Livrări mai rapide cu mai puțin combustibil." />
+        <meta property="og:url" content="https://livra.delivery" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://livra.delivery" />
+      </Helmet>
 
       {/* ── Navbar ── */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">

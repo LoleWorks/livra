@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -409,6 +410,10 @@ export default function Drivers() {
 
   return (
     <>
+      <Helmet>
+        <title>Utilizatori — Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Add / Edit modal */}
       {showModal && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center">

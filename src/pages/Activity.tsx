@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Activity as ActivityIcon,
@@ -196,6 +197,10 @@ export default function Activity() {
 
   return (
     <div className="flex flex-col h-full">
+      <Helmet>
+        <title>Activitate — Livra</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
         <div className="flex items-center gap-2">
           <ActivityIcon size={14} className="text-zinc-500" />

@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Package, RotateCcw, CheckCircle, Clock, Plus, ArrowRight, Phone, AlertTriangle } from 'lucide-react'
@@ -93,6 +94,10 @@ export default function SalesDashboard() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <Helmet>
+        <title>Prezentare — Livra Sales</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
 
       {/* Header */}
       <div className="flex items-center justify-between">
