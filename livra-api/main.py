@@ -29,8 +29,9 @@ VROOM_URL     = os.environ.get("VROOM_URL", "https://api.openrouteservice.org/op
 ORS_API_KEY   = os.environ.get("ORS_API_KEY", "")
 VROOM_HOSTED  = "openrouteservice.org" in VROOM_URL  # true when using ORS public API
 
-SUPABASE_URL      = os.environ.get("SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
+SUPABASE_URL              = os.environ.get("SUPABASE_URL", "")
+SUPABASE_ANON_KEY         = os.environ.get("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -649,6 +650,44 @@ def _sb_headers() -> dict:
         "Prefer": "return=representation",
     }
 
+def _sb_admin_headers() -> dict:
+    return {
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+        "Content-Type": "application/json",
+    }
+
+async def _create_auth_user(client: httpx.AsyncClient, email: str, password: str) -> str:
+    res = await client.post(
+        f"{SUPABASE_URL}/auth/v1/admin/users",
+        headers=_sb_admin_headers(),
+        json={"email": email, "password": password, "email_confirm": True},
+    )
+    if res.status_code not in (200, 201):
+        raise HTTPException(status_code=500, detail=f"Creare cont auth eșuată: {res.text}")
+    return res.json()["id"]
+
+async def _get_auth_user_id_by_email(client: httpx.AsyncClient, email: str) -> str:
+    res = await client.get(
+        f"{SUPABASE_URL}/auth/v1/admin/users",
+        headers=_sb_admin_headers(),
+        params={"email": email, "per_page": 1},
+    )
+    if res.status_code == 200:
+        users = res.json().get("users", [])
+        if users:
+            return users[0]["id"]
+    raise HTTPException(status_code=404, detail="Contul auth nu a fost găsit")
+
+async def _update_auth_password(client: httpx.AsyncClient, auth_user_id: str, new_password: str):
+    res = await client.put(
+        f"{SUPABASE_URL}/auth/v1/admin/users/{auth_user_id}",
+        headers=_sb_admin_headers(),
+        json={"password": new_password},
+    )
+    if res.status_code not in (200, 204):
+        raise HTTPException(status_code=500, detail=f"Actualizare parolă auth eșuată: {res.text}")
+
 def _hash_pw(password: str, salt: str) -> str:
     key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100_000)
     return key.hex()
@@ -694,9 +733,11 @@ COLOR_CYCLE = ["violet", "blue", "emerald", "amber", "rose", "cyan"]
 async def create_manager(req: CreateManagerRequest):
     if not SUPABASE_URL or not SUPABASE_ANON_KEY:
         raise HTTPException(status_code=503, detail="SUPABASE_URL / SUPABASE_ANON_KEY not configured")
-    salt = _make_salt()
-    pw_hash = _hash_pw(req.password, salt)
+    if not SUPABASE_SERVICE_ROLE_KEY:
+        raise HTTPException(status_code=503, detail="SUPABASE_SERVICE_ROLE_KEY not configured")
     async with httpx.AsyncClient() as client:
+        # Create Supabase Auth user first so login works immediately
+        await _create_auth_user(client, req.email, req.password)
         # Pick a color based on current manager count
         count_res = await client.get(
             f"{SUPABASE_URL}/rest/v1/livra_sales_managers?select=id",
@@ -709,7 +750,7 @@ async def create_manager(req: CreateManagerRequest):
             json={
                 "name": req.name, "phone": req.phone, "email": req.email,
                 "status": req.status, "initials": _initials(req.name), "color": color,
-                "password_hash": pw_hash, "salt": salt, "must_change_password": False,
+                "must_change_password": False,
             },
         )
     if res.status_code not in (200, 201):
@@ -722,13 +763,26 @@ async def create_manager(req: CreateManagerRequest):
 async def reset_manager_password(manager_id: str, req: ResetPasswordRequest):
     if not SUPABASE_URL or not SUPABASE_ANON_KEY:
         raise HTTPException(status_code=503, detail="SUPABASE_URL / SUPABASE_ANON_KEY not configured")
-    salt = _make_salt()
-    pw_hash = _hash_pw(req.temp_password, salt)
+    if not SUPABASE_SERVICE_ROLE_KEY:
+        raise HTTPException(status_code=503, detail="SUPABASE_SERVICE_ROLE_KEY not configured")
     async with httpx.AsyncClient() as client:
+        # Get manager email to look up the auth user
+        mgr_res = await client.get(
+            f"{SUPABASE_URL}/rest/v1/livra_sales_managers?id=eq.{manager_id}&select=email",
+            headers=_sb_headers(),
+        )
+        managers = mgr_res.json() if mgr_res.status_code == 200 else []
+        if not managers:
+            raise HTTPException(status_code=404, detail="Manager negăsit")
+        email = managers[0]["email"]
+        # Update password in Supabase Auth
+        auth_user_id = await _get_auth_user_id_by_email(client, email)
+        await _update_auth_password(client, auth_user_id, req.temp_password)
+        # Flag must_change_password in the profile table
         res = await client.patch(
             f"{SUPABASE_URL}/rest/v1/livra_sales_managers?id=eq.{manager_id}",
             headers=_sb_headers(),
-            json={"password_hash": pw_hash, "salt": salt, "must_change_password": True},
+            json={"must_change_password": True},
         )
     if res.status_code not in (200, 204):
         raise HTTPException(status_code=500, detail=res.text)
