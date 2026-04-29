@@ -41,9 +41,19 @@ class ControllerExtensionModuleLivra extends Controller {
         $payment_name  = trim($order['payment_firstname']  . ' ' . $order['payment_lastname']);
 
         $products = $this->model_checkout_order->getOrderProducts($order_id);
-        $items = [];
+        $items_json = [];
+        $items_text = [];
         foreach ($products as $product) {
-            $items[] = $product['quantity'] . 'x ' . $product['name'];
+            $sku  = isset($product['sku']) ? trim($product['sku']) : '';
+            $qty  = (int)$product['quantity'];
+            $name = $product['name'];
+            $items_json[] = [
+                'sku'   => $sku !== '' ? $sku : null,
+                'name'  => $name,
+                'qty'   => $qty,
+                'price' => (float)($product['total'] ?? $product['price'] ?? 0),
+            ];
+            $items_text[] = $qty . 'x ' . $name . ($sku !== '' ? " [$sku]" : '');
         }
 
         $payload = json_encode([
@@ -52,7 +62,8 @@ class ControllerExtensionModuleLivra extends Controller {
             'customer_phone'   => $order['telephone'] ?? '',
             'delivery_address' => $address,
             'notes'            => $order['comment'] ?? '',
-            'order_items'      => implode(', ', $items),
+            'order_items'      => implode(', ', $items_text),
+            'order_items_json' => $items_json,
             'order_value'      => (float)$order['total'],
             'shipping_cost'    => (float)($order['shipping_cost'] ?? 0),
         ]);
