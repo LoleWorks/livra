@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Warehouse, Plus, Trash2, Star, Package, ChevronRight } from 'lucide-react'
+import { Warehouse, Plus, Trash2, Star, Package, ChevronRight, Pencil } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getUser } from '../lib/auth'
 
@@ -20,8 +20,10 @@ export default function Warehouses() {
   const user = getUser()
   const [items, setItems] = useState<Wh[]>([])
   const [skuCounts, setSkuCounts] = useState<Record<string, number>>({})
-  const [showAdd, setShowAdd] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', address: '' })
+  const [originalAddress, setOriginalAddress] = useState('')
   const [busy, setBusy] = useState(false)
 
   async function load() {
@@ -50,21 +52,52 @@ export default function Warehouses() {
     return null
   }
 
-  async function create() {
+  function openAdd() {
+    setEditingId(null)
+    setForm({ name: '', address: '' })
+    setOriginalAddress('')
+    setShowModal(true)
+  }
+
+  function openEdit(w: Wh) {
+    setEditingId(w.id)
+    setForm({ name: w.name, address: w.address })
+    setOriginalAddress(w.address)
+    setShowModal(true)
+  }
+
+  async function save() {
     if (!form.name.trim() || !form.address.trim()) return
     setBusy(true)
-    const coords = await geocode(form.address)
-    const isFirst = items.length === 0
-    await supabase.from('livra_warehouses').insert({
-      company_id: user?.id,
-      name: form.name.trim(),
-      address: form.address.trim(),
-      lat: coords?.lat ?? null,
-      lng: coords?.lng ?? null,
-      is_default: isFirst,
-    })
+    if (editingId) {
+      // Re-geocode only if the address changed
+      const addressChanged = form.address.trim() !== originalAddress.trim()
+      const update: Record<string, unknown> = {
+        name: form.name.trim(),
+        address: form.address.trim(),
+      }
+      if (addressChanged) {
+        const coords = await geocode(form.address)
+        update.lat = coords?.lat ?? null
+        update.lng = coords?.lng ?? null
+      }
+      await supabase.from('livra_warehouses').update(update).eq('id', editingId)
+    } else {
+      const coords = await geocode(form.address)
+      const isFirst = items.length === 0
+      await supabase.from('livra_warehouses').insert({
+        company_id: user?.id,
+        name: form.name.trim(),
+        address: form.address.trim(),
+        lat: coords?.lat ?? null,
+        lng: coords?.lng ?? null,
+        is_default: isFirst,
+      })
+    }
+    setShowModal(false)
+    setEditingId(null)
     setForm({ name: '', address: '' })
-    setShowAdd(false)
+    setOriginalAddress('')
     setBusy(false)
     load()
   }
@@ -93,7 +126,7 @@ export default function Warehouses() {
             </p>
           </div>
           <button
-            onClick={() => setShowAdd(true)}
+            onClick={openAdd}
             className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700"
           >
             <Plus size={16} /> Adaugă depozit
@@ -146,6 +179,13 @@ export default function Warehouses() {
                     </button>
                   )}
                   <button
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); openEdit(w) }}
+                    title="Editează"
+                    className="p-2 text-zinc-400 hover:text-blue-500"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
                     onClick={e => { e.preventDefault(); e.stopPropagation(); remove(w.id) }}
                     title="Șterge"
                     className="p-2 text-zinc-400 hover:text-red-500"
@@ -159,10 +199,12 @@ export default function Warehouses() {
           </div>
         )}
 
-        {showAdd && (
-          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => !busy && setShowAdd(false)}>
+        {showModal && (
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => !busy && setShowModal(false)}>
             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Adaugă depozit</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+                {editingId ? 'Editează depozit' : 'Adaugă depozit'}
+              </h2>
               <div className="space-y-3">
                 <div>
                   <label className="block text-[12px] text-zinc-600 dark:text-zinc-400 mb-1">Nume</label>
@@ -183,11 +225,16 @@ export default function Warehouses() {
                     placeholder="ex. bd. Dacia 50, Chișinău"
                     className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-[13px]"
                   />
+                  {editingId && form.address.trim() !== originalAddress.trim() && (
+                    <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1">
+                      Adresa s-a schimbat — va fi geocodificată din nou la salvare.
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-5">
-                <button onClick={() => setShowAdd(false)} disabled={busy} className="px-3 py-2 text-[13px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">Anulează</button>
-                <button onClick={create} disabled={busy || !form.name.trim() || !form.address.trim()} className="px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                <button onClick={() => setShowModal(false)} disabled={busy} className="px-3 py-2 text-[13px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">Anulează</button>
+                <button onClick={save} disabled={busy || !form.name.trim() || !form.address.trim()} className="px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700 disabled:opacity-50">
                   {busy ? 'Se salvează…' : 'Salvează'}
                 </button>
               </div>
