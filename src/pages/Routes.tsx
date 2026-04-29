@@ -5,16 +5,16 @@ import { YandexMapLayer, YandexTrafficLayer } from '../components/YandexLayer'
 import MoldovaBorder from '../components/MoldovaBorder'
 import L from 'leaflet'
 import {
-  Upload, Wand2, Plus, Trash2, MapPin, Clock,
+  Wand2, Trash2, MapPin, Clock,
   ChevronRight, CheckCircle2, X, Check, Radio,
-  Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Phone, Truck,
+  Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Truck, User,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getUser } from '../lib/auth'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type Delivery = { id: string; customer: string; phone: string; address: string; notes: string; package_description?: string; time_window_start?: string; time_window_end?: string; delivery_date?: string; status?: 'upcoming' | 'dispatched' | 'delivered' | 'failed'; order_items?: string; order_value?: number; shipping_cost?: number }
+type Delivery = { id: string; customer: string; phone: string; address: string; notes: string; package_description?: string; time_window_start?: string; time_window_end?: string; delivery_date?: string; status?: 'upcoming' | 'dispatched' | 'delivered' | 'failed'; order_items?: string; order_value?: number; shipping_cost?: number; assigned_to?: string }
 type RouteStop = { order: number; delivery_id: string; customer: string; address: string; phone: string; lat: number; lng: number; type: string; break_duration_min: number; package_description?: string; arrival_time?: string }
 type DriverRoute = { driver_id: string; driver_name: string; color: string; stops: RouteStop[]; total_distance_km: number; total_duration_min: number; path?: [number, number][]; start_lat: number; start_lng: number }
 type DeferredDelivery = { delivery_id: string; customer: string; address: string; reason: string }
@@ -133,17 +133,6 @@ function capacityState(used: number, cap: number): 'ok' | 'warn' | 'full' {
   if (used >= cap) return 'full'
   if (used >= cap * 0.8) return 'warn'
   return 'ok'
-}
-
-function parseCSV(text: string): Delivery[] {
-  const lines = text.trim().split(/\r?\n/)
-  const isHeader = (row: string) => /client|customer|nume|name|adres/i.test(row)
-  const start = isHeader(lines[0]) ? 1 : 0
-  return lines.slice(start).flatMap((line, i) => {
-    const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''))
-    if (cols.length < 2 || !cols[0]) return []
-    return [{ id: `csv-${Date.now()}-${i}`, customer: cols[0], phone: cols[1] || '', address: cols[2] || '', notes: cols[3] || '' }]
-  })
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -483,25 +472,19 @@ function OptimizeLoadingScreen() {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function RoutesPage() {
-  const csvRef = useRef<HTMLInputElement>(null)
-
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [drivers, setDrivers]       = useState<DriverConfig[]>([])
   const [shiftStart, setShiftStart] = useState('09:00')
+  const [managers, setManagers]     = useState<{ id: string; name: string }[]>([])
 
   const [step, setStep]         = useState<'input' | 'loading' | 'results'>('input')
   const [, setLoadingMsg] = useState('')
   const [result, setResult]     = useState<OptimizeResult | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  // Modals / forms
-  const [showAddForm, setShowAddForm]   = useState(false)
-  const [toast, setToast]               = useState<string | null>(null)
-  const [newDel, setNewDel]             = useState({ customer: '', phone: '', address: '', notes: '', package_description: '', time_window_start: '', time_window_end: '', delivery_date: '' })
-  const [dispatched, setDispatched]     = useState(false)
-  const [traffic, setTraffic]           = useState(false)
-  const [editingId, setEditingId]       = useState<string | null>(null)
-  const [editDraft, setEditDraft]       = useState({ time_window_start: '', time_window_end: '', package_description: '', delivery_date: '' })
+  const [toast, setToast]           = useState<string | null>(null)
+  const [dispatched, setDispatched] = useState(false)
+  const [traffic, setTraffic]       = useState(false)
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab]           = useState<'new' | 'scheduled' | 'finished'>('new')
   // Date the dispatcher is optimizing for. Defaults to today; manager can pick
@@ -530,6 +513,7 @@ export default function RoutesPage() {
       order_items:       r.order_items       ?? undefined,
       order_value:       r.order_value       ?? undefined,
       shipping_cost:     r.shipping_cost     ?? undefined,
+      assigned_to:       r.assigned_to       ?? undefined,
     })
 
     supabase
@@ -603,126 +587,16 @@ export default function RoutesPage() {
         setFinishedStops(rows)
       })
 
+    supabase
+      .from('livra_sales_managers')
+      .select('id, name')
+      .eq('admin_id', adminId)
+      .then(({ data }) => { if (data) setManagers(data) })
+
     return () => { supabase.removeChannel(channel) }
   }, [])
 
   const activeDrivers = drivers.filter(d => d.enabled)
-
-  // ── CSV import ──────────────────────────────────────────────────────────────
-
-  function onCSVChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = async ev => {
-      const parsed = parseCSV(ev.target?.result as string)
-      if (!parsed.length) return
-      // Persist to Supabase WITHOUT a delivery_date so they land in "Comenzi noi"
-      const rows = parsed.map(p => ({
-        customer: p.customer, phone: p.phone, address: p.address, notes: p.notes,
-        status: 'upcoming', company_id: adminId,
-      }))
-      const { data } = await supabase.from('livra_deliveries').insert(rows).select()
-      if (data?.length) {
-        setDeliveries(prev => [...prev, ...data.map(r => ({
-          id: r.id, customer: r.customer, phone: r.phone ?? '',
-          address: r.address, notes: r.notes ?? '',
-        }))])
-        setToast(`${data.length} livrări importate în Comenzi noi`)
-        setActiveTab('new')
-      }
-    }
-    reader.readAsText(file)
-    e.target.value = ''
-  }
-
-  // ── Add delivery ────────────────────────────────────────────────────────────
-
-  async function handleAddDelivery() {
-    if (!newDel.customer.trim() || !newDel.address.trim()) return
-
-    // Capacity hard-block
-    const date = newDel.delivery_date || defaultDateForAddress(newDel.address)
-    const numDrivers = activeDrivers.length || 1
-    const dayUsed = deliveries.filter(d => d.delivery_date === date).length
-    if (dayUsed >= dayCapacity(numDrivers)) {
-      setToast(`Ziua ${fmtDateRO(date)} este plină (${dayUsed}/${dayCapacity(numDrivers)} livrări)`)
-      return
-    }
-    if (newDel.time_window_start && newDel.time_window_end) {
-      const winUsed = deliveries.filter(d =>
-        d.delivery_date === date &&
-        d.time_window_start === newDel.time_window_start &&
-        d.time_window_end   === newDel.time_window_end
-      ).length
-      const winCap = windowCapacity(numDrivers, newDel.time_window_start, newDel.time_window_end)
-      if (winUsed >= winCap) {
-        setToast(`Fereastra ${newDel.time_window_start}–${newDel.time_window_end} este plină (${winUsed}/${winCap} livrări)`)
-        return
-      }
-    }
-
-    const { data } = await supabase
-      .from('livra_deliveries')
-      .insert({
-        customer: newDel.customer,
-        phone: newDel.phone,
-        address: newDel.address,
-        notes: newDel.notes,
-        package_description: newDel.package_description || null,
-        time_window_start:   newDel.time_window_start   || null,
-        time_window_end:     newDel.time_window_end     || null,
-        delivery_date:       date,
-        status: 'upcoming',
-        company_id: adminId,
-      })
-      .select()
-      .single()
-    if (data) setDeliveries(prev => [...prev, {
-      id: data.id,
-      customer: data.customer,
-      phone: data.phone ?? '',
-      address: data.address,
-      notes: data.notes ?? '',
-      package_description: data.package_description ?? '',
-      time_window_start: data.time_window_start ?? undefined,
-      time_window_end:   data.time_window_end   ?? undefined,
-      delivery_date:     data.delivery_date     ?? undefined,
-    }])
-    setNewDel({ customer: '', phone: '', address: '', notes: '', package_description: '', time_window_start: '', time_window_end: '', delivery_date: '' })
-    setShowAddForm(false)
-    setToast('Livrare adăugată')
-  }
-
-  function startEditDelivery(d: Delivery) {
-    setEditingId(d.id)
-    setEditDraft({
-      time_window_start:   d.time_window_start   ?? '',
-      time_window_end:     d.time_window_end     ?? '',
-      package_description: d.package_description ?? '',
-      delivery_date:       d.delivery_date       ?? '',
-    })
-  }
-
-  async function saveEditDelivery() {
-    if (!editingId) return
-    await supabase.from('livra_deliveries').update({
-      time_window_start:   editDraft.time_window_start   || null,
-      time_window_end:     editDraft.time_window_end     || null,
-      package_description: editDraft.package_description || null,
-      delivery_date:       editDraft.delivery_date       || null,
-    }).eq('id', editingId)
-    setDeliveries(prev => prev.map(x => x.id === editingId ? {
-      ...x,
-      time_window_start:   editDraft.time_window_start   || undefined,
-      time_window_end:     editDraft.time_window_end     || undefined,
-      package_description: editDraft.package_description,
-      delivery_date:       editDraft.delivery_date       || undefined,
-    } : x))
-    setEditingId(null)
-    setToast('Livrare actualizată')
-  }
-
 
   // ── Optimize ────────────────────────────────────────────────────────────────
 
@@ -1109,21 +983,9 @@ export default function RoutesPage() {
       </Helmet>
       {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
 
-      {/* Hidden CSV input */}
-      <input ref={csvRef} type="file" accept=".csv,.txt" className="hidden" onChange={onCSVChange} />
-
-
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-4 md:px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 gap-2">
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex-shrink-0">Rute</span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => csvRef.current?.click()}
-              className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 px-2.5 py-1.5 rounded-lg transition-colors"
-            >
-              <Upload size={12} /> <span className="hidden sm:inline">Import CSV</span>
-            </button>
-          </div>
+        <div className="flex items-center px-4 md:px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
+          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Rute</span>
         </div>
 
         <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
@@ -1182,132 +1044,9 @@ export default function RoutesPage() {
                         </span>
                       )}
                     </button>
-                    <button
-                      onClick={() => setShowAddForm(v => !v)}
-                      className="ml-auto flex items-center gap-1 text-[12px] text-brand-orange dark:text-orange-400 hover:text-blue-500 transition-colors px-3 py-2"
-                    >
-                      <Plus size={12} /> Adaugă
-                    </button>
                   </div>
                 )
               })()}
-
-              {/* Inline add form */}
-              {showAddForm && (
-                <div className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/50 dark:bg-orange-950/20 space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      autoFocus
-                      value={newDel.customer}
-                      onChange={e => setNewDel(p => ({ ...p, customer: e.target.value }))}
-                      placeholder="Nume client *"
-                      className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
-                    />
-                    <input
-                      value={newDel.phone}
-                      onChange={e => setNewDel(p => ({ ...p, phone: e.target.value }))}
-                      placeholder="Telefon"
-                      className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
-                    />
-                  </div>
-                  <input
-                    value={newDel.address}
-                    onChange={e => setNewDel(p => ({ ...p, address: e.target.value }))}
-                    placeholder="Adresa de livrare *"
-                    className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
-                  />
-                  <input
-                    value={newDel.notes}
-                    onChange={e => setNewDel(p => ({ ...p, notes: e.target.value }))}
-                    placeholder="Note (opțional)"
-                    className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
-                  />
-                  <input
-                    value={newDel.package_description}
-                    onChange={e => setNewDel(p => ({ ...p, package_description: e.target.value }))}
-                    placeholder="Pachet | ce conține (opțional)"
-                    className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
-                  />
-                  {/* Delivery date picker | defaults based on address (Chișinău = +1d, else +3d) */}
-                  {(() => {
-                    const date = newDel.delivery_date || defaultDateForAddress(newDel.address)
-                    const numDrivers = activeDrivers.length || 1
-                    const used = deliveries.filter(d => d.delivery_date === date).length
-                    const cap  = dayCapacity(numDrivers)
-                    const state = capacityState(used, cap)
-                    return (
-                      <div>
-                        <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block flex items-center justify-between">
-                          <span>Data livrării</span>
-                          <span className={`flex items-center gap-1 font-mono ${state==='full' ? 'text-red-600 dark:text-red-400 font-semibold' : state==='warn' ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400'}`}>
-                            <span>{used}/{cap}</span>
-                            {state==='full' && <><Ban size={9} /><span>plin</span></>}
-                            {state==='warn' && <><AlertTriangle size={9} /><span>aproape plin</span></>}
-                          </span>
-                        </label>
-                        <input
-                          type="date"
-                          value={date}
-                          onChange={e => setNewDel(p => ({ ...p, delivery_date: e.target.value }))}
-                          className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </div>
-                    )
-                  })()}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil de la</label>
-                      <TimeInput24
-                        value={newDel.time_window_start}
-                        onChange={v => setNewDel(p => ({ ...p, time_window_start: v }))}
-                        className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil până la</label>
-                      <TimeInput24
-                        value={newDel.time_window_end}
-                        onChange={v => setNewDel(p => ({ ...p, time_window_end: v }))}
-                        className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      />
-                    </div>
-                  </div>
-                  {/* Window capacity counter */}
-                  {newDel.time_window_start && newDel.time_window_end && (() => {
-                    const date = newDel.delivery_date || defaultDateForAddress(newDel.address)
-                    const numDrivers = activeDrivers.length || 1
-                    const winUsed = deliveries.filter(d =>
-                      d.delivery_date === date &&
-                      d.time_window_start === newDel.time_window_start &&
-                      d.time_window_end   === newDel.time_window_end
-                    ).length
-                    const winCap = windowCapacity(numDrivers, newDel.time_window_start, newDel.time_window_end)
-                    const state = capacityState(winUsed, winCap)
-                    if (state === 'ok') return null
-                    return (
-                      <div className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded ${
-                        state === 'full' ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400' :
-                                           'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
-                      }`}>
-                        <span>Fereastra {newDel.time_window_start}–{newDel.time_window_end}: {winUsed}/{winCap}</span>
-                        {state === 'full' ? <><Ban size={9} /><span>plin</span></> : <><AlertTriangle size={9} /><span>aproape plin</span></>}
-                      </div>
-                    )
-                  })()}
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={handleAddDelivery}
-                      disabled={!newDel.customer.trim() || !newDel.address.trim()}
-                      className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-4 py-1.5 rounded-lg transition-colors"
-                    >
-                      <Check size={12} /> Adaugă
-                    </button>
-                    <button onClick={() => setShowAddForm(false)} className="text-[12px] text-zinc-400 hover:text-zinc-600 px-3 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                      Anulează
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {/* "Comenzi noi" tab: flat list of orders without a delivery_date */}
               {activeTab === 'new' && (() => {
@@ -1327,15 +1066,16 @@ export default function RoutesPage() {
                 }
                 return (
                   <>
-                    <div className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-50/50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/30 text-[11px] text-amber-700 dark:text-amber-400">
-                      <Phone size={11} className="flex-shrink-0" />
-                      <span>Sună clientul, apoi setează data și fereastra orară pentru a programa livrarea</span>
+                    <div className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800/40 border-b border-zinc-100 dark:border-zinc-800 text-[11px] text-zinc-500 dark:text-zinc-400">
+                      <User size={11} className="flex-shrink-0" />
+                      <span>Comenzile sunt procesate de agentul de vânzări asignat. Programarea se face din aplicația lor.</span>
                     </div>
-                    {newOrders.map((d, i) => (
-                      <Fragment key={d.id}>
+                    {newOrders.map((d, i) => {
+                      const manager = managers.find(m => d.assigned_to === m.id)
+                      return (
                         <div
-                          onClick={() => editingId === d.id ? setEditingId(null) : startEditDelivery(d)}
-                          className="flex items-start gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors group cursor-pointer"
+                          key={d.id}
+                          className="flex items-start gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 group"
                         >
                           <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[10px] font-mono flex-shrink-0 mt-0.5">
                             {i + 1}
@@ -1353,11 +1093,16 @@ export default function RoutesPage() {
                                 {d.shipping_cost != null && <span className="text-[10px] text-zinc-400">Livrare: <span className="font-medium text-zinc-600 dark:text-zinc-300">{d.shipping_cost} lei</span></span>}
                               </div>
                             )}
+                            {manager && (
+                              <div className="flex items-center gap-1 text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                                <User size={9} />
+                                <span>{manager.name}</span>
+                              </div>
+                            )}
                           </div>
                           <span className="text-[11px] text-zinc-400 dark:text-zinc-500 flex-shrink-0">{d.phone}</span>
                           <button
-                            onClick={async (e) => {
-                              e.stopPropagation()
+                            onClick={async () => {
                               await supabase.from('livra_deliveries').delete().eq('id', d.id)
                               setDeliveries(prev => prev.filter(x => x.id !== d.id))
                             }}
@@ -1366,57 +1111,8 @@ export default function RoutesPage() {
                             <Trash2 size={13} />
                           </button>
                         </div>
-                        {editingId === d.id && (
-                          <div className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20 space-y-2" onClick={e => e.stopPropagation()}>
-                            <div>
-                              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Data livrării</label>
-                              <input
-                                type="date"
-                                value={editDraft.delivery_date}
-                                onChange={e => setEditDraft(p => ({ ...p, delivery_date: e.target.value }))}
-                                className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil de la</label>
-                                <TimeInput24
-                                  value={editDraft.time_window_start}
-                                  onChange={v => setEditDraft(p => ({ ...p, time_window_start: v }))}
-                                  className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil până la</label>
-                                <TimeInput24
-                                  value={editDraft.time_window_end}
-                                  onChange={v => setEditDraft(p => ({ ...p, time_window_end: v }))}
-                                  className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                />
-                              </div>
-                            </div>
-                            <input
-                              value={editDraft.package_description}
-                              onChange={e => setEditDraft(p => ({ ...p, package_description: e.target.value }))}
-                              placeholder="Pachet | ce conține (opțional)"
-                              className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
-                            />
-                            <div className="flex gap-2 pt-1">
-                              <button
-                                onClick={async () => { await saveEditDelivery(); setActiveTab('scheduled') }}
-                                disabled={!editDraft.delivery_date}
-                                className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-3 py-1 rounded-lg transition-colors"
-                              >
-                                <Check size={11} /> Programează
-                              </button>
-                              <button onClick={() => setEditingId(null)} className="text-[11px] text-zinc-400 hover:text-zinc-600 px-2 py-1 ml-auto">
-                                Închide
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </Fragment>
-                    ))}
+                      )
+                    })}
                   </>
                 )
               })()}
@@ -1475,103 +1171,44 @@ export default function RoutesPage() {
                         )}
                       </button>
                       {!collapsed && rows.map((d, i) => (
-                <Fragment key={d.id}>
-                  <div
-                    onClick={() => editingId === d.id ? setEditingId(null) : startEditDelivery(d)}
-                    className="flex items-start gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors group cursor-pointer"
-                  >
-                    <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 flex items-center justify-center text-[10px] font-mono flex-shrink-0 mt-0.5">
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200">{d.customer}</span>
-                        {d.status === 'dispatched' && (
-                          <span className="flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400">
-                            <Truck size={9} /> În drum
-                          </span>
-                        )}
-                        {(d.time_window_start && d.time_window_end) && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-brand-orange dark:text-orange-400">
-                            {d.time_window_start}–{d.time_window_end}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
-                        <MapPin size={9} />{d.address}
-                      </div>
-                      {d.package_description && <div className="flex items-center gap-1 text-[11px] text-brand-orange dark:text-orange-400 mt-0.5"><Package size={9} className="flex-shrink-0" /><span className="truncate">{d.package_description}</span></div>}
-                      {d.notes && <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 italic">{d.notes}</div>}
-                    </div>
-                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500 flex-shrink-0">{d.phone}</span>
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation()
-                        await supabase.from('livra_deliveries').delete().eq('id', d.id)
-                        setDeliveries(prev => prev.filter(x => x.id !== d.id))
-                      }}
-                      className="text-zinc-200 dark:text-zinc-700 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                <div
+                  key={d.id}
+                  className="flex items-start gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 group"
+                >
+                  <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 flex items-center justify-center text-[10px] font-mono flex-shrink-0 mt-0.5">
+                    {i + 1}
                   </div>
-                  {editingId === d.id && (
-                    <div className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20 space-y-2" onClick={e => e.stopPropagation()}>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil de la</label>
-                          <TimeInput24
-                            value={editDraft.time_window_start}
-                            onChange={v => setEditDraft(p => ({ ...p, time_window_start: v }))}
-                            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil până la</label>
-                          <TimeInput24
-                            value={editDraft.time_window_end}
-                            onChange={v => setEditDraft(p => ({ ...p, time_window_end: v }))}
-                            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                          />
-                        </div>
-                      </div>
-                      <input
-                        value={editDraft.package_description}
-                        onChange={e => setEditDraft(p => ({ ...p, package_description: e.target.value }))}
-                        placeholder="Pachet | ce conține (opțional)"
-                        className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-400"
-                      />
-                      <div>
-                        <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Data livrării</label>
-                        <input
-                          type="date"
-                          value={editDraft.delivery_date}
-                          onChange={e => setEditDraft(p => ({ ...p, delivery_date: e.target.value }))}
-                          className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="flex gap-2 pt-1">
-                        <button
-                          onClick={saveEditDelivery}
-                          className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-semibold px-3 py-1 rounded-lg transition-colors"
-                        >
-                          <Check size={11} /> Salvează
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditDraft({ time_window_start: '', time_window_end: '', package_description: '', delivery_date: '' })
-                          }}
-                          className="text-[11px] text-zinc-400 hover:text-zinc-600 px-2 py-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                        >
-                          Golește
-                        </button>
-                        <button onClick={() => setEditingId(null)} className="text-[11px] text-zinc-400 hover:text-zinc-600 px-2 py-1 ml-auto">
-                          Închide
-                        </button>
-                      </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200">{d.customer}</span>
+                      {d.status === 'dispatched' && (
+                        <span className="flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400">
+                          <Truck size={9} /> În drum
+                        </span>
+                      )}
+                      {(d.time_window_start && d.time_window_end) && (
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 text-brand-orange dark:text-orange-400">
+                          {d.time_window_start}–{d.time_window_end}
+                        </span>
+                      )}
                     </div>
-                  )}
-                </Fragment>
+                    <div className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                      <MapPin size={9} />{d.address}
+                    </div>
+                    {d.package_description && <div className="flex items-center gap-1 text-[11px] text-brand-orange dark:text-orange-400 mt-0.5"><Package size={9} className="flex-shrink-0" /><span className="truncate">{d.package_description}</span></div>}
+                    {d.notes && <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 italic">{d.notes}</div>}
+                  </div>
+                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500 flex-shrink-0">{d.phone}</span>
+                  <button
+                    onClick={async () => {
+                      await supabase.from('livra_deliveries').delete().eq('id', d.id)
+                      setDeliveries(prev => prev.filter(x => x.id !== d.id))
+                    }}
+                    className="text-zinc-200 dark:text-zinc-700 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               ))}
                     </Fragment>
                   )
