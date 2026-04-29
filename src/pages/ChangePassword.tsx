@@ -45,7 +45,7 @@ export default function ChangePassword() {
     }
   }
 
-  const inputCls = 'w-full pl-9 pr-10 py-2.5 text-[13px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition-colors'
+  const inputCls = 'w-full pl-9 pr-10 py-2.5 text-[13px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-colors'
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
@@ -56,7 +56,7 @@ export default function ChangePassword() {
       <div className="w-full max-w-sm">
 
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-violet-600 flex items-center justify-center mb-3 shadow-lg shadow-violet-500/25">
+          <div className="w-12 h-12 rounded-2xl bg-brand-orange flex items-center justify-center mb-3 shadow-lg shadow-orange-400/25">
             <Truck size={22} className="text-white" />
           </div>
           <h1 className="text-[20px] font-bold text-zinc-900 dark:text-zinc-50">Setează parola</h1>
@@ -95,7 +95,7 @@ export default function ChangePassword() {
               {newPw && (
                 <div className="flex gap-1 mt-1.5">
                   {[4, 6, 8, 10].map(n => (
-                    <div key={n} className={`flex-1 h-1 rounded-full transition-colors ${newPw.length >= n ? 'bg-violet-500' : 'bg-zinc-200 dark:bg-zinc-700'}`} />
+                    <div key={n} className={`flex-1 h-1 rounded-full transition-colors ${newPw.length >= n ? 'bg-brand-orange' : 'bg-zinc-200 dark:bg-zinc-700'}`} />
                   ))}
                 </div>
               )}
@@ -128,7 +128,7 @@ export default function ChangePassword() {
             <button
               type="submit"
               disabled={loading || !newPw || !confirmPw}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-[13px] font-medium rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-50 text-white text-[13px] font-medium rounded-lg transition-colors"
             >
               {loading ? <><Loader2 size={14} className="animate-spin" /> Se salvează...</> : 'Setează parola'}
             </button>

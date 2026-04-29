@@ -32,7 +32,7 @@ export default function Login() {
     }
   }
 
-  const inputCls = 'w-full pl-9 pr-3 py-2.5 text-[13px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition-colors'
+  const inputCls = 'w-full pl-9 pr-3 py-2.5 text-[13px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition-colors'
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
@@ -104,7 +104,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading || !email || !password}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-[13px] font-medium rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-50 text-white text-[13px] font-medium rounded-lg transition-colors"
             >
               {loading ? <><Loader2 size={14} className="animate-spin" /> Se verifică...</> : 'Autentifică-te'}
             </button>
