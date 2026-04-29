@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, useRef, Fragment } from 'react'
-import { Package, Phone, Search, Plus, Check, CalendarDays, ShoppingCart, Banknote, Truck } from 'lucide-react'
+import { Package, Phone, Search, Plus, Check, CalendarDays, Banknote, Truck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { getUser } from '../../lib/auth'
