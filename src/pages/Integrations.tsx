@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import React, { useState, useEffect } from 'react'
-import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route, ShoppingCart, ShoppingBag, Store, Copy, Webhook } from 'lucide-react'
+import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route, ShoppingCart, ShoppingBag, Store, Copy, Webhook, Activity } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getUser } from '../lib/auth'
 
@@ -100,6 +100,8 @@ export default function Integrations() {
   const [importToast, setImportToast] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState<string | null>(null)
   const [apiKeyId, setApiKeyId] = useState<string | null>(null)
+  const [lastUsedAt, setLastUsedAt] = useState<string | null | undefined>(undefined)
+  const [totalReceived, setTotalReceived] = useState<number | null>(null)
   const [regenerating, setRegenerating] = useState(false)
 
   const user = getUser()
@@ -114,11 +116,15 @@ export default function Integrations() {
     if (user?.id) {
       supabase
         .from('livra_api_keys')
-        .select('id, key')
+        .select('id, key, last_used_at')
         .eq('admin_id', user.id)
         .maybeSingle()
         .then(({ data }) => {
-          if (data) { setApiKey(data.key); setApiKeyId(data.id) }
+          if (data) {
+            setApiKey(data.key)
+            setApiKeyId(data.id)
+            setLastUsedAt(data.last_used_at ?? null)
+          }
         })
 
       supabase
@@ -127,6 +133,12 @@ export default function Integrations() {
         .eq('status', 'pending')
         .eq('company_id', user.id)
         .then(({ count }) => setPendingCount(count ?? 0))
+
+      supabase
+        .from('livra_webhook_orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('company_id', user.id)
+        .then(({ count }) => setTotalReceived(count ?? 0))
     }
   }, [])
 
@@ -184,6 +196,7 @@ export default function Integrations() {
         .map(b => b.toString(16).padStart(2, '0')).join('')
       if (apiKeyId) {
         await supabase.from('livra_api_keys').update({ key: newKey, last_used_at: null }).eq('id', apiKeyId)
+        setLastUsedAt(null)
       } else {
         const { data } = await supabase
           .from('livra_api_keys')
@@ -478,14 +491,38 @@ export default function Integrations() {
           {/* Webhook section */}
           <div>
             <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Webhook direct</p>
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/40 flex items-center justify-center flex-shrink-0">
-                  <Webhook size={15} className="text-brand-orange dark:text-orange-400" />
-                </div>
-                <div>
-                  <div className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">Integrare prin Webhook</div>
-                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">Trimite comenzi direct din orice platformă sau ERP cu un simplu POST request.</div>
+            <div className={`bg-white dark:bg-zinc-900 rounded-xl p-4 space-y-4 border ${lastUsedAt ? 'border-emerald-200 dark:border-emerald-900/60' : 'border-zinc-200 dark:border-zinc-800'}`}>
+              {/* Status header */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lastUsedAt ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'bg-orange-50 dark:bg-orange-950/40'}`}>
+                    {lastUsedAt
+                      ? <Activity size={15} className="text-emerald-600 dark:text-emerald-400" />
+                      : <Webhook size={15} className="text-brand-orange dark:text-orange-400" />
+                    }
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">Webhook</span>
+                      {lastUsedAt === undefined
+                        ? <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400">Se încarcă…</span>
+                        : lastUsedAt
+                          ? <span className="flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Activ
+                            </span>
+                          : <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
+                              Neconectat
+                            </span>
+                      }
+                    </div>
+                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                      {lastUsedAt
+                        ? `Ultimul request: ${formatLastSync(lastUsedAt)}${totalReceived !== null ? ` · ${totalReceived} comenzi primite total` : ''}`
+                        : 'Niciun request primit încă. Configurează platforma cu cheia de mai jos.'
+                      }
+                    </div>
+                  </div>
                 </div>
               </div>
 
