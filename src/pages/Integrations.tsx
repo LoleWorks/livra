@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import React, { useState, useEffect } from 'react'
 import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route, ShoppingCart, ShoppingBag, Store, Copy, Webhook } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getUser } from '../lib/auth'
 
 const WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/webhook-orders`
 const WEBHOOK_SAMPLE = `{
@@ -93,10 +94,15 @@ export default function Integrations() {
   const [form, setForm] = useState({ name: '', url: '', username: '', key: '' })
   const [testError, setTestError] = useState('')
   const [syncing, setSyncing] = useState<string | null>(null)
-  const [copied, setCopied] = useState<'url' | 'payload' | null>(null)
+  const [copied, setCopied] = useState<'url' | 'payload' | 'key' | null>(null)
   const [pendingCount, setPendingCount] = useState<number | null>(null)
   const [importing, setImporting] = useState(false)
   const [importToast, setImportToast] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState<string | null>(null)
+  const [apiKeyId, setApiKeyId] = useState<string | null>(null)
+  const [regenerating, setRegenerating] = useState(false)
+
+  const user = getUser()
 
   useEffect(() => {
     supabase
@@ -104,11 +110,24 @@ export default function Integrations() {
       .select('*')
       .order('created_at')
       .then(({ data }) => { if (data) setConnections(data.map(r => mapRow(r as Record<string, unknown>))) })
-    supabase
-      .from('livra_webhook_orders')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending')
-      .then(({ count }) => setPendingCount(count ?? 0))
+
+    if (user?.id) {
+      supabase
+        .from('livra_api_keys')
+        .select('id, key')
+        .eq('admin_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) { setApiKey(data.key); setApiKeyId(data.id) }
+        })
+
+      supabase
+        .from('livra_webhook_orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+        .eq('company_id', user.id)
+        .then(({ count }) => setPendingCount(count ?? 0))
+    }
   }, [])
 
   function openModal() {
@@ -130,25 +149,52 @@ export default function Integrations() {
   }
 
   async function importPending() {
+    if (!user?.id) return
     setImporting(true)
     try {
       const { data: pending } = await supabase
         .from('livra_webhook_orders')
         .select('*')
         .eq('status', 'pending')
+        .eq('company_id', user.id)
       const rows = (pending ?? []).map((o: any) => ({
         customer: o.customer_name, phone: o.customer_phone,
         address: o.delivery_address, notes: o.notes, status: 'upcoming',
       }))
       if (rows.length) {
         await supabase.from('livra_deliveries').insert(rows)
-        await supabase.from('livra_webhook_orders').update({ status: 'imported' }).eq('status', 'pending')
+        await supabase
+          .from('livra_webhook_orders')
+          .update({ status: 'imported' })
+          .eq('status', 'pending')
+          .eq('company_id', user.id)
         setPendingCount(0)
         setImportToast(`${rows.length} livrări importate în Comenzi noi`)
         setTimeout(() => setImportToast(null), 3000)
       }
     } catch { setImportToast('Eroare la import') }
     setImporting(false)
+  }
+
+  async function regenerateKey() {
+    if (!user?.id) return
+    setRegenerating(true)
+    try {
+      const newKey = 'livra_' + Array.from(crypto.getRandomValues(new Uint8Array(24)))
+        .map(b => b.toString(16).padStart(2, '0')).join('')
+      if (apiKeyId) {
+        await supabase.from('livra_api_keys').update({ key: newKey, last_used_at: null }).eq('id', apiKeyId)
+      } else {
+        const { data } = await supabase
+          .from('livra_api_keys')
+          .insert({ key: newKey, admin_id: user.id, name: 'Cheie principală' })
+          .select('id')
+          .single()
+        if (data) setApiKeyId(data.id)
+      }
+      setApiKey(newKey)
+    } catch { /* silent */ }
+    setRegenerating(false)
   }
 
   function selectPlatform(p: Platform) {
@@ -443,6 +489,31 @@ export default function Integrations() {
                 </div>
               </div>
 
+              {/* API Key */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Cheia ta API</p>
+                  <button
+                    onClick={regenerateKey}
+                    disabled={regenerating}
+                    className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw size={11} className={regenerating ? 'animate-spin' : ''} />
+                    {regenerating ? 'Se generează…' : 'Regenerează'}
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2">
+                  <code className="flex-1 text-[11px] text-zinc-700 dark:text-zinc-300 truncate font-mono">
+                    {apiKey ?? '…'}
+                  </code>
+                  <button onClick={() => apiKey && copyToClipboard(apiKey, 'key')} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors flex-shrink-0">
+                    {copied === 'key' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">Păstrează această cheie secretă — nu o partaja public.</p>
+              </div>
+
+              {/* Endpoint */}
               <div>
                 <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Endpoint URL</p>
                 <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2">
@@ -453,11 +524,21 @@ export default function Integrations() {
                 </div>
               </div>
 
+              {/* Curl example */}
               <div>
-                <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Payload JSON</p>
+                <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Exemplu request</p>
                 <div className="relative bg-zinc-950 rounded-lg p-3">
-                  <pre className="text-[11px] text-zinc-300 overflow-x-auto">{WEBHOOK_SAMPLE}</pre>
-                  <button onClick={() => copyToClipboard(WEBHOOK_SAMPLE, 'payload')} className="absolute top-2 right-2 text-zinc-500 hover:text-zinc-300 transition-colors">
+                  <pre className="text-[11px] text-zinc-300 overflow-x-auto whitespace-pre-wrap">{`curl -X POST ${WEBHOOK_URL} \\
+  -H "Content-Type: application/json" \\
+  -H "X-Api-Key: ${apiKey ?? '<cheia-ta>'}" \\
+  -d '${WEBHOOK_SAMPLE}'`}</pre>
+                  <button
+                    onClick={() => copyToClipboard(
+                      `curl -X POST ${WEBHOOK_URL} \\\n  -H "Content-Type: application/json" \\\n  -H "X-Api-Key: ${apiKey ?? '<cheia-ta>'}" \\\n  -d '${WEBHOOK_SAMPLE}'`,
+                      'payload'
+                    )}
+                    className="absolute top-2 right-2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
                     {copied === 'payload' ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
                   </button>
                 </div>
