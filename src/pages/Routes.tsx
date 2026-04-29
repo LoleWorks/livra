@@ -789,6 +789,11 @@ export default function RoutesPage() {
       setResult({ ...result, routes: routesWithPaths })
       setSelectedId(routesWithPaths[0]?.driver_id ?? null)
       setStep('results')
+      const geocodeFails = (result.deferred ?? []).filter(d => d.reason === 'geocode_failed' || d.reason === 'geocode failed')
+      if (geocodeFails.length) {
+        const list = geocodeFails.map(d => d.address).join(' · ')
+        setToast(`${geocodeFails.length} ${geocodeFails.length === 1 ? 'adresă negăsită' : 'adrese negăsite'}: ${list}`)
+      }
     } catch (e) {
       setStep('input')
       setToast(`Eroare: ${(e as Error).message || 'serverul nu răspunde'}`)
