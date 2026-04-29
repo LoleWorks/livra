@@ -27,9 +27,13 @@ export default function Warehouses() {
   const [busy, setBusy] = useState(false)
 
   async function load() {
+    if (!user?.id) return
     const [whRes, invRes] = await Promise.all([
-      supabase.from('livra_warehouses').select('*').order('is_default', { ascending: false }).order('created_at', { ascending: true }),
-      supabase.from('livra_inventory').select('warehouse_id'),
+      supabase.from('livra_warehouses').select('*')
+        .eq('company_id', user.id)
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: true }),
+      supabase.from('livra_inventory').select('warehouse_id').eq('company_id', user.id),
     ])
     setItems((whRes.data ?? []) as Wh[])
     const counts: Record<string, number> = {}
@@ -38,7 +42,7 @@ export default function Warehouses() {
     }
     setSkuCounts(counts)
   }
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [user?.id])
 
   async function geocode(address: string): Promise<{ lat: number, lng: number } | null> {
     try {

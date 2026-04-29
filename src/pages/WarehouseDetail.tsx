@@ -79,19 +79,24 @@ export default function WarehouseDetail() {
   const [showMappingModal, setShowMappingModal] = useState(false)
 
   async function load() {
-    if (!warehouseId) return
+    if (!warehouseId || !user?.id) return
     setLoading(true)
     const [whRes, invRes, upRes] = await Promise.all([
-      supabase.from('livra_warehouses').select('id, name, address, is_default, lat, lng').eq('id', warehouseId).single(),
-      supabase.from('livra_inventory').select('id, sku, product_name, quantity, updated_at').eq('warehouse_id', warehouseId).order('product_name', { ascending: true }),
-      supabase.from('livra_inventory_uploads').select('*').order('uploaded_at', { ascending: false }).limit(5),
+      supabase.from('livra_warehouses').select('id, name, address, is_default, lat, lng')
+        .eq('id', warehouseId).eq('company_id', user.id).maybeSingle(),
+      supabase.from('livra_inventory').select('id, sku, product_name, quantity, updated_at')
+        .eq('warehouse_id', warehouseId).eq('company_id', user.id)
+        .order('product_name', { ascending: true }),
+      supabase.from('livra_inventory_uploads').select('*')
+        .eq('company_id', user.id)
+        .order('uploaded_at', { ascending: false }).limit(5),
     ])
     setWarehouse(whRes.data as Warehouse | null)
     setInventory((invRes.data ?? []) as InventoryRow[])
     setUploads((upRes.data ?? []) as UploadRecord[])
     setLoading(false)
   }
-  useEffect(() => { load() }, [warehouseId])
+  useEffect(() => { load() }, [warehouseId, user?.id])
 
   async function onFile(file: File) {
     setMsg(null)
@@ -181,8 +186,10 @@ export default function WarehouseDetail() {
         updated_at: new Date().toISOString(),
       }))
 
-      // Replace inventory wholesale for this warehouse
-      await supabase.from('livra_inventory').delete().eq('warehouse_id', warehouseId)
+      // Replace inventory wholesale for this warehouse (scoped to company)
+      await supabase.from('livra_inventory').delete()
+        .eq('warehouse_id', warehouseId)
+        .eq('company_id', user?.id ?? '')
       for (let i = 0; i < rows.length; i += 500) {
         await supabase.from('livra_inventory').insert(rows.slice(i, i + 500))
       }

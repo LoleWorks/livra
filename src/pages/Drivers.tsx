@@ -225,8 +225,13 @@ export default function Drivers() {
       .then(({ data }) => { if (data) setManagers(data as SalesManager[]) })
 
     // Load warehouses for home-warehouse dropdown
-    supabase.from('livra_warehouses').select('id, name, address, is_default').order('is_default', { ascending: false })
-      .then(({ data }) => { if (data) setWarehouses(data as { id: string, name: string, address: string, is_default: boolean }[]) })
+    const adminId = getUser()?.id
+    if (adminId) {
+      supabase.from('livra_warehouses').select('id, name, address, is_default')
+        .eq('company_id', adminId)
+        .order('is_default', { ascending: false })
+        .then(({ data }) => { if (data) setWarehouses(data as { id: string, name: string, address: string, is_default: boolean }[]) })
+    }
 
     const refresh = setInterval(fetchAll, 30_000)
 
