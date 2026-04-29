@@ -262,19 +262,20 @@ export default function SalesOrders() {
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800">
               <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Client</th>
+              <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Produse</th>
               <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Adresă</th>
               <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Data</th>
-              <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Interval</th>
+              <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Valoare</th>
               <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Status</th>
               <th className="px-4 py-2.5" />
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {loading ? (
-              <tr><td colSpan={6} className="py-12 text-center text-zinc-400">Se încarcă...</td></tr>
+              <tr><td colSpan={7} className="py-12 text-center text-zinc-400">Se încarcă...</td></tr>
             ) : visible.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center">
+                <td colSpan={7} className="py-12 text-center">
                   <Package size={24} className="text-zinc-300 dark:text-zinc-600 mx-auto mb-2" />
                   <p className="text-zinc-400 text-[13px]">Nicio comandă găsită</p>
                 </td>
@@ -289,36 +290,57 @@ export default function SalesOrders() {
                     onClick={() => canSchedule ? (isEditing ? setEditingId(null) : startEdit(o)) : undefined}
                     className={`transition-colors ${canSchedule ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50' : ''} ${isEditing ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''}`}
                   >
+                    {/* Client */}
                     <td className="px-4 py-3">
                       <div className="font-medium text-zinc-800 dark:text-zinc-200">{o.customer}</div>
-                      {o.order_items && <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 truncate max-w-[160px]">{o.order_items}</div>}
-                      {o.notes && <div className="text-[11px] text-zinc-400 mt-0.5 italic truncate max-w-[160px]">{o.notes}</div>}
-                      {(o.order_value != null || o.shipping_cost != null) && (
-                        <div className="flex items-center gap-2 mt-0.5">
-                          {o.order_value != null && <span className="text-[10px] text-zinc-400">Val: <span className="font-medium text-zinc-600 dark:text-zinc-300">{o.order_value} lei</span></span>}
-                          {o.shipping_cost != null && <span className="text-[10px] text-zinc-400">Liv: <span className="font-medium text-zinc-600 dark:text-zinc-300">{o.shipping_cost} lei</span></span>}
-                        </div>
-                      )}
+                      {o.notes && <div className="text-[11px] text-zinc-400 mt-0.5 italic truncate max-w-[140px]">{o.notes}</div>}
                     </td>
-                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 max-w-[200px]">
-                      <div className="truncate">{o.address}</div>
+                    {/* Produse */}
+                    <td className="px-4 py-3 max-w-[180px]">
+                      {o.order_items
+                        ? <div className="text-[12px] text-zinc-700 dark:text-zinc-300 leading-snug">{o.order_items}</div>
+                        : <span className="text-[11px] text-zinc-300 dark:text-zinc-600">—</span>
+                      }
                       {o.package_description && <div className="text-[11px] text-zinc-400 mt-0.5">{o.package_description}</div>}
                     </td>
+                    {/* Adresă */}
+                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 max-w-[180px]">
+                      <div className="truncate">{o.address}</div>
+                    </td>
+                    {/* Data */}
                     <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
                       {o.delivery_date
-                        ? fmtDate(o.delivery_date)
+                        ? <><div>{fmtDate(o.delivery_date)}</div><div className="text-[11px] text-zinc-400">{fmtWindow(o.time_window_start, o.time_window_end)}</div></>
                         : canSchedule
                           ? <span className="flex items-center gap-1 text-orange-500 text-[11px] font-medium"><CalendarDays size={11} />Programează</span>
                           : '—'
                       }
                     </td>
-                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{fmtWindow(o.time_window_start, o.time_window_end)}</td>
+                    {/* Valoare */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {o.order_value != null || o.shipping_cost != null ? (
+                        <div className="space-y-0.5">
+                          {o.order_value != null && (
+                            <div className="flex items-center gap-1 text-[12px] text-zinc-700 dark:text-zinc-300 font-medium">
+                              <Banknote size={11} className="text-zinc-400" />{o.order_value} lei
+                            </div>
+                          )}
+                          {o.shipping_cost != null && (
+                            <div className="flex items-center gap-1 text-[11px] text-zinc-400">
+                              <Truck size={10} />{o.shipping_cost} lei livrare
+                            </div>
+                          )}
+                        </div>
+                      ) : <span className="text-[11px] text-zinc-300 dark:text-zinc-600">—</span>}
+                    </td>
+                    {/* Status */}
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full ${cfg.badge}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                         {cfg.label}
                       </span>
                     </td>
+                    {/* Phone */}
                     <td className="px-4 py-3 text-right">
                       <a
                         href={`tel:${o.phone}`}
@@ -332,7 +354,7 @@ export default function SalesOrders() {
                   </tr>
                   {isEditing && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20" onClick={e => e.stopPropagation()}>
+                      <td colSpan={7} className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20" onClick={e => e.stopPropagation()}>
                         <div className="space-y-2 max-w-md">
                           <div>
                             <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Data livrării *</label>
