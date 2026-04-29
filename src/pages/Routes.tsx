@@ -6,7 +6,7 @@ import MoldovaBorder from '../components/MoldovaBorder'
 import L from 'leaflet'
 import {
   Upload, Wand2, Plus, Trash2, MapPin, Clock,
-  ChevronRight, Link2, CheckCircle2, X, Copy, Check, Radio,
+  ChevronRight, CheckCircle2, X, Check, Radio,
   Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Phone, Truck,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -36,15 +36,6 @@ type DriverConfig = { id: string; name: string; enabled: boolean }
 
 const DRIVER_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4']
 
-
-const WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/webhook-orders`
-const WEBHOOK_SAMPLE = `{
-  "order_id": "ORD-001",
-  "customer_name": "Maria Ionescu",
-  "customer_phone": "069 123 456",
-  "delivery_address": "str. Ismail 12, Chișinău",
-  "notes": "Interfon 3"
-}`
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -156,22 +147,6 @@ function parseCSV(text: string): Delivery[] {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-          <span className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-50">{title}</span>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
-            <X size={14} />
-          </button>
-        </div>
-        <div className="p-5">{children}</div>
-      </div>
-    </div>
-  )
-}
 
 // 24h time picker | guaranteed no AM/PM regardless of OS locale.
 // Click the field to open a dropdown with two scrollable columns: hours (00-23)
@@ -520,9 +495,6 @@ export default function RoutesPage() {
 
   // Modals / forms
   const [showAddForm, setShowAddForm]   = useState(false)
-  const [showWebhook, setShowWebhook]   = useState(false)
-  const [copied, setCopied]             = useState<'url' | 'payload' | null>(null)
-  const [pendingCount, setPendingCount] = useState<number | null>(null)
   const [toast, setToast]               = useState<string | null>(null)
   const [newDel, setNewDel]             = useState({ customer: '', phone: '', address: '', notes: '', package_description: '', time_window_start: '', time_window_end: '', delivery_date: '' })
   const [dispatched, setDispatched]     = useState(false)
@@ -717,54 +689,6 @@ export default function RoutesPage() {
     setToast('Livrare actualizată')
   }
 
-  // ── Webhook helpers ─────────────────────────────────────────────────────────
-
-  async function openWebhook() {
-    setShowWebhook(true)
-    try {
-      const { count, error } = await supabase
-        .from('livra_webhook_orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
-      setPendingCount(error ? null : (count ?? 0))
-    } catch { setPendingCount(null) }
-  }
-
-  async function importPending() {
-    try {
-      const { data: pending } = await supabase
-        .from('livra_webhook_orders')
-        .select('*')
-        .eq('status', 'pending')
-      const rows = (pending ?? []).map((o: any) => ({
-        customer: o.customer_name, phone: o.customer_phone, address: o.delivery_address,
-        notes: o.notes, status: 'upcoming',
-      }))
-      if (rows.length) {
-        const { data: inserted } = await supabase.from('livra_deliveries').insert(rows).select()
-        await supabase
-          .from('livra_webhook_orders')
-          .update({ status: 'imported' })
-          .eq('status', 'pending')
-        if (inserted?.length) {
-          setDeliveries(prev => [...prev, ...inserted.map(r => ({
-            id: r.id, customer: r.customer, phone: r.phone ?? '',
-            address: r.address, notes: r.notes ?? '',
-          }))])
-        }
-        setPendingCount(0)
-        setToast(`${rows.length} livrări importate în Comenzi noi`)
-        setShowWebhook(false)
-        setActiveTab('new')
-      }
-    } catch { setToast('Eroare la importul comenzilor') }
-  }
-
-  function copyToClipboard(text: string, key: 'url' | 'payload') {
-    navigator.clipboard.writeText(text)
-    setCopied(key)
-    setTimeout(() => setCopied(null), 2000)
-  }
 
   // ── Optimize ────────────────────────────────────────────────────────────────
 
@@ -1153,52 +1077,6 @@ export default function RoutesPage() {
       {/* Hidden CSV input */}
       <input ref={csvRef} type="file" accept=".csv,.txt" className="hidden" onChange={onCSVChange} />
 
-      {/* Webhook modal */}
-      {showWebhook && (
-        <Modal title="Integrare Webhook" onClose={() => setShowWebhook(false)}>
-          <div className="space-y-4">
-            <div>
-              <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Endpoint URL</p>
-              <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2">
-                <code className="flex-1 text-[11px] text-zinc-700 dark:text-zinc-300 truncate">{WEBHOOK_URL}</code>
-                <button onClick={() => copyToClipboard(WEBHOOK_URL, 'url')} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
-                  {copied === 'url' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Payload JSON</p>
-              <div className="relative bg-zinc-950 rounded-lg p-3">
-                <pre className="text-[11px] text-zinc-300 overflow-x-auto">{WEBHOOK_SAMPLE}</pre>
-                <button onClick={() => copyToClipboard(WEBHOOK_SAMPLE, 'payload')} className="absolute top-2 right-2 text-zinc-500 hover:text-zinc-300 transition-colors">
-                  {copied === 'payload' ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
-                </button>
-              </div>
-            </div>
-
-            {pendingCount !== null && (
-              <div className={`flex items-center justify-between rounded-xl px-4 py-3 ${pendingCount > 0 ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900' : 'bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700'}`}>
-                <div>
-                  <div className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-200">
-                    {pendingCount > 0 ? `${pendingCount} livrări în așteptare` : 'Nicio livrare în așteptare'}
-                  </div>
-                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">comenzi primite prin webhook</div>
-                </div>
-                {pendingCount > 0 && (
-                  <button onClick={importPending} className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                    Importă <ChevronRight size={11} />
-                  </button>
-                )}
-              </div>
-            )}
-
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
-              Trimite un POST request la URL-ul de mai sus din platforma ta e-commerce sau ERP. Comenzile vor apărea în Livra automat.
-            </p>
-          </div>
-        </Modal>
-      )}
 
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-4 md:px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 gap-2">
@@ -1209,12 +1087,6 @@ export default function RoutesPage() {
               className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 px-2.5 py-1.5 rounded-lg transition-colors"
             >
               <Upload size={12} /> <span className="hidden sm:inline">Import CSV</span>
-            </button>
-            <button
-              onClick={openWebhook}
-              className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 px-2.5 py-1.5 rounded-lg transition-colors"
-            >
-              <Link2 size={12} /> <span className="hidden sm:inline">Webhook</span>
             </button>
           </div>
         </div>

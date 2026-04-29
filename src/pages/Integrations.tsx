@@ -1,7 +1,16 @@
 import { Helmet } from 'react-helmet-async'
 import React, { useState, useEffect } from 'react'
-import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route, ShoppingCart, ShoppingBag, Store } from 'lucide-react'
+import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route, ShoppingCart, ShoppingBag, Store, Copy, Webhook } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+
+const WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/webhook-orders`
+const WEBHOOK_SAMPLE = `{
+  "order_id": "ORD-001",
+  "customer_name": "Maria Ionescu",
+  "customer_phone": "069 123 456",
+  "delivery_address": "str. Ismail 12, Chișinău",
+  "notes": "Interfon 3"
+}`
 
 type Platform = 'opencart' | 'woocommerce'
 
@@ -84,6 +93,10 @@ export default function Integrations() {
   const [form, setForm] = useState({ name: '', url: '', username: '', key: '' })
   const [testError, setTestError] = useState('')
   const [syncing, setSyncing] = useState<string | null>(null)
+  const [copied, setCopied] = useState<'url' | 'payload' | null>(null)
+  const [pendingCount, setPendingCount] = useState<number | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importToast, setImportToast] = useState<string | null>(null)
 
   useEffect(() => {
     supabase
@@ -91,6 +104,11 @@ export default function Integrations() {
       .select('*')
       .order('created_at')
       .then(({ data }) => { if (data) setConnections(data.map(r => mapRow(r as Record<string, unknown>))) })
+    supabase
+      .from('livra_webhook_orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .then(({ count }) => setPendingCount(count ?? 0))
   }, [])
 
   function openModal() {
@@ -103,6 +121,34 @@ export default function Integrations() {
 
   function closeModal() {
     setShowModal(false)
+  }
+
+  function copyToClipboard(text: string, key: 'url' | 'payload') {
+    navigator.clipboard.writeText(text)
+    setCopied(key)
+    setTimeout(() => setCopied(null), 2000)
+  }
+
+  async function importPending() {
+    setImporting(true)
+    try {
+      const { data: pending } = await supabase
+        .from('livra_webhook_orders')
+        .select('*')
+        .eq('status', 'pending')
+      const rows = (pending ?? []).map((o: any) => ({
+        customer: o.customer_name, phone: o.customer_phone,
+        address: o.delivery_address, notes: o.notes, status: 'upcoming',
+      }))
+      if (rows.length) {
+        await supabase.from('livra_deliveries').insert(rows)
+        await supabase.from('livra_webhook_orders').update({ status: 'imported' }).eq('status', 'pending')
+        setPendingCount(0)
+        setImportToast(`${rows.length} livrări importate în Comenzi noi`)
+        setTimeout(() => setImportToast(null), 3000)
+      }
+    } catch { setImportToast('Eroare la import') }
+    setImporting(false)
   }
 
   function selectPlatform(p: Platform) {
@@ -382,6 +428,64 @@ export default function Integrations() {
               </div>
             </div>
           )}
+
+          {/* Webhook section */}
+          <div>
+            <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Webhook direct</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/40 flex items-center justify-center flex-shrink-0">
+                  <Webhook size={15} className="text-brand-orange dark:text-orange-400" />
+                </div>
+                <div>
+                  <div className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">Integrare prin Webhook</div>
+                  <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">Trimite comenzi direct din orice platformă sau ERP cu un simplu POST request.</div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Endpoint URL</p>
+                <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2">
+                  <code className="flex-1 text-[11px] text-zinc-700 dark:text-zinc-300 truncate">{WEBHOOK_URL}</code>
+                  <button onClick={() => copyToClipboard(WEBHOOK_URL, 'url')} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors flex-shrink-0">
+                    {copied === 'url' ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Payload JSON</p>
+                <div className="relative bg-zinc-950 rounded-lg p-3">
+                  <pre className="text-[11px] text-zinc-300 overflow-x-auto">{WEBHOOK_SAMPLE}</pre>
+                  <button onClick={() => copyToClipboard(WEBHOOK_SAMPLE, 'payload')} className="absolute top-2 right-2 text-zinc-500 hover:text-zinc-300 transition-colors">
+                    {copied === 'payload' ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                  </button>
+                </div>
+              </div>
+
+              {pendingCount !== null && (
+                <div className={`flex items-center justify-between rounded-xl px-4 py-3 ${pendingCount > 0 ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900' : 'bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700'}`}>
+                  <div>
+                    <div className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-200">
+                      {pendingCount > 0 ? `${pendingCount} comenzi în așteptare` : 'Nicio comandă în așteptare'}
+                    </div>
+                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">primite prin webhook, neimportate încă</div>
+                  </div>
+                  {pendingCount > 0 && (
+                    <button onClick={importPending} disabled={importing} className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                      {importing ? 'Se importă…' : <><ChevronRight size={11} /> Importă</>}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {importToast && (
+                <div className="text-[12px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-lg px-3 py-2">
+                  {importToast}
+                </div>
+              )}
+            </div>
+          </div>
 
           <div>
             <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Cum funcționează</p>
