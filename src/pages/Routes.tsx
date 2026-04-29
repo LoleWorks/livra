@@ -582,12 +582,15 @@ export default function RoutesPage() {
       .eq('admin_id', adminId)
       .then(({ data }) => { if (data) setManagers(data) })
 
-    supabase
-      .from('livra_inventory_uploads')
-      .select('uploaded_at, row_count')
-      .order('uploaded_at', { ascending: false })
-      .limit(1)
-      .then(({ data }) => { if (data?.[0]) setLastInvUpload(data[0] as { uploaded_at: string; row_count: number }) })
+    if (adminId) {
+      supabase
+        .from('livra_inventory_uploads')
+        .select('uploaded_at, row_count')
+        .eq('company_id', adminId)
+        .order('uploaded_at', { ascending: false })
+        .limit(1)
+        .then(({ data }) => { if (data?.[0]) setLastInvUpload(data[0] as { uploaded_at: string; row_count: number }) })
+    }
 
     return () => { supabase.removeChannel(channel) }
   }, [])
@@ -628,9 +631,11 @@ export default function RoutesPage() {
         .from('livra_drivers')
         .select('id, home_warehouse_id')
         .in('id', activeDrivers.map(d => d.id))
+      const adminIdForWh = getUser()?.id
       const { data: warehouses } = await supabase
         .from('livra_warehouses')
         .select('id, lat, lng, address, is_default')
+        .eq('company_id', adminIdForWh ?? '')
       const defaultWh = warehouses?.find(w => w.is_default) ?? warehouses?.[0]
 
       const driverStartPositions = activeDrivers.map(d => {
