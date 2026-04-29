@@ -789,10 +789,16 @@ export default function RoutesPage() {
       setResult({ ...result, routes: routesWithPaths })
       setSelectedId(routesWithPaths[0]?.driver_id ?? null)
       setStep('results')
-      const geocodeFails = (result.deferred ?? []).filter(d => d.reason === 'geocode_failed' || d.reason === 'geocode failed')
-      if (geocodeFails.length) {
-        const list = geocodeFails.map(d => d.address).join(' · ')
-        setToast(`${geocodeFails.length} ${geocodeFails.length === 1 ? 'adresă negăsită' : 'adrese negăsite'}: ${list}`)
+      console.log('[optimize-routes] response:', result)
+      const allDeferred = result.deferred ?? []
+      if (allDeferred.length) {
+        const labels = allDeferred.map(d => {
+          const reason = (d.reason === 'geocode_failed' || d.reason === 'geocode failed') ? 'adresă negăsită'
+                       : (d.reason === 'no_capacity'   || d.reason === 'no capacity')   ? 'fără capacitate'
+                       : d.reason || 'amânat'
+          return `${d.address} (${reason})`
+        }).join(' · ')
+        setToast(`${allDeferred.length} ${allDeferred.length === 1 ? 'livrare nealocată' : 'livrări nealocate'}: ${labels}`)
       }
     } catch (e) {
       setStep('input')
