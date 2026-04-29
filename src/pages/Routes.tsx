@@ -600,24 +600,25 @@ export default function RoutesPage() {
     setDispatched(false)
     setLoadingMsg('Se geocodifică adresele…')
     try {
-      // Fetch last known positions for all active drivers
-      const { data: locs } = await supabase
-        .from('livra_driver_locations')
-        .select('driver_id, lat, lng')
-        .in('driver_id', activeDrivers.map(d => d.id))
+      // Drivers always start the day from their assigned home warehouse —
+      // packages are loaded there. Live GPS is for tracking only, not planning.
       const { data: dbDrivers } = await supabase
         .from('livra_drivers')
-        .select('id, pos_lat, pos_lng')
+        .select('id, home_warehouse_id')
         .in('id', activeDrivers.map(d => d.id))
+      const { data: warehouses } = await supabase
+        .from('livra_warehouses')
+        .select('id, lat, lng, address, is_default')
+      const defaultWh = warehouses?.find(w => w.is_default) ?? warehouses?.[0]
 
       const driverStartPositions = activeDrivers.map(d => {
-        const live = locs?.find(l => l.driver_id === d.id)
-        const saved = dbDrivers?.find(x => x.id === d.id)
+        const driverRow = dbDrivers?.find(x => x.id === d.id)
+        const wh = warehouses?.find(w => w.id === driverRow?.home_warehouse_id) ?? defaultWh
         return {
           id: d.id,
           name: d.name,
-          start_lat: live?.lat ?? saved?.pos_lat ?? null,
-          start_lng: live?.lng ?? saved?.pos_lng ?? null,
+          start_lat: wh?.lat ?? null,
+          start_lng: wh?.lng ?? null,
         }
       })
 

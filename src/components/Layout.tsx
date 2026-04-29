@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, Navigate } from 'react-router-dom'
-import { LayoutDashboard, RouteIcon, UserCog, CreditCard, Sun, Moon, Plug, ChevronLeft, ChevronRight, Activity, LogOut } from 'lucide-react'
+import { LayoutDashboard, RouteIcon, UserCog, CreditCard, Sun, Moon, Plug, ChevronLeft, ChevronRight, Activity, LogOut, Warehouse } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { getUser, signOut } from '../lib/auth'
 import { supabase } from '../lib/supabase'
@@ -9,6 +9,7 @@ const nav = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/routes',    icon: RouteIcon,        label: 'Rute' },
   { to: '/drivers',   icon: UserCog,          label: 'Utilizatori' },
+  { to: '/warehouses', icon: Warehouse,       label: 'Depozite' },
   { to: '/activity',  icon: Activity,         label: 'Activitate' },
   { to: '/integrations', icon: Plug,          label: 'Integrări' },
   { to: '/credits',   icon: CreditCard,       label: 'Credite' },

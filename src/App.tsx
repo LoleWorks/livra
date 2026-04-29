@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import Dashboard from './pages/Dashboard'
 import RoutesPage from './pages/Routes'
 import Drivers from './pages/Drivers'
+import Warehouses from './pages/Warehouses'
 import Credits from './pages/Credits'
 import Integrations from './pages/Integrations'
 import Track from './pages/Track'
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/routes" element={<RoutesPage />} />
             <Route path="/drivers" element={<Drivers />} />
+            <Route path="/warehouses" element={<Warehouses />} />
             <Route path="/activity" element={<Activity />} />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="/credits" element={<Credits />} />
