@@ -55,7 +55,7 @@ function livra_get_settings() {
         [
             'title'    => __( 'Cheie API (opțional)', 'livra' ),
             'type'     => 'password',
-            'desc'     => __( 'Trimisă ca header X-Livra-Key dacă este setată.', 'livra' ),
+            'desc'     => __( 'Trimisă ca header X-Api-Key dacă este setată.', 'livra' ),
             'id'       => LIVRA_OPTION_KEY,
             'default'  => '',
             'css'      => 'min-width:400px;',
@@ -115,12 +115,20 @@ function livra_send_order( $order_id ) {
     // Order notes
     $notes = $order->get_customer_note();
 
+    $items = [];
+    foreach ( $order->get_items() as $item ) {
+        $items[] = $item->get_quantity() . 'x ' . $item->get_name();
+    }
+
     $payload = [
         'order_id'         => (string) $order_id,
         'customer_name'    => $name,
         'customer_phone'   => $phone,
         'delivery_address' => $address,
         'notes'            => $notes,
+        'order_items'      => implode( ', ', $items ),
+        'order_value'      => (float) $order->get_total(),
+        'shipping_cost'    => (float) $order->get_shipping_total(),
     ];
 
     $headers = [ 'Content-Type' => 'application/json' ];
