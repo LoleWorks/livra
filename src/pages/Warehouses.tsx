@@ -22,7 +22,7 @@ export default function Warehouses() {
   const [skuCounts, setSkuCounts] = useState<Record<string, number>>({})
   const [showModal, setShowModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState({ name: '', address: '' })
+  const [form, setForm] = useState({ name: '', address: '', is_default: false })
   const [originalAddress, setOriginalAddress] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -54,56 +54,70 @@ export default function Warehouses() {
 
   function openAdd() {
     setEditingId(null)
-    setForm({ name: '', address: '' })
+    // First warehouse defaults to is_default; subsequent ones don't
+    setForm({ name: '', address: '', is_default: items.length === 0 })
     setOriginalAddress('')
     setShowModal(true)
   }
 
   function openEdit(w: Wh) {
     setEditingId(w.id)
-    setForm({ name: w.name, address: w.address })
+    setForm({ name: w.name, address: w.address, is_default: w.is_default })
     setOriginalAddress(w.address)
     setShowModal(true)
   }
 
   async function save() {
     if (!form.name.trim() || !form.address.trim()) return
+    if (!user?.id) return
     setBusy(true)
     if (editingId) {
-      // Re-geocode only if the address changed
       const addressChanged = form.address.trim() !== originalAddress.trim()
       const update: Record<string, unknown> = {
         name: form.name.trim(),
         address: form.address.trim(),
+        is_default: form.is_default,
       }
       if (addressChanged) {
         const coords = await geocode(form.address)
         update.lat = coords?.lat ?? null
         update.lng = coords?.lng ?? null
       }
+      // If we're promoting this one to default, demote the others first
+      if (form.is_default) {
+        await supabase.from('livra_warehouses').update({ is_default: false })
+          .eq('company_id', user.id).neq('id', editingId)
+      }
       await supabase.from('livra_warehouses').update(update).eq('id', editingId)
     } else {
       const coords = await geocode(form.address)
-      const isFirst = items.length === 0
+      // First warehouse must be default; otherwise honor checkbox
+      const willBeDefault = items.length === 0 ? true : form.is_default
+      if (willBeDefault) {
+        await supabase.from('livra_warehouses').update({ is_default: false })
+          .eq('company_id', user.id)
+      }
       await supabase.from('livra_warehouses').insert({
-        company_id: user?.id,
+        company_id: user.id,
         name: form.name.trim(),
         address: form.address.trim(),
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
-        is_default: isFirst,
+        is_default: willBeDefault,
       })
     }
     setShowModal(false)
     setEditingId(null)
-    setForm({ name: '', address: '' })
+    setForm({ name: '', address: '', is_default: false })
     setOriginalAddress('')
     setBusy(false)
     load()
   }
 
   async function setDefault(id: string) {
-    await supabase.from('livra_warehouses').update({ is_default: false }).neq('id', id)
+    if (!user?.id) return
+    await supabase.from('livra_warehouses').update({ is_default: false })
+      .eq('company_id', user.id).neq('id', id)
     await supabase.from('livra_warehouses').update({ is_default: true }).eq('id', id)
     load()
   }
@@ -231,6 +245,28 @@ export default function Warehouses() {
                     </p>
                   )}
                 </div>
+                {/* Default checkbox — first warehouse is forced default */}
+                {!(editingId === null && items.length === 0) && (
+                  <label className="flex items-start gap-2.5 pt-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.is_default}
+                      onChange={e => setForm(f => ({ ...f, is_default: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 rounded border-zinc-300 dark:border-zinc-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-[12px] text-zinc-700 dark:text-zinc-300">
+                      Setează ca depozit implicit
+                      <span className="block text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Șoferii fără un depozit asignat pleacă de aici. Doar un depozit poate fi implicit — celelalte se vor demota automat.
+                      </span>
+                    </span>
+                  </label>
+                )}
+                {editingId === null && items.length === 0 && (
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                    Primul depozit este setat automat ca implicit.
+                  </p>
+                )}
               </div>
               <div className="flex justify-end gap-2 mt-5">
                 <button onClick={() => setShowModal(false)} disabled={busy} className="px-3 py-2 text-[13px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">Anulează</button>
