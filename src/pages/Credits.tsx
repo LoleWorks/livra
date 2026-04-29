@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { Plus, ArrowDownLeft, ArrowUpRight, Zap, X, Check, CreditCard } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getUser } from '../lib/auth'
 
 type Transaction = { id: string; type: 'deduct' | 'topup'; desc: string; date: string; amount: number }
 type Package = { credits: number; price: string; per: string; popular: boolean }
@@ -20,25 +21,43 @@ function formatTxDate(iso: string): string {
 }
 
 export default function Credits() {
-  const [balance, setBalance]           = useState(0)
-  const [creditsId, setCreditsId]       = useState<string | null>(null)
-  const [txs, setTxs]                   = useState<Transaction[]>([])
-  const [selectedPkg, setSelectedPkg]   = useState<Package | null>(null)
-  const [showConfirm, setShowConfirm]   = useState(false)
-  const [showSuccess, setShowSuccess]   = useState(false)
+  const [balance, setBalance]         = useState(0)
+  const [creditsId, setCreditsId]     = useState<string | null>(null)
+  const [txs, setTxs]                 = useState<Transaction[]>([])
+  const [selectedPkg, setSelectedPkg] = useState<Package | null>(null)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+
+  const adminId = getUser()?.id
 
   useEffect(() => {
+    if (!adminId) return
+
+    // Load or create credit row for this company
     supabase
       .from('livra_credits')
       .select('*')
-      .limit(1)
-      .single()
-      .then(({ data }) => {
-        if (data) { setBalance(data.balance ?? 0); setCreditsId(data.id) }
+      .eq('company_id', adminId)
+      .maybeSingle()
+      .then(async ({ data }) => {
+        if (data) {
+          setBalance(data.balance ?? 0)
+          setCreditsId(data.id)
+        } else {
+          // First time — create the row
+          const { data: newRow } = await supabase
+            .from('livra_credits')
+            .insert({ balance: 0, company_id: adminId })
+            .select()
+            .single()
+          if (newRow) { setBalance(0); setCreditsId(newRow.id) }
+        }
       })
+
     supabase
       .from('livra_transactions')
       .select('*')
+      .eq('company_id', adminId)
       .order('created_at', { ascending: false })
       .then(({ data }) => {
         if (data) setTxs(data.map(r => ({
@@ -49,7 +68,26 @@ export default function Credits() {
           amount: r.amount,
         })))
       })
-  }, [])
+
+    // Realtime: keep balance in sync when Routes.tsx deducts on dispatch
+    const channel = supabase
+      .channel('credits_realtime')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'livra_credits' }, payload => {
+        const r = payload.new
+        if (r.company_id === adminId) setBalance(r.balance ?? 0)
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'livra_transactions' }, payload => {
+        const r = payload.new
+        if (r.company_id === adminId) {
+          setTxs(prev => [{
+            id: r.id, type: r.type, desc: r.description ?? '', date: r.created_at, amount: r.amount,
+          }, ...prev])
+        }
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [adminId])
 
   function openPurchase(pkg: Package) {
     setSelectedPkg(pkg)
@@ -58,17 +96,25 @@ export default function Credits() {
   }
 
   async function handlePurchase() {
-    if (!selectedPkg) return
+    if (!selectedPkg || !adminId) return
     const newBalance = balance + selectedPkg.credits
     const desc = `Reîncărcare · ${selectedPkg.credits} credite`
     const now = new Date().toISOString()
 
     if (creditsId) {
       await supabase.from('livra_credits').update({ balance: newBalance }).eq('id', creditsId)
+    } else {
+      const { data: newRow } = await supabase
+        .from('livra_credits')
+        .insert({ balance: newBalance, company_id: adminId })
+        .select()
+        .single()
+      if (newRow) setCreditsId(newRow.id)
     }
+
     const { data: txData } = await supabase
       .from('livra_transactions')
-      .insert({ type: 'topup', description: desc, amount: selectedPkg.credits })
+      .insert({ type: 'topup', description: desc, amount: selectedPkg.credits, company_id: adminId })
       .select()
       .single()
 
@@ -84,9 +130,18 @@ export default function Credits() {
     }, 1800)
   }
 
+  // Real stats derived from transaction history
   const todayStr = new Date().toDateString()
-  const usedToday = txs.filter(t => t.type === 'deduct' && new Date(t.date).toDateString() === todayStr).length
-  const thisMonth = txs.filter(t => t.type === 'topup').reduce((s, t) => s + t.amount, 0)
+  const usedToday = txs
+    .filter(t => t.type === 'deduct' && new Date(t.date).toDateString() === todayStr)
+    .reduce((s, t) => s + Math.abs(t.amount), 0)
+
+  const thirtyDaysAgo = Date.now() - 30 * 86_400_000
+  const deductLast30 = txs.filter(t => t.type === 'deduct' && new Date(t.date).getTime() > thirtyDaysAgo)
+  const totalLast30  = deductLast30.reduce((s, t) => s + Math.abs(t.amount), 0)
+  const dailyAvg     = deductLast30.length > 0 ? Math.round(totalLast30 / 30) : 0
+
+  const topupTotal = txs.filter(t => t.type === 'topup').reduce((s, t) => s + t.amount, 0)
 
   return (
     <>
@@ -94,6 +149,7 @@ export default function Credits() {
         <title>Credite | Livra</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
+
       {/* Purchase modal */}
       {showConfirm && selectedPkg && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center">
@@ -169,16 +225,37 @@ export default function Credits() {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
           <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Credite</span>
-          <span className="text-[12px] text-zinc-400 dark:text-zinc-500">1 credit = 1 livrare finalizată</span>
+          <span className="text-[12px] text-zinc-400 dark:text-zinc-500">1 credit = 1 livrare expediată</span>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 space-y-4">
+
+          {/* Low balance warning */}
+          {balance >= 0 && balance < 20 && (
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[13px] text-amber-700 dark:text-amber-400">
+              <Zap size={14} className="flex-shrink-0" />
+              <span>Sold scăzut — mai ai <strong>{balance}</strong> credite. Reîncarcă pentru a putea expedia rute noi.</span>
+              <button onClick={() => openPurchase(PACKAGES[2])} className="ml-auto text-[12px] font-semibold underline underline-offset-2 flex-shrink-0">
+                Reîncarcă
+              </button>
+            </div>
+          )}
+          {balance < 0 && (
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-[13px] text-red-700 dark:text-red-400">
+              <Zap size={14} className="flex-shrink-0" />
+              <span>Sold negativ (<strong>{balance}</strong> credite). Livrările au fost expediate dar contul trebuie reîncărcat.</span>
+              <button onClick={() => openPurchase(PACKAGES[2])} className="ml-auto text-[12px] font-semibold underline underline-offset-2 flex-shrink-0">
+                Reîncarcă acum
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-brand-orange rounded-xl p-4 flex flex-col justify-between">
-              <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider">Sold curent</div>
+            <div className={`rounded-xl p-4 flex flex-col justify-between ${balance < 0 ? 'bg-red-500' : 'bg-brand-orange'}`}>
+              <div className="text-[11px] font-semibold text-white/70 uppercase tracking-wider">Sold curent</div>
               <div>
                 <div className="text-4xl font-bold text-white">{balance}</div>
-                <div className="text-[12px] text-blue-200 mt-0.5">credite · ≈ {(balance * 20).toLocaleString()} MDL</div>
+                <div className="text-[12px] text-white/70 mt-0.5">credite · ≈ {(balance * 20).toLocaleString()} MDL</div>
               </div>
               <button
                 onClick={() => openPurchase(PACKAGES[2])}
@@ -189,9 +266,9 @@ export default function Credits() {
             </div>
 
             {[
-              { label: 'Folosite azi',   value: String(usedToday), sub: 'livrări facturate'     },
-              { label: 'Luna aceasta',   value: String(thisMonth), sub: `≈ ${(thisMonth * 20).toLocaleString()} MDL` },
-              { label: 'Medie zilnică',  value: '~28',             sub: 'ultimele 30 zile'       },
+              { label: 'Folosite azi',    value: String(usedToday), sub: 'livrări expediate' },
+              { label: 'Reîncărcate total', value: String(topupTotal), sub: `≈ ${(topupTotal * 20).toLocaleString()} MDL` },
+              { label: 'Medie zilnică',   value: dailyAvg > 0 ? `~${dailyAvg}` : '—', sub: 'ultimele 30 zile' },
             ].map(s => (
               <div key={s.label} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
                 <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{s.label}</div>
@@ -211,7 +288,7 @@ export default function Credits() {
                   onClick={() => openPurchase(pkg)}
                   className={`relative text-left rounded-xl p-4 border transition-all hover:scale-[1.02] active:scale-[0.99] ${
                     pkg.popular
-                      ? 'bg-white dark:bg-zinc-900 border-orange-500 dark:border-brand-orange ring-1 ring-blue-500 dark:ring-blue-600'
+                      ? 'bg-white dark:bg-zinc-900 border-orange-500 dark:border-brand-orange ring-1 ring-orange-500 dark:ring-brand-orange'
                       : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                   }`}
                 >
@@ -233,7 +310,11 @@ export default function Credits() {
           <div>
             <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Tranzacții</p>
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-              {txs.map(t => (
+              {txs.length === 0 ? (
+                <div className="px-4 py-8 text-center text-[12px] text-zinc-400 dark:text-zinc-500">
+                  Nicio tranzacție încă. Creditele se deduc automat la fiecare expediere.
+                </div>
+              ) : txs.map(t => (
                 <div key={t.id} className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
                   <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${t.type === 'topup' ? 'bg-emerald-50 dark:bg-emerald-950/50' : 'bg-zinc-100 dark:bg-zinc-800'}`}>
                     {t.type === 'topup'
@@ -252,6 +333,7 @@ export default function Credits() {
               ))}
             </div>
           </div>
+
         </div>
       </div>
     </>

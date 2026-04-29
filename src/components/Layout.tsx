@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, Outlet, Navigate } from 'react-router-dom'
 import { LayoutDashboard, RouteIcon, UserCog, CreditCard, Sun, Moon, Plug, ChevronLeft, ChevronRight, Activity, LogOut } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { getUser, signOut } from '../lib/auth'
+import { supabase } from '../lib/supabase'
 
 const nav = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -16,7 +17,26 @@ const nav = [
 export default function Layout() {
   const { theme, toggle } = useTheme()
   const [collapsed, setCollapsed] = useState(false)
+  const [creditBalance, setCreditBalance] = useState<number | null>(null)
   const user = getUser()
+
+  useEffect(() => {
+    if (!user?.id) return
+    supabase
+      .from('livra_credits')
+      .select('balance')
+      .eq('company_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setCreditBalance(data.balance ?? 0) })
+
+    const channel = supabase
+      .channel('layout_credits')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'livra_credits' }, payload => {
+        if (payload.new.company_id === user.id) setCreditBalance(payload.new.balance ?? 0)
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [user?.id])
 
   if (!user) return <Navigate to="/login" replace />
   if (user.must_change_password) return <Navigate to="/change-password" replace />
@@ -70,7 +90,18 @@ export default function Layout() {
               {({ isActive }) => (
                 <>
                   <Icon size={14} className={isActive ? 'text-brand-orange dark:text-orange-400' : ''} />
-                  {!collapsed && label}
+                  {!collapsed && <span className="flex-1">{label}</span>}
+                  {!collapsed && to === '/credits' && creditBalance !== null && (
+                    <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-full ${
+                      creditBalance < 0
+                        ? 'bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400'
+                        : creditBalance < 20
+                          ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                    }`}>
+                      {creditBalance}
+                    </span>
+                  )}
                 </>
               )}
             </NavLink>

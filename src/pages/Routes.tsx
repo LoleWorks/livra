@@ -726,6 +726,40 @@ export default function RoutesPage() {
       const deliveryIds = result.routes.flatMap(r => r.stops.filter(s => s.type === 'delivery').map(s => s.delivery_id))
       await supabase.from('livra_deliveries').update({ status: 'dispatched' }).in('id', deliveryIds)
 
+      // ── Credit deduction: 1 credit per dispatched delivery ──────────────────
+      const stopCount = deliveryIds.length
+      if (stopCount > 0) {
+        // Fetch current balance
+        const { data: credRow } = await supabase
+          .from('livra_credits')
+          .select('id, balance')
+          .eq('company_id', adminId)
+          .single()
+
+        if (credRow) {
+          const newBalance = credRow.balance - stopCount
+          await supabase.from('livra_credits').update({ balance: newBalance }).eq('id', credRow.id)
+          await supabase.from('livra_transactions').insert({
+            type: 'deduct',
+            description: `Expediere ${optimizeDate} · ${stopCount} livrări`,
+            amount: -stopCount,
+            company_id: adminId,
+          })
+          if (newBalance < 0) {
+            setToast(`Rute trimise — atenție: sold negativ (${newBalance} credite). Reîncarcă din pagina Credite.`)
+          } else if (newBalance < 20) {
+            setToast(`Rute trimise la ${result.routes.length} șoferi · ${newBalance} credite rămase`)
+          } else {
+            setToast(`Rute trimise la ${result.routes.length} șoferi · -${stopCount} credite`)
+          }
+        } else {
+          setToast(`Rute trimise la ${result.routes.length} șoferi`)
+        }
+      } else {
+        setToast(`Rute trimise la ${result.routes.length} șoferi`)
+      }
+      // ────────────────────────────────────────────────────────────────────────
+
       // Push notifications: fire one Supabase RPC per dispatched driver. The
       // RPC runs server-side via pg_net so we bypass the browser CORS block on
       // exp.host. Each call queues an HTTP POST to Expo Push API and returns
@@ -741,8 +775,6 @@ export default function RoutesPage() {
           else       console.log('[push] queued via supabase rpc:', data)
         })
       }
-
-      setToast(`Rute trimise la ${result.routes.length} șoferi`)
     } catch {
       setToast('Eroare la trimiterea rutelor')
       setDispatched(false)
