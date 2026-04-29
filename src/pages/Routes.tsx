@@ -106,13 +106,6 @@ function isPastISO(iso?: string) {
   return iso < todayISO()
 }
 
-// Smart default date: 24h for Chișinău/suburbs, 3 days for inter-city
-const CHISINAU_AREA_RX = /chi[sș]in[aă]u|ialoveni|cricova|durle[șs]ti|codru|stra[șs]eni|anenii\s*noi/i
-function defaultDateForAddress(address: string): string {
-  const today = todayISO()
-  return CHISINAU_AREA_RX.test(address) ? addDaysISO(today, 1) : addDaysISO(today, 3)
-}
-
 // ── Capacity helpers ──────────────────────────────────────────────────────────
 
 const STOPS_PER_DRIVER_DAY    = 30   // ~16 min/stop × 8h shift
@@ -120,14 +113,6 @@ const STOPS_PER_DRIVER_DAY    = 30   // ~16 min/stop × 8h shift
 
 function dayCapacity(numDrivers: number) {
   return Math.max(1, numDrivers) * STOPS_PER_DRIVER_DAY
-}
-function windowCapacity(numDrivers: number, startHHMM: string, endHHMM: string) {
-  if (!startHHMM || !endHHMM) return Infinity
-  const [sh, sm] = startHHMM.split(':').map(Number)
-  const [eh, em] = endHHMM.split(':').map(Number)
-  const minutes = (eh * 60 + em) - (sh * 60 + sm)
-  if (minutes <= 0) return Infinity
-  return Math.max(1, numDrivers) * Math.floor(minutes / 25)
 }
 function capacityState(used: number, cap: number): 'ok' | 'warn' | 'full' {
   if (used >= cap) return 'full'
