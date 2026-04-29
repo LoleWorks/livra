@@ -283,7 +283,11 @@ export default function Drivers() {
 
   function openEdit(d: Driver) {
     setEditTarget(d)
-    setForm({ name: d.name, phone: d.phone, pin: '', home_warehouse_id: (d as Driver & { home_warehouse_id?: string | null }).home_warehouse_id ?? '' })
+    const existing = (d as Driver & { home_warehouse_id?: string | null }).home_warehouse_id
+    setForm({
+      name: d.name, phone: d.phone, pin: '',
+      home_warehouse_id: existing ?? warehouses.find(w => w.is_default)?.id ?? '',
+    })
     setPinError('')
     setShowModal(true)
   }
