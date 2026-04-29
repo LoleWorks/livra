@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 import { useEffect, useState } from 'react'
-import { Warehouse, Plus, Trash2, Star } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Warehouse, Plus, Trash2, Star, Package, ChevronRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getUser } from '../lib/auth'
 
@@ -18,17 +19,22 @@ type Wh = {
 export default function Warehouses() {
   const user = getUser()
   const [items, setItems] = useState<Wh[]>([])
+  const [skuCounts, setSkuCounts] = useState<Record<string, number>>({})
   const [showAdd, setShowAdd] = useState(false)
   const [form, setForm] = useState({ name: '', address: '' })
   const [busy, setBusy] = useState(false)
 
   async function load() {
-    const { data } = await supabase
-      .from('livra_warehouses')
-      .select('*')
-      .order('is_default', { ascending: false })
-      .order('created_at', { ascending: true })
-    setItems((data ?? []) as Wh[])
+    const [whRes, invRes] = await Promise.all([
+      supabase.from('livra_warehouses').select('*').order('is_default', { ascending: false }).order('created_at', { ascending: true }),
+      supabase.from('livra_inventory').select('warehouse_id'),
+    ])
+    setItems((whRes.data ?? []) as Wh[])
+    const counts: Record<string, number> = {}
+    for (const r of (invRes.data ?? []) as { warehouse_id: string }[]) {
+      counts[r.warehouse_id] = (counts[r.warehouse_id] ?? 0) + 1
+    }
+    setSkuCounts(counts)
   }
   useEffect(() => { load() }, [])
 
@@ -102,28 +108,37 @@ export default function Warehouses() {
         ) : (
           <div className="grid gap-3">
             {items.map(w => (
-              <div key={w.id} className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
+              <Link
+                key={w.id}
+                to={`/warehouses/${w.id}`}
+                className="group flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Warehouse size={18} className="text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-zinc-900 dark:text-zinc-100 text-[14px]">{w.name}</span>
                       {w.is_default && (
                         <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 rounded uppercase tracking-wider font-semibold">Implicit</span>
                       )}
                     </div>
-                    <div className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-0.5">{w.address}</div>
+                    <div className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">{w.address}</div>
                     {w.lat == null && (
                       <div className="text-[11px] text-amber-600 dark:text-amber-400 mt-1">⚠ Adresa nu a fost geocodificată — verifică-o</div>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400">
+                    <Package size={13} />
+                    <span className="tabular-nums font-semibold text-zinc-700 dark:text-zinc-200">{skuCounts[w.id] ?? 0}</span>
+                    <span className="hidden sm:inline">produse</span>
+                  </div>
                   {!w.is_default && (
                     <button
-                      onClick={() => setDefault(w.id)}
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); setDefault(w.id) }}
                       title="Setează ca depozit implicit"
                       className="p-2 text-zinc-400 hover:text-amber-500"
                     >
@@ -131,14 +146,15 @@ export default function Warehouses() {
                     </button>
                   )}
                   <button
-                    onClick={() => remove(w.id)}
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); remove(w.id) }}
                     title="Șterge"
                     className="p-2 text-zinc-400 hover:text-red-500"
                   >
                     <Trash2 size={16} />
                   </button>
+                  <ChevronRight size={16} className="text-zinc-300 dark:text-zinc-600 group-hover:text-blue-500 transition-colors" />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
