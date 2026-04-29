@@ -460,6 +460,8 @@ export default function RoutesPage() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [drivers, setDrivers]       = useState<DriverConfig[]>([])
   const [shiftStart, setShiftStart] = useState('09:00')
+  const [serviceTimeMin, setServiceTimeMin] = useState(5)
+  const [allowOvertime, setAllowOvertime] = useState(false)
   const [managers, setManagers]     = useState<{ id: string; name: string }[]>([])
 
   const [step, setStep]         = useState<'input' | 'loading' | 'results'>('input')
@@ -628,10 +630,15 @@ export default function RoutesPage() {
             package_description: d.package_description ?? '',
             time_window_start: d.time_window_start || null,
             time_window_end:   d.time_window_end   || null,
+            service_time_min:  (d as any).service_time_min ?? null,
           })),
           drivers: driverStartPositions,
           skip_breaks: false,
           shift_start_time: shiftStart,
+          default_service_time_min: serviceTimeMin,
+          allow_overtime: allowOvertime,
+          max_workday_hours: 8,
+          overtime_max_hours: 10,
         },
       })
       if (fnErr) throw new Error(fnErr.message)
@@ -1386,6 +1393,25 @@ export default function RoutesPage() {
                     onChange={setShiftStart}
                     className="w-20 text-center bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-[12px] rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
+                </label>
+                <label className="flex items-center justify-between gap-2.5">
+                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400">Timp / livrare (min)</span>
+                  <input
+                    type="number" min={1} max={60}
+                    value={serviceTimeMin}
+                    onChange={e => setServiceTimeMin(Math.max(1, Math.min(60, Number(e.target.value) || 5)))}
+                    className="w-20 text-center bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-[12px] rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-2.5 cursor-pointer">
+                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400">Permite ore suplimentare (până la 10h)</span>
+                  <button
+                    type="button"
+                    onClick={() => setAllowOvertime(v => !v)}
+                    className={`relative w-9 h-5 rounded-full transition-colors ${allowOvertime ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}
+                  >
+                    <span className={`absolute top-0.5 ${allowOvertime ? 'left-[18px]' : 'left-0.5'} w-4 h-4 bg-white rounded-full transition-all`} />
+                  </button>
                 </label>
               </div>
             </div>
