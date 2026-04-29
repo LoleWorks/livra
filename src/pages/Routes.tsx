@@ -535,6 +535,7 @@ export default function RoutesPage() {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
   })
   const [finishedStops, setFinishedStops]   = useState<FinishedStop[]>([])
+  const [resultsTab, setResultsTab]         = useState<'map' | 'routes'>('map')
 
   useEffect(() => {
     supabase
@@ -940,33 +941,39 @@ export default function RoutesPage() {
       <>
         {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <button onClick={() => setStep('input')} className="text-[12px] text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
+          <div className="flex items-center justify-between px-3 md:px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <button onClick={() => setStep('input')} className="text-[12px] text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors flex-shrink-0">
                 ← Înapoi
               </button>
-              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Rezultate optimizare</span>
+              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate hidden sm:block">Rezultate</span>
               {result.savings_pct > 0 && (
-                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full hidden sm:block">
                   -{result.savings_pct}% distanță
                 </span>
               )}
             </div>
+            {/* Mobile tab switcher */}
+            <div className="flex md:hidden items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5 flex-shrink-0">
+              <button onClick={() => setResultsTab('map')} className={`px-3 py-1 text-[11px] font-semibold rounded-md transition-colors ${resultsTab === 'map' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Hartă</button>
+              <button onClick={() => setResultsTab('routes')} className={`px-3 py-1 text-[11px] font-semibold rounded-md transition-colors ${resultsTab === 'routes' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Rute</button>
+            </div>
             <button
               onClick={handleDispatch}
               disabled={dispatched}
-              className={`flex items-center gap-1.5 text-white text-[12px] font-semibold px-4 py-2 rounded-lg transition-colors ${
+              className={`flex items-center gap-1.5 text-white text-[12px] font-semibold px-3 py-2 rounded-lg transition-colors flex-shrink-0 ${
                 dispatched ? 'bg-emerald-700 opacity-70 cursor-default' : 'bg-emerald-600 hover:bg-emerald-500'
               }`}
             >
               <CheckCircle2 size={13} />
-              {dispatched ? 'Trimis' : 'Trimite la șoferi'}
+              <span className="hidden sm:inline">{dispatched ? 'Trimis' : 'Trimite la șoferi'}</span>
+              <span className="sm:hidden">{dispatched ? 'Trimis' : 'Trimite'}</span>
               {!dispatched && <ChevronRight size={12} />}
             </button>
           </div>
 
           <div className="flex flex-1 overflow-hidden">
-            <div className="flex-1 relative">
+            <div className={`${resultsTab === 'map' ? 'flex-1' : 'hidden'} md:flex-1 relative`}>
               <MapContainer center={[47.0245, 28.8322]} zoom={12} crs={L.CRS.EPSG3395} style={{ height: '100%', width: '100%' }}>
                 <YandexMapLayer />
                 <MoldovaBorder />
@@ -1046,7 +1053,7 @@ export default function RoutesPage() {
               </div>
             </div>
 
-            <div className="w-72 flex-shrink-0 flex flex-col border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto">
+            <div className={`${resultsTab === 'routes' ? 'flex w-full' : 'hidden'} md:flex md:w-72 flex-shrink-0 flex-col border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto`}>
               {result.deferred?.length > 0 && (
                 <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50">
                   <div className="flex items-center gap-2 mb-1.5">
@@ -1208,9 +1215,9 @@ export default function RoutesPage() {
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
           {/* Delivery list */}
-          <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4">
+          <div className="flex-1 min-h-0 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4">
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
               {(() => {
                 const newOrders   = deliveries.filter(d => !d.delivery_date)
@@ -1736,7 +1743,7 @@ export default function RoutesPage() {
           </div>
 
           {/* Config sidebar */}
-          <div className="w-64 flex-shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-5 overflow-y-auto">
+          <div className="md:w-64 md:flex-shrink-0 border-t md:border-t-0 md:border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-5 overflow-y-auto">
             <div>
               <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2.5">Șoferi activi</p>
               <div className="space-y-2">
