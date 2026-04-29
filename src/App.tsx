@@ -5,7 +5,7 @@ import Dashboard from './pages/Dashboard'
 import RoutesPage from './pages/Routes'
 import Drivers from './pages/Drivers'
 import Warehouses from './pages/Warehouses'
-import Inventory from './pages/Inventory'
+import WarehouseDetail from './pages/WarehouseDetail'
 import Credits from './pages/Credits'
 import Integrations from './pages/Integrations'
 import Track from './pages/Track'
@@ -50,7 +50,7 @@ export default function App() {
             <Route path="/routes" element={<RoutesPage />} />
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/warehouses" element={<Warehouses />} />
-            <Route path="/inventory" element={<Inventory />} />
+            <Route path="/warehouses/:id" element={<WarehouseDetail />} />
             <Route path="/activity" element={<Activity />} />
             <Route path="/integrations" element={<Integrations />} />
             <Route path="/credits" element={<Credits />} />

@@ -1511,10 +1511,10 @@ export default function RoutesPage() {
                 Anulează
               </button>
               <a
-                href="/inventory"
+                href="/warehouses"
                 className="px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700"
               >
-                Încarcă inventarul
+                Mergi la depozite
               </a>
               {lastInvUpload && (
                 <button
