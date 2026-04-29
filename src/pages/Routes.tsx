@@ -14,7 +14,7 @@ import { getUser } from '../lib/auth'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type Delivery = { id: string; customer: string; phone: string; address: string; notes: string; package_description?: string; time_window_start?: string; time_window_end?: string; delivery_date?: string; status?: 'upcoming' | 'dispatched' | 'delivered' | 'failed'; order_items?: string; order_value?: number; shipping_cost?: number; assigned_to?: string }
+type Delivery = { id: string; customer: string; phone: string; address: string; notes: string; package_description?: string; time_window_start?: string; time_window_end?: string; delivery_date?: string; status?: 'upcoming' | 'dispatched' | 'delivered' | 'failed'; order_items?: string; order_items_json?: { sku?: string | null; name?: string | null; qty?: number | null }[] | null; order_value?: number; shipping_cost?: number; assigned_to?: string; service_time_min?: number; source_warehouse_id?: string | null }
 type RouteStop = { order: number; delivery_id: string; customer: string; address: string; phone: string; lat: number; lng: number; type: string; break_duration_min: number; package_description?: string; arrival_time?: string }
 type DriverRoute = { driver_id: string; driver_name: string; color: string; stops: RouteStop[]; total_distance_km: number; total_duration_min: number; path?: [number, number][]; start_lat: number; start_lng: number }
 type DeferredDelivery = { delivery_id: string; customer: string; address: string; reason: string }
@@ -499,10 +499,12 @@ export default function RoutesPage() {
       time_window_end:   r.time_window_end   ?? undefined,
       delivery_date:     r.delivery_date     ?? undefined,
       status:            r.status            ?? 'upcoming',
-      order_items:       r.order_items       ?? undefined,
-      order_value:       r.order_value       ?? undefined,
-      shipping_cost:     r.shipping_cost     ?? undefined,
-      assigned_to:       r.assigned_to       ?? undefined,
+      order_items:         r.order_items         ?? undefined,
+      order_items_json:    r.order_items_json    ?? undefined,
+      order_value:         r.order_value         ?? undefined,
+      shipping_cost:       r.shipping_cost       ?? undefined,
+      assigned_to:         r.assigned_to         ?? undefined,
+      source_warehouse_id: r.source_warehouse_id ?? undefined,
     })
 
     supabase
@@ -597,6 +599,12 @@ export default function RoutesPage() {
 
   const activeDrivers = drivers.filter(d => d.enabled)
 
+  // Scheduled deliveries with SKUs that couldn't be resolved to a warehouse
+  const unmatchedOrders = deliveries.filter(d => {
+    const skus = (d.order_items_json ?? []).map(i => i.sku).filter(Boolean)
+    return skus.length > 0 && !d.source_warehouse_id && !!d.delivery_date
+  })
+
   // ── Optimize ────────────────────────────────────────────────────────────────
 
   function startOptimize() {
@@ -623,20 +631,87 @@ export default function RoutesPage() {
     if (!todayDeliveries.length || !activeDrivers.length) return
     setStep('loading')
     setDispatched(false)
-    setLoadingMsg('Se geocodifică adresele…')
+    setLoadingMsg('Se rezolvă depozitele pe SKU…')
     try {
+      const adminIdForWh = getUser()?.id
       // Drivers always start the day from their assigned home warehouse —
       // packages are loaded there. Live GPS is for tracking only, not planning.
-      const { data: dbDrivers } = await supabase
-        .from('livra_drivers')
-        .select('id, home_warehouse_id')
-        .in('id', activeDrivers.map(d => d.id))
-      const adminIdForWh = getUser()?.id
-      const { data: warehouses } = await supabase
-        .from('livra_warehouses')
-        .select('id, lat, lng, address, is_default')
-        .eq('company_id', adminIdForWh ?? '')
+      const [{ data: dbDrivers }, { data: warehouses }, { data: inventoryRows }] = await Promise.all([
+        supabase.from('livra_drivers')
+          .select('id, home_warehouse_id')
+          .in('id', activeDrivers.map(d => d.id)),
+        supabase.from('livra_warehouses')
+          .select('id, lat, lng, address, is_default')
+          .eq('company_id', adminIdForWh ?? ''),
+        supabase.from('livra_inventory')
+          .select('sku, warehouse_id, quantity')
+          .eq('company_id', adminIdForWh ?? '')
+          .gt('quantity', 0),
+      ])
       const defaultWh = warehouses?.find(w => w.is_default) ?? warehouses?.[0]
+
+      // Build inventory index: sku → [{ warehouseId, quantity }]
+      const invBySku = new Map<string, { warehouseId: string; quantity: number }[]>()
+      for (const r of (inventoryRows ?? []) as { sku: string; warehouse_id: string; quantity: number }[]) {
+        const list = invBySku.get(r.sku) ?? []
+        list.push({ warehouseId: r.warehouse_id, quantity: r.quantity })
+        invBySku.set(r.sku, list)
+      }
+
+      // Resolve source_warehouse_id from order SKUs.
+      // Returns 'matched' | 'unmatched' (some SKU not in any warehouse) | 'no_skus' (legacy / free-text).
+      type ResolveOutcome = { warehouseId: string | null; reason: 'matched' | 'unmatched' | 'no_skus' }
+      function resolveWarehouse(items: { sku?: string | null }[] | null): ResolveOutcome {
+        const skus = (items ?? []).map(i => (i.sku ?? '').trim()).filter(Boolean)
+        if (!skus.length) return { warehouseId: defaultWh?.id ?? null, reason: 'no_skus' }
+        // Find warehouses that have ALL requested SKUs in stock
+        let candidates: Set<string> | null = null
+        for (const sku of skus) {
+          const here = invBySku.get(sku)
+          if (!here || here.length === 0) return { warehouseId: null, reason: 'unmatched' }
+          const ids = new Set(here.map(h => h.warehouseId))
+          candidates = candidates ? new Set([...candidates].filter(id => ids.has(id))) : ids
+          if (!candidates.size) return { warehouseId: null, reason: 'unmatched' }
+        }
+        if (!candidates || !candidates.size) return { warehouseId: null, reason: 'unmatched' }
+        // Pick the warehouse with the most total stock for these SKUs (tiebreak: default)
+        const ranked = [...candidates].map(wid => {
+          const total = skus.reduce((sum, sku) => {
+            const m = invBySku.get(sku)?.find(h => h.warehouseId === wid)
+            return sum + (m?.quantity ?? 0)
+          }, 0)
+          return { wid, total, isDefault: wid === defaultWh?.id }
+        }).sort((a, b) => (b.total - a.total) || (Number(b.isDefault) - Number(a.isDefault)))
+        return { warehouseId: ranked[0].wid, reason: 'matched' }
+      }
+
+      // Run resolver for each delivery, persist matches, collect unmatched separately.
+      const matched: { delivery: typeof todayDeliveries[number]; sourceWarehouseId: string | null }[] = []
+      const unmatched: { delivery: typeof todayDeliveries[number]; reason: 'unmatched' }[] = []
+      const updatesNeeded: { id: string; source_warehouse_id: string | null }[] = []
+      for (const d of todayDeliveries) {
+        const itemsJson = (d as Delivery & { order_items_json?: { sku?: string | null }[] | null }).order_items_json
+        const existing = (d as Delivery & { source_warehouse_id?: string | null }).source_warehouse_id
+        if (existing) {
+          // Already resolved — trust it
+          matched.push({ delivery: d, sourceWarehouseId: existing })
+          continue
+        }
+        const out = resolveWarehouse(itemsJson ?? null)
+        if (out.reason === 'unmatched') {
+          unmatched.push({ delivery: d, reason: 'unmatched' })
+          continue
+        }
+        matched.push({ delivery: d, sourceWarehouseId: out.warehouseId })
+        if (out.warehouseId) updatesNeeded.push({ id: d.id, source_warehouse_id: out.warehouseId })
+      }
+
+      // Persist newly resolved warehouse IDs (best-effort, parallel)
+      if (updatesNeeded.length) {
+        await Promise.all(updatesNeeded.map(u =>
+          supabase.from('livra_deliveries').update({ source_warehouse_id: u.source_warehouse_id }).eq('id', u.id)
+        ))
+      }
 
       const driverStartPositions = activeDrivers.map(d => {
         const driverRow = dbDrivers?.find(x => x.id === d.id)
@@ -646,19 +721,27 @@ export default function RoutesPage() {
           name: d.name,
           start_lat: wh?.lat ?? null,
           start_lng: wh?.lng ?? null,
+          home_warehouse_id: wh?.id ?? null,
         }
       })
 
-      setLoadingMsg(`Se geocodifică ${todayDeliveries.length} adrese… (${todayDeliveries.length}s estimat)`)
+      if (!matched.length) {
+        setStep('input')
+        setToast(`Toate ${unmatched.length} comenzi au SKU-uri care nu sunt în niciun depozit. Verifică inventarul.`)
+        return
+      }
+
+      setLoadingMsg(`Se geocodifică ${matched.length} adrese… (${matched.length}s estimat)`)
       const { data, error: fnErr } = await supabase.functions.invoke('optimize-routes', {
         body: {
-          deliveries: todayDeliveries.map(d => ({
+          deliveries: matched.map(({ delivery: d, sourceWarehouseId }) => ({
             id: d.id, address: d.address, customer: d.customer,
             phone: d.phone, notes: d.notes,
             package_description: d.package_description ?? '',
             time_window_start: d.time_window_start || null,
             time_window_end:   d.time_window_end   || null,
-            service_time_min:  (d as any).service_time_min ?? null,
+            service_time_min:  (d as Delivery & { service_time_min?: number }).service_time_min ?? null,
+            source_warehouse_id: sourceWarehouseId,
           })),
           drivers: driverStartPositions,
           skip_breaks: false,
@@ -694,11 +777,21 @@ export default function RoutesPage() {
       setSelectedId(routesWithPaths[0]?.driver_id ?? null)
       setStep('results')
       console.log('[optimize-routes] response:', result)
-      const allDeferred = result.deferred ?? []
+      const allDeferred = [
+        ...(result.deferred ?? []),
+        ...unmatched.map(u => ({
+          delivery_id: u.delivery.id,
+          customer: u.delivery.customer,
+          address: u.delivery.address,
+          reason: 'unmatched_inventory',
+        })),
+      ]
       if (allDeferred.length) {
         const labels = allDeferred.map(d => {
           const reason = (d.reason === 'geocode_failed' || d.reason === 'geocode failed') ? 'adresă negăsită'
                        : (d.reason === 'no_capacity'   || d.reason === 'no capacity')   ? 'fără capacitate'
+                       : d.reason === 'unmatched_inventory'                              ? 'SKU lipsă din inventar'
+                       : d.reason === 'no_driver_for_warehouse'                          ? 'niciun șofer pentru depozit'
                        : d.reason || 'amânat'
           return `${d.address} (${reason})`
         }).join(' · ')
@@ -954,8 +1047,10 @@ export default function RoutesPage() {
 
             <div className={`${resultsTab === 'routes' ? 'flex w-full' : 'hidden'} md:flex md:w-72 flex-shrink-0 flex-col border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto`}>
               {result.deferred?.length > 0 && (() => {
-                const geocodeFails = result.deferred.filter(d => d.reason === 'geocode_failed' || d.reason === 'geocode failed')
-                const noCapacity = result.deferred.filter(d => d.reason === 'no_capacity' || d.reason === 'no capacity')
+                const geocodeFails   = result.deferred.filter(d => d.reason === 'geocode_failed' || d.reason === 'geocode failed')
+                const noCapacity     = result.deferred.filter(d => d.reason === 'no_capacity' || d.reason === 'no capacity')
+                const noDriver       = result.deferred.filter(d => d.reason === 'no_driver_for_warehouse')
+                const noSku          = result.deferred.filter(d => d.reason === 'unmatched_inventory')
                 return (
                   <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50 space-y-2">
                     {geocodeFails.length > 0 && (
@@ -991,6 +1086,43 @@ export default function RoutesPage() {
                         </div>
                         <div className="space-y-0.5 max-h-24 overflow-y-auto">
                           {noCapacity.map(d => (
+                            <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
+                              • {d.customer} | {d.address}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {noDriver.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                          <span className="text-[12px] font-semibold text-purple-700 dark:text-purple-400">
+                            {noDriver.length} {noDriver.length === 1 ? 'comandă' : 'comenzi'} fără șofer la depozitul corect
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-amber-600/70 dark:text-amber-500/70 mb-1">
+                          Niciun șofer activ nu este asignat depozitului acestor produse.
+                        </div>
+                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
+                          {noDriver.map(d => (
+                            <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
+                              • {d.customer} | {d.address}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {noSku.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle size={12} className="text-amber-700 dark:text-amber-400 flex-shrink-0" />
+                          <span className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
+                            {noSku.length} {noSku.length === 1 ? 'comandă' : 'comenzi'} cu SKU lipsă din inventar
+                          </span>
+                        </div>
+                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
+                          {noSku.map(d => (
                             <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
                               • {d.customer} | {d.address}
                             </div>
@@ -1225,7 +1357,31 @@ export default function RoutesPage() {
                 const numDrivers = activeDrivers.length || 1
                 const cap = dayCapacity(numDrivers)
 
-                return dateKeys.map(dateKey => {
+                return (
+                  <>
+                    {unmatchedOrders.length > 0 && (
+                      <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle size={13} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
+                              {unmatchedOrders.length} {unmatchedOrders.length === 1 ? 'comandă' : 'comenzi'} cu SKU lipsă din inventar
+                            </div>
+                            <div className="text-[11px] text-amber-600/80 dark:text-amber-500/80 mt-0.5">
+                              Vor fi excluse din optimizare. Urcă inventarul în pagina Depozite.
+                            </div>
+                            <div className="mt-1.5 space-y-0.5">
+                              {unmatchedOrders.map(d => (
+                                <div key={d.id} className="text-[11px] text-amber-700 dark:text-amber-400 truncate">
+                                  • {d.customer} — {(d.order_items_json ?? []).map(i => i.sku).filter(Boolean).join(', ')}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {dateKeys.map(dateKey => {
                   const rows = groups.get(dateKey)!
                   const isPast = isPastISO(dateKey)
                   const collapsed = collapsedDates.has(dateKey) || isPast
@@ -1303,7 +1459,9 @@ export default function RoutesPage() {
               ))}
                     </Fragment>
                   )
-                })
+                })}
+                  </>
+                )
               })()}
 
               {/* "Livrate" tab | completed + failed deliveries from the last 30 days */}

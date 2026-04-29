@@ -220,6 +220,43 @@ export default function SalesNewOrder() {
       ? lines.map(l => `${l.qty}x ${l.name} [${l.sku}]`).join(', ')
       : null
     const itemsJson = lines.length ? lines.map(l => ({ sku: l.sku, name: l.name, qty: l.qty })) : null
+
+    // Resolve source warehouse from selected SKUs
+    let source_warehouse_id: string | null = null
+    if (lines.length > 0 && user?.company_id) {
+      const skus = lines.map(l => l.sku)
+      const { data: invRows } = await supabase
+        .from('livra_inventory')
+        .select('sku, warehouse_id, quantity')
+        .eq('company_id', user.company_id)
+        .in('sku', skus)
+        .gt('quantity', 0)
+      if (invRows?.length) {
+        const invBySku = new Map<string, { warehouseId: string; quantity: number }[]>()
+        for (const r of invRows as { sku: string; warehouse_id: string; quantity: number }[]) {
+          const list = invBySku.get(r.sku) ?? []
+          list.push({ warehouseId: r.warehouse_id, quantity: r.quantity })
+          invBySku.set(r.sku, list)
+        }
+        let candidates: Set<string> | null = null
+        let allFound = true
+        for (const sku of skus) {
+          const here = invBySku.get(sku)
+          if (!here?.length) { allFound = false; break }
+          const ids = new Set(here.map(h => h.warehouseId))
+          candidates = candidates ? new Set([...candidates].filter(id => ids.has(id))) : ids
+          if (!candidates.size) { allFound = false; break }
+        }
+        if (allFound && candidates?.size) {
+          const ranked = [...candidates].map(wid => ({
+            wid,
+            total: skus.reduce((s, sku) => s + (invBySku.get(sku)?.find(h => h.warehouseId === wid)?.quantity ?? 0), 0),
+          })).sort((a, b) => b.total - a.total)
+          source_warehouse_id = ranked[0].wid
+        }
+      }
+    }
+
     const { error: dbErr } = await supabase.from('livra_deliveries').insert({
       customer:            form.customer.trim(),
       phone:               form.phone.trim(),
@@ -236,6 +273,7 @@ export default function SalesNewOrder() {
       status:              'upcoming',
       assigned_to:         user?.id ?? null,
       company_id:          user?.company_id ?? null,
+      source_warehouse_id: source_warehouse_id,
     })
     setSaving(false)
 
