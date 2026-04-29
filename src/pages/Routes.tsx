@@ -513,27 +513,49 @@ export default function RoutesPage() {
   const [resultsTab, setResultsTab]         = useState<'map' | 'routes'>('map')
 
   useEffect(() => {
+    const mapDelivery = (r: any) => ({
+      id: r.id,
+      customer: r.customer,
+      phone: r.phone ?? '',
+      address: r.address,
+      notes: r.notes ?? '',
+      package_description: r.package_description ?? '',
+      time_window_start: r.time_window_start ?? undefined,
+      time_window_end:   r.time_window_end   ?? undefined,
+      delivery_date:     r.delivery_date     ?? undefined,
+      status:            r.status            ?? 'upcoming',
+    })
+
     supabase
       .from('livra_deliveries')
       .select('*')
-      // Show both not-yet-dispatched AND in-flight orders. The "Livrate" tab
-      // handles the rest (delivered + failed).
       .in('status', ['upcoming', 'dispatched'])
       .order('created_at')
       .then(({ data }) => {
-        if (data) setDeliveries(data.map(r => ({
-          id: r.id,
-          customer: r.customer,
-          phone: r.phone ?? '',
-          address: r.address,
-          notes: r.notes ?? '',
-          package_description: r.package_description ?? '',
-          time_window_start: r.time_window_start ?? undefined,
-          time_window_end:   r.time_window_end   ?? undefined,
-          delivery_date:     r.delivery_date     ?? undefined,
-          status:            r.status            ?? 'upcoming',
-        })))
+        if (data) setDeliveries(data.map(mapDelivery))
       })
+
+    const channel = supabase
+      .channel('livra_deliveries_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_deliveries' }, payload => {
+        if (payload.eventType === 'INSERT') {
+          const r = payload.new
+          if (['upcoming', 'dispatched'].includes(r.status)) {
+            setDeliveries(prev => [...prev, mapDelivery(r)])
+          }
+        } else if (payload.eventType === 'UPDATE') {
+          const r = payload.new
+          if (['upcoming', 'dispatched'].includes(r.status)) {
+            setDeliveries(prev => prev.map(d => d.id === r.id ? mapDelivery(r) : d))
+          } else {
+            setDeliveries(prev => prev.filter(d => d.id !== r.id))
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setDeliveries(prev => prev.filter(d => d.id !== payload.old.id))
+        }
+      })
+      .subscribe()
+
     supabase
       .from('livra_drivers')
       .select('id, name, status')
@@ -571,6 +593,8 @@ export default function RoutesPage() {
         }))
         setFinishedStops(rows)
       })
+
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   const activeDrivers = drivers.filter(d => d.enabled)
