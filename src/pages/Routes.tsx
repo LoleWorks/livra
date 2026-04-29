@@ -814,15 +814,16 @@ export default function RoutesPage() {
         },
       })
       if (fnErr) throw new Error(fnErr.message)
-      if (data?.error) throw new Error(data.error)
-      if (!data.routes?.length) {
+      const result = data as OptimizeResult
+      if ((result as any)?.error) throw new Error((result as any).error)
+      if (!result.routes?.length) {
         setStep('input')
         setToast('Nicio rută generată. Verificați adresele sau serverul.')
         return
       }
       setLoadingMsg('Se calculează traseele pe șosea…')
       const routesWithPaths = await Promise.all(
-        data.routes.map(async (route, idx) => {
+        result.routes.map(async (route, idx) => {
           const startLat = route.start_lat ?? 47.0245
           const startLng = route.start_lng ?? 28.8322
           const waypoints: [number, number][] = [
@@ -833,7 +834,7 @@ export default function RoutesPage() {
           return { ...route, start_lat: startLat, start_lng: startLng, path: path ?? undefined, color: DRIVER_COLORS[idx % DRIVER_COLORS.length] }
         })
       )
-      setResult({ ...data, routes: routesWithPaths })
+      setResult({ ...result, routes: routesWithPaths })
       setSelectedId(routesWithPaths[0]?.driver_id ?? null)
       setStep('results')
     } catch (e) {
