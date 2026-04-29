@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
-import { useState, useEffect } from 'react'
-import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Plus, X, Check, RefreshCw, Trash2, Zap, Globe, AlertCircle, ChevronRight, Link2, Route, ShoppingCart, ShoppingBag, Store } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 type Platform = 'opencart' | 'woocommerce'
@@ -19,18 +19,18 @@ type Connection = {
 
 type Step = 'platform' | 'credentials' | 'testing' | 'done'
 
-const PLATFORM_META: Record<Platform, { label: string; color: string; bg: string; logo: string }> = {
+const PLATFORM_META: Record<Platform, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   opencart: {
     label: 'OpenCart',
     color: 'text-brand-orange dark:text-orange-400',
     bg: 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-blue-800',
-    logo: '🛒',
+    icon: <ShoppingCart size={20} />,
   },
   woocommerce: {
     label: 'WooCommerce',
     color: 'text-violet-600 dark:text-violet-400',
     bg: 'bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800',
-    logo: '🛍',
+    icon: <ShoppingBag size={20} />,
   },
 }
 
@@ -218,7 +218,7 @@ export default function Integrations() {
                       onClick={() => selectPlatform(p)}
                       className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all hover:scale-[1.01] active:scale-[0.99] ${m.bg}`}
                     >
-                      <span className="text-2xl">{m.logo}</span>
+                      <span className={m.color}>{m.icon}</span>
                       <div className="flex-1">
                         <div className={`text-[13px] font-semibold ${m.color}`}>{m.label}</div>
                         <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
@@ -230,7 +230,7 @@ export default function Integrations() {
                   )
                 })}
                 <div className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700 opacity-50">
-                  <span className="text-2xl">🏪</span>
+                  <Store size={20} className="text-zinc-400 dark:text-zinc-500" />
                   <div>
                     <div className="text-[13px] font-semibold text-zinc-500 dark:text-zinc-400">Shopify, 1C, altele</div>
                     <div className="text-[11px] text-zinc-400 dark:text-zinc-500">În curând</div>
@@ -357,7 +357,7 @@ export default function Integrations() {
                   const m = PLATFORM_META[c.platform]
                   return (
                     <div key={c.id} className="flex items-center gap-4 px-4 py-3.5 border-b border-zinc-100 dark:border-zinc-800/60 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
-                      <span className="text-xl">{m.logo}</span>
+                      <span className={m.color}>{m.icon}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">{c.name}</span>

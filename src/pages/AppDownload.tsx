@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import {
   Bell, Package, CheckCircle, Star, Navigation, Clock,
   History, MapPin, Zap, AlertCircle, Phone,
-  XCircle, ChevronDown, ChevronUp, ArrowRight,
+  XCircle, ChevronDown, ChevronUp, ArrowRight, X, Check,
 } from 'lucide-react'
 
 // ── Logo ──────────────────────────────────────────────────────────────────────
@@ -510,19 +510,19 @@ export default function AppDownload() {
                   <p className="text-sm text-gray-500 dark:text-gray-400 font-bold mb-2">FĂ Ră LIVRA</p>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
                     <p className="flex items-start gap-2">
-                      <span className="text-red-500">✗</span>
+                      <X size={14} className="text-red-500 flex-shrink-0" />
                       <span>Curierul nu găsește adresa</span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-red-500">✗</span>
+                      <X size={14} className="text-red-500 flex-shrink-0" />
                       <span>Sună tu de 3 ori</span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-red-500">✗</span>
+                      <X size={14} className="text-red-500 flex-shrink-0" />
                       <span>Pierde 20 de minute</span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-red-500">✗</span>
+                      <X size={14} className="text-red-500 flex-shrink-0" />
                       <span>Livrare ratată</span>
                     </p>
                   </div>
@@ -531,19 +531,19 @@ export default function AppDownload() {
                   <p className="text-sm text-brand-orange font-bold mb-2">CU LIVRA</p>
                   <div className="bg-emerald-50 dark:bg-emerald-900/30 rounded-lg p-4 space-y-2 text-sm text-emerald-700 dark:text-emerald-300">
                     <p className="flex items-start gap-2">
-                      <span className="text-emerald-500">✓</span>
+                      <Check size={14} className="text-emerald-500 flex-shrink-0" />
                       <span>Marchezi pe hartă exact unde stai</span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-emerald-500">✓</span>
+                      <Check size={14} className="text-emerald-500 flex-shrink-0" />
                       <span>Curierul navigă direct</span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-emerald-500">✓</span>
+                      <Check size={14} className="text-emerald-500 flex-shrink-0" />
                       <span>Zero telefoane</span>
                     </p>
                     <p className="flex items-start gap-2">
-                      <span className="text-emerald-500">✓</span>
+                      <Check size={14} className="text-emerald-500 flex-shrink-0" />
                       <span>Livrare de prima dată</span>
                     </p>
                   </div>

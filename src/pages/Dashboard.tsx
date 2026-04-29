@@ -4,7 +4,7 @@ import { MapContainer, Tooltip, Polyline, Marker, useMap } from 'react-leaflet'
 import { YandexMapLayer, YandexSatLayer, YandexTrafficLayer } from '../components/YandexLayer'
 import MoldovaBorder from '../components/MoldovaBorder'
 import L from 'leaflet'
-import { Package, CheckCircle, XCircle, Clock, MoreHorizontal, Layers, Radio, ArrowLeft, MapPin, AlertTriangle, Phone, RotateCcw, Ban } from 'lucide-react'
+import { Package, CheckCircle, XCircle, Clock, MoreHorizontal, Layers, Radio, ArrowLeft, MapPin, AlertTriangle, Phone, RotateCcw, Ban, Check } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 
@@ -498,7 +498,7 @@ export default function Dashboard() {
                       stop.status === 'next' ? 'bg-brand-orange text-white' :
                       'border border-zinc-200 dark:border-zinc-700 text-zinc-400 dark:text-zinc-500'
                     }`}>
-                      {stop.status === 'done' ? '✓' : i + 1}
+                      {stop.status === 'done' ? <Check size={9} /> : i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className={`text-[12px] font-medium truncate ${
@@ -635,7 +635,7 @@ export default function Dashboard() {
 
                       {(item.status === 'rescheduled' || item.status === 'cancelled') && (
                         <div className={`text-center text-[11px] font-semibold py-1 rounded-lg ${item.status === 'rescheduled' ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'}`}>
-                          {item.status === 'rescheduled' ? 'Reprogramat ✓' : 'Anulat'}
+                          {item.status === 'rescheduled' ? <span className="flex items-center justify-center gap-1"><Check size={11} /> Reprogramat</span> : 'Anulat'}
                         </div>
                       )}
                     </div>

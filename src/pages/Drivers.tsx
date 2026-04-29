@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle } from 'lucide-react'
+import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle, Truck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 // ── Sales Manager types ───────────────────────────────────────────────────────
@@ -694,7 +694,7 @@ export default function Drivers() {
           {/* ── Drivers tab ──────────────────────────────────────────────── */}
           {tab === 'soferi' && (drivers.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-zinc-400 dark:text-zinc-600">
-              <div className="text-4xl">🚚</div>
+              <Truck size={40} className="text-zinc-300 dark:text-zinc-700" />
               <p className="text-[13px]">Niciun șofer adăugat încă</p>
               <button onClick={openAdd} className="flex items-center gap-1.5 text-[12px] text-brand-orange dark:text-orange-400 hover:underline">
                 <Plus size={12} /> Adaugă primul șofer

@@ -7,6 +7,7 @@ import L from 'leaflet'
 import {
   Upload, Wand2, Plus, Trash2, MapPin, Clock,
   ChevronRight, Link2, CheckCircle2, X, Copy, Check, Radio,
+  Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Phone, Truck,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -66,9 +67,11 @@ function stopIcon(num: number, color: string) {
 }
 
 function breakIcon(kind: 'lunch_break' | 'fuel_break') {
-  const emoji = kind === 'lunch_break' ? '🍽' : '⛽'
+  const svg = kind === 'lunch_break'
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="15" y2="22"/><line x1="4" y1="9" x2="14" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg>`
   return L.divIcon({
-    html: `<div style="width:24px;height:24px;background:#f59e0b;color:white;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${emoji}</div>`,
+    html: `<div style="width:24px;height:24px;background:#f59e0b;color:white;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${svg}</div>`,
     iconSize: [24, 24], iconAnchor: [12, 12], className: '',
   })
 }
@@ -1057,8 +1060,9 @@ export default function RoutesPage() {
               {result.deferred?.length > 0 && (
                 <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50">
                   <div className="flex items-center gap-2 mb-1.5">
+                    <AlertTriangle size={12} className="text-amber-700 dark:text-amber-400 flex-shrink-0" />
                     <span className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
-                      ⚠ {result.deferred.length} {result.deferred.length === 1 ? 'livrare amânată' : 'livrări amânate'} pentru mâine
+                      {result.deferred.length} {result.deferred.length === 1 ? 'livrare amânată' : 'livrări amânate'} pentru mâine
                     </span>
                   </div>
                   <div className="text-[10px] text-amber-600/70 dark:text-amber-500/70 mb-2">
@@ -1096,8 +1100,8 @@ export default function RoutesPage() {
                       const isLunch = stop.type === 'lunch_break'
                       return (
                         <div key={stop.delivery_id} className="flex items-start gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800/50 bg-amber-50/60 dark:bg-amber-950/20">
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 text-[11px]">
-                            {isLunch ? '🍽' : '⛽'}
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
+                            {isLunch ? <UtensilsCrossed size={11} /> : <Fuel size={11} />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -1121,7 +1125,7 @@ export default function RoutesPage() {
                             {stop.arrival_time && <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">{stop.arrival_time}</span>}
                           </div>
                           <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{stop.address}</div>
-                          {stop.package_description && <div className="text-[11px] text-brand-orange dark:text-orange-400 truncate mt-0.5">📦 {stop.package_description}</div>}
+                          {stop.package_description && <div className="flex items-center gap-1 text-[11px] text-brand-orange dark:text-orange-400 truncate mt-0.5"><Package size={9} className="flex-shrink-0" /><span className="truncate">{stop.package_description}</span></div>}
                           {stop.phone && <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{stop.phone}</div>}
                         </div>
                       </div>
@@ -1328,8 +1332,10 @@ export default function RoutesPage() {
                       <div>
                         <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block flex items-center justify-between">
                           <span>Data livrării</span>
-                          <span className={`font-mono ${state==='full' ? 'text-red-600 dark:text-red-400 font-semibold' : state==='warn' ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400'}`}>
-                            {used}/{cap} {state==='full' ? '🚫 plin' : state==='warn' ? '⚠ aproape plin' : ''}
+                          <span className={`flex items-center gap-1 font-mono ${state==='full' ? 'text-red-600 dark:text-red-400 font-semibold' : state==='warn' ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400'}`}>
+                            <span>{used}/{cap}</span>
+                            {state==='full' && <><Ban size={9} /><span>plin</span></>}
+                            {state==='warn' && <><AlertTriangle size={9} /><span>aproape plin</span></>}
                           </span>
                         </label>
                         <input
@@ -1372,11 +1378,12 @@ export default function RoutesPage() {
                     const state = capacityState(winUsed, winCap)
                     if (state === 'ok') return null
                     return (
-                      <div className={`text-[10px] font-semibold px-2 py-1 rounded ${
+                      <div className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded ${
                         state === 'full' ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400' :
                                            'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
                       }`}>
-                        Fereastra {newDel.time_window_start}–{newDel.time_window_end}: {winUsed}/{winCap} {state === 'full' ? '🚫 plin' : '⚠ aproape plin'}
+                        <span>Fereastra {newDel.time_window_start}–{newDel.time_window_end}: {winUsed}/{winCap}</span>
+                        {state === 'full' ? <><Ban size={9} /><span>plin</span></> : <><AlertTriangle size={9} /><span>aproape plin</span></>}
                       </div>
                     )
                   })()}
@@ -1401,7 +1408,7 @@ export default function RoutesPage() {
                 if (!newOrders.length) {
                   return (
                     <div className="px-6 py-12 text-center">
-                      <div className="text-[32px] mb-2">📭</div>
+                      <Inbox size={32} className="mx-auto mb-2 text-zinc-300 dark:text-zinc-700" />
                       <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
                         Nicio comandă nouă de procesat
                       </p>
@@ -1413,8 +1420,9 @@ export default function RoutesPage() {
                 }
                 return (
                   <>
-                    <div className="px-4 py-2.5 bg-amber-50/50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/30 text-[11px] text-amber-700 dark:text-amber-400">
-                      ☎ Sună clientul, apoi setează data și fereastra orară pentru a programa livrarea
+                    <div className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-50/50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/30 text-[11px] text-amber-700 dark:text-amber-400">
+                      <Phone size={11} className="flex-shrink-0" />
+                      <span>Sună clientul, apoi setează data și fereastra orară pentru a programa livrarea</span>
                     </div>
                     {newOrders.map((d, i) => (
                       <Fragment key={d.id}>
@@ -1542,13 +1550,13 @@ export default function RoutesPage() {
                           {rows.length} {rows.length === 1 ? 'livrare' : 'livrări'}
                         </span>
                         {dateKey && state === 'full' && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400">
-                            🚫 plin {rows.length}/{cap}
+                          <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400">
+                            <Ban size={9} /> plin {rows.length}/{cap}
                           </span>
                         )}
                         {dateKey && state === 'warn' && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400">
-                            ⚠ {rows.length}/{cap}
+                          <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400">
+                            <AlertTriangle size={9} /> {rows.length}/{cap}
                           </span>
                         )}
                       </button>
@@ -1565,8 +1573,8 @@ export default function RoutesPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200">{d.customer}</span>
                         {d.status === 'dispatched' && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400">
-                            🚐 În drum
+                          <span className="flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400">
+                            <Truck size={9} /> În drum
                           </span>
                         )}
                         {(d.time_window_start && d.time_window_end) && (
@@ -1578,7 +1586,7 @@ export default function RoutesPage() {
                       <div className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
                         <MapPin size={9} />{d.address}
                       </div>
-                      {d.package_description && <div className="text-[11px] text-brand-orange dark:text-orange-400 mt-0.5">📦 {d.package_description}</div>}
+                      {d.package_description && <div className="flex items-center gap-1 text-[11px] text-brand-orange dark:text-orange-400 mt-0.5"><Package size={9} className="flex-shrink-0" /><span className="truncate">{d.package_description}</span></div>}
                       {d.notes && <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 italic">{d.notes}</div>}
                     </div>
                     <span className="text-[11px] text-zinc-400 dark:text-zinc-500 flex-shrink-0">{d.phone}</span>
@@ -1661,7 +1669,7 @@ export default function RoutesPage() {
                 if (finishedStops.length === 0) {
                   return (
                     <div className="px-6 py-12 text-center">
-                      <div className="text-[32px] mb-2">📋</div>
+                      <ClipboardList size={32} className="mx-auto mb-2 text-zinc-300 dark:text-zinc-700" />
                       <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
                         Încă nicio livrare finalizată
                       </p>
@@ -1723,7 +1731,7 @@ export default function RoutesPage() {
                                     <span className="text-[10px] text-zinc-400 dark:text-zinc-500">· {s.driver_name}</span>
                                   </div>
                                   <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{s.address}</div>
-                                  {s.package_description && <div className="text-[11px] text-brand-orange dark:text-orange-400 truncate mt-0.5">📦 {s.package_description}</div>}
+                                  {s.package_description && <div className="flex items-center gap-1 text-[11px] text-brand-orange dark:text-orange-400 truncate mt-0.5"><Package size={9} className="flex-shrink-0" /><span className="truncate">{s.package_description}</span></div>}
                                   {!isDone && s.fail_reason && (
                                     <div className="text-[11px] text-red-600 dark:text-red-400 mt-0.5 italic">
                                       Motiv: {s.fail_reason}
