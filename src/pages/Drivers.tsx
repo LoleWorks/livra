@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle, Truck } from 'lucide-react'
+import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle, Truck, ChevronDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getUser } from '../lib/auth'
 
@@ -161,7 +161,9 @@ export default function Drivers() {
   const [showModal, setShowModal] = useState(false)
   const [editTarget, setEditTarget] = useState<Driver | null>(null)
   const [form, setForm] = useState({ name: '', phone: '', pin: '', home_warehouse_id: '' as string | '' })
-  const [warehouses, setWarehouses] = useState<{ id: string, name: string, is_default: boolean }[]>([])
+  const [warehouses, setWarehouses] = useState<{ id: string, name: string, address: string, is_default: boolean }[]>([])
+  const [warehouseDropdownOpen, setWarehouseDropdownOpen] = useState(false)
+  const warehouseDropdownRef = useRef<HTMLDivElement>(null)
   const [pinError, setPinError] = useState('')
 
   // ── Sales managers state ───────────────────────────────────────────────────
@@ -223,8 +225,8 @@ export default function Drivers() {
       .then(({ data }) => { if (data) setManagers(data as SalesManager[]) })
 
     // Load warehouses for home-warehouse dropdown
-    supabase.from('livra_warehouses').select('id, name, is_default').order('is_default', { ascending: false })
-      .then(({ data }) => { if (data) setWarehouses(data as { id: string, name: string, is_default: boolean }[]) })
+    supabase.from('livra_warehouses').select('id, name, address, is_default').order('is_default', { ascending: false })
+      .then(({ data }) => { if (data) setWarehouses(data as { id: string, name: string, address: string, is_default: boolean }[]) })
 
     const refresh = setInterval(fetchAll, 30_000)
 
@@ -255,6 +257,17 @@ export default function Drivers() {
   }, [])
   // `now` is referenced in render so eslint doesn't complain that it's unused
   void now
+
+  useEffect(() => {
+    if (!warehouseDropdownOpen) return
+    function onClick(e: MouseEvent) {
+      if (warehouseDropdownRef.current && !warehouseDropdownRef.current.contains(e.target as Node)) {
+        setWarehouseDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [warehouseDropdownOpen])
 
   function openAdd() {
     setEditTarget(null)
@@ -437,21 +450,64 @@ export default function Drivers() {
                   className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                 />
               </div>
-              {warehouses.length > 0 && (
-                <div>
-                  <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">Depozit</label>
-                  <select
-                    value={form.home_warehouse_id}
-                    onChange={e => setForm(p => ({ ...p, home_warehouse_id: e.target.value }))}
-                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    {warehouses.map(w => (
-                      <option key={w.id} value={w.id}>{w.name}{w.is_default ? ' (implicit)' : ''}</option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">De aici pleacă șoferul în fiecare zi cu coletele încărcate.</p>
-                </div>
-              )}
+              {warehouses.length > 0 && (() => {
+                const sel = warehouses.find(w => w.id === form.home_warehouse_id)
+                return (
+                  <div>
+                    <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">Depozit</label>
+                    <div ref={warehouseDropdownRef} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setWarehouseDropdownOpen(o => !o)}
+                        className="w-full flex items-center justify-between gap-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-left focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      >
+                        <div className="min-w-0 flex-1">
+                          {sel ? (
+                            <>
+                              <div className="text-[13px] text-zinc-800 dark:text-zinc-200 truncate flex items-center gap-1.5">
+                                {sel.name}
+                                {sel.is_default && (
+                                  <span className="text-[9px] px-1 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 rounded uppercase tracking-wider font-semibold flex-shrink-0">Implicit</span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">{sel.address}</div>
+                            </>
+                          ) : (
+                            <span className="text-[13px] text-zinc-400">Alege depozit…</span>
+                          )}
+                        </div>
+                        <ChevronDown size={14} className={`text-zinc-400 flex-shrink-0 transition-transform ${warehouseDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      {warehouseDropdownOpen && (
+                        <div className="absolute z-50 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg">
+                          {warehouses.map(w => (
+                            <button
+                              key={w.id}
+                              type="button"
+                              onClick={() => { setForm(p => ({ ...p, home_warehouse_id: w.id })); setWarehouseDropdownOpen(false) }}
+                              className={`w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors ${form.home_warehouse_id === w.id ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-[13px] text-zinc-800 dark:text-zinc-200 truncate flex items-center gap-1.5">
+                                    {w.name}
+                                    {w.is_default && (
+                                      <span className="text-[9px] px-1 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 rounded uppercase tracking-wider font-semibold flex-shrink-0">Implicit</span>
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">{w.address}</div>
+                                </div>
+                                {form.home_warehouse_id === w.id && <Check size={13} className="text-blue-500 flex-shrink-0" />}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">De aici pleacă șoferul în fiecare zi cu coletele încărcate.</p>
+                  </div>
+                )
+              })()}
               <div>
                 <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">
                   PIN aplicație {editTarget ? '(lasă gol pentru a păstra)' : '*'}
