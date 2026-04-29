@@ -116,21 +116,18 @@ export default function Integrations() {
     setTestError('')
 
     try {
-      const res = await fetch('http://localhost:8000/connections/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ platform, ...form }),
+      const { data, error } = await supabase.functions.invoke('test-connection', {
+        body: { platform, ...form },
       })
-      const data = await res.json()
-      if (data.ok) {
-        setStep('done')
-      } else {
-        setTestError(data.error || 'Conexiune eșuată')
+      if (error || !data?.ok) {
+        setTestError(data?.error || error?.message || 'Conexiune eșuată')
         setStep('credentials')
+      } else {
+        setStep('done')
       }
-    } catch {
-      // Simulate success in dev when backend not running
-      setStep('done')
+    } catch (e: any) {
+      setTestError(e.message || 'Conexiune eșuată')
+      setStep('credentials')
     }
   }
 
@@ -157,10 +154,8 @@ export default function Integrations() {
   async function syncNow(id: string) {
     setSyncing(id)
     try {
-      await fetch(`http://localhost:8000/connections/${id}/sync`, { method: 'POST' })
+      await supabase.functions.invoke('sync-connection', { body: { connection_id: id } })
     } catch { /* ignore */ }
-    const now = new Date().toISOString()
-    await supabase.from('livra_integrations').update({ last_sync: now }).eq('id', id)
     setConnections(prev => prev.map(c => c.id === id ? { ...c, lastSync: 'acum' } : c))
     setTimeout(() => setSyncing(null), 1200)
   }

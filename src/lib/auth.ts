@@ -1,6 +1,5 @@
 import { supabase } from './supabase'
 
-export const API = 'http://localhost:8000'
 
 export type AppUser = {
   id: string

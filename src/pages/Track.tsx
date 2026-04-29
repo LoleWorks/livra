@@ -5,7 +5,7 @@ import { MapContainer, Marker, useMap } from 'react-leaflet'
 import { YandexMapLayer } from '../components/YandexLayer'
 import L from 'leaflet'
 import { MapPin, Package, AlertCircle, CheckCircle2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
-import { API } from '../lib/auth'
+import { supabase } from '../lib/supabase'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -213,13 +213,25 @@ export default function Track() {
   async function load() {
     if (!token) return
     try {
-      const res = await fetch(`${API}/track/${token}`)
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        setError(body.detail ?? 'Comanda nu a fost găsită.')
+      const { data: delivery, error } = await supabase
+        .from('livra_deliveries')
+        .select('*')
+        .eq('tracking_token', token)
+        .single()
+      if (error || !delivery) {
+        setError('Comanda nu a fost găsită.')
         return
       }
-      setData(await res.json())
+      let driver_location = null
+      if (delivery.driver_id) {
+        const { data: loc } = await supabase
+          .from('livra_driver_locations')
+          .select('lat, lng, updated_at')
+          .eq('driver_id', delivery.driver_id)
+          .single()
+        if (loc) driver_location = loc
+      }
+      setData({ ...delivery, driver_location })
     } catch {
       setError('Nu s-a putut încărca informația. Încearcă din nou.')
     }

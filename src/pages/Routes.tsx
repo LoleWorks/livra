@@ -36,7 +36,7 @@ type DriverConfig = { id: string; name: string; enabled: boolean }
 const DRIVER_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4']
 
 
-const WEBHOOK_URL = 'http://localhost:8002/webhook/orders'
+const WEBHOOK_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/webhook-orders`
 const WEBHOOK_SAMPLE = `{
   "order_id": "ORD-001",
   "customer_name": "Maria Ionescu",
@@ -718,24 +718,30 @@ export default function RoutesPage() {
   async function openWebhook() {
     setShowWebhook(true)
     try {
-      const res = await fetch('http://localhost:8002/webhook/pending')
-      const data = await res.json()
-      setPendingCount(data.deliveries?.length ?? 0)
+      const { count, error } = await supabase
+        .from('livra_webhook_orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+      setPendingCount(error ? null : (count ?? 0))
     } catch { setPendingCount(null) }
   }
 
   async function importPending() {
     try {
-      const res = await fetch('http://localhost:8002/webhook/pending')
-      const data = await res.json()
-      const rows = (data.deliveries ?? []).map((o: any) => ({
-        customer: o.customer, phone: o.phone, address: o.address, notes: o.notes,
-        status: 'upcoming',
+      const { data: pending } = await supabase
+        .from('livra_webhook_orders')
+        .select('*')
+        .eq('status', 'pending')
+      const rows = (pending ?? []).map((o: any) => ({
+        customer: o.customer_name, phone: o.customer_phone, address: o.delivery_address,
+        notes: o.notes, status: 'upcoming',
       }))
       if (rows.length) {
-        // Persist to Supabase (no delivery_date → lands in "Comenzi noi")
         const { data: inserted } = await supabase.from('livra_deliveries').insert(rows).select()
-        await fetch('http://localhost:8002/webhook/pending', { method: 'DELETE' })
+        await supabase
+          .from('livra_webhook_orders')
+          .update({ status: 'imported' })
+          .eq('status', 'pending')
         if (inserted?.length) {
           setDeliveries(prev => [...prev, ...inserted.map(r => ({
             id: r.id, customer: r.customer, phone: r.phone ?? '',
@@ -747,7 +753,7 @@ export default function RoutesPage() {
         setShowWebhook(false)
         setActiveTab('new')
       }
-    } catch { setToast('Serverul nu este pornit pe portul 8002') }
+    } catch { setToast('Eroare la importul comenzilor') }
   }
 
   function copyToClipboard(text: string, key: 'url' | 'payload') {
@@ -793,10 +799,8 @@ export default function RoutesPage() {
       })
 
       setLoadingMsg(`Se geocodifică ${todayDeliveries.length} adrese… (${todayDeliveries.length}s estimat)`)
-      const res = await fetch('http://localhost:8002/optimize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data, error: fnErr } = await supabase.functions.invoke('optimize-routes', {
+        body: {
           deliveries: todayDeliveries.map(d => ({
             id: d.id, address: d.address, customer: d.customer,
             phone: d.phone, notes: d.notes,
@@ -807,13 +811,10 @@ export default function RoutesPage() {
           drivers: driverStartPositions,
           skip_breaks: false,
           shift_start_time: shiftStart,
-        }),
+        },
       })
-      if (!res.ok) {
-        const err = await res.text()
-        throw new Error(err)
-      }
-      const data: OptimizeResult = await res.json()
+      if (fnErr) throw new Error(fnErr.message)
+      if (data?.error) throw new Error(data.error)
       if (!data.routes?.length) {
         setStep('input')
         setToast('Nicio rută generată. Verificați adresele sau serverul.')
