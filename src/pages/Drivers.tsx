@@ -614,9 +614,9 @@ export default function Drivers() {
       )}
 
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
+        <div className="flex items-center justify-between px-4 md:px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 gap-2">
           {/* Tab switcher */}
-          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5">
+          <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 min-w-0 overflow-x-auto scrollbar-none">
             <button
               onClick={() => setTab('soferi')}
               className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors ${tab === 'soferi' ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}`}
@@ -627,22 +627,22 @@ export default function Drivers() {
               onClick={() => setTab('agenti')}
               className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors ${tab === 'agenti' ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'}`}
             >
-              Agenți de vânzări ({managers.length})
+              <span className="hidden sm:inline">Agenți de vânzări</span><span className="sm:hidden">Agenți</span> ({managers.length})
             </button>
           </div>
           {tab === 'soferi' ? (
             <button
               onClick={openAdd}
-              className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
             >
-              <Plus size={12} /> Adaugă șofer
+              <Plus size={12} /> <span className="hidden sm:inline">Adaugă șofer</span><span className="sm:hidden">Adaugă</span>
             </button>
           ) : (
             <button
               onClick={openAddMgr}
-              className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
             >
-              <Plus size={12} /> Adaugă agent
+              <Plus size={12} /> <span className="hidden sm:inline">Adaugă agent</span><span className="sm:hidden">Adaugă</span>
             </button>
           )}
         </div>

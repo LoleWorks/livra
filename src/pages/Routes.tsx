@@ -1189,20 +1189,20 @@ export default function RoutesPage() {
       )}
 
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Rute</span>
+        <div className="flex items-center justify-between px-4 md:px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0 gap-2">
+          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex-shrink-0">Rute</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => csvRef.current?.click()}
-              className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 px-2.5 py-1.5 rounded-lg transition-colors"
             >
-              <Upload size={12} /> Import CSV
+              <Upload size={12} /> <span className="hidden sm:inline">Import CSV</span>
             </button>
             <button
               onClick={openWebhook}
-              className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-[12px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 px-2.5 py-1.5 rounded-lg transition-colors"
             >
-              <Link2 size={12} /> Webhook
+              <Link2 size={12} /> <span className="hidden sm:inline">Webhook</span>
             </button>
           </div>
         </div>

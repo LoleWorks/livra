@@ -336,7 +336,7 @@ export default function Integrations() {
         <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
           <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Integrări</span>
           <button onClick={openModal} className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors">
-            <Plus size={12} /> Conectează magazin
+            <Plus size={12} /> <span className="hidden sm:inline">Conectează magazin</span><span className="sm:hidden">Conectează</span>
           </button>
         </div>
 
@@ -364,8 +364,8 @@ export default function Integrations() {
                           <StatusDot status={c.status} />
                           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${m.bg} ${m.color}`}>{m.label}</span>
                         </div>
-                        <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
-                          {c.url} · Ultima sincronizare: {c.lastSync} · {c.ordersSynced} comenzi azi
+                        <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">
+                          {c.url} · {c.lastSync} · {c.ordersSynced} comenzi
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
@@ -385,7 +385,7 @@ export default function Integrations() {
 
           <div>
             <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Cum funcționează</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {[
                 { icon: Link2,     title: 'Conectezi magazinul',   desc: 'Introduci URL-ul și credențialele API o singură dată.' },
                 { icon: RefreshCw, title: 'Comenzile vin automat', desc: 'Livra preia comenzile noi la fiecare 2 minute, fără intervenție.' },

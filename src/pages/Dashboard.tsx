@@ -255,6 +255,7 @@ export default function Dashboard() {
   const [traffic, setTraffic] = useState(false)
   const [routePaths, setRoutePaths] = useState<{ completed: [number,number][] | null; upcoming: [number,number][] | null }>({ completed: null, upcoming: null })
   const [eta, setEta] = useState<string | null>(null)
+  const [mobileTab, setMobileTab] = useState<'map' | 'list'>('map')
   const fetchRef = useRef(0)
 
   const selected = selectedIdx !== null ? (drivers[selectedIdx] ?? null) : null
@@ -437,14 +438,20 @@ export default function Dashboard() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
         <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Dashboard</span>
-        <span className="text-[12px] text-zinc-400 dark:text-zinc-500">
-          {new Date().toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="hidden md:block text-[12px] text-zinc-400 dark:text-zinc-500">
+            {new Date().toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
+          </span>
+          <div className="flex md:hidden items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5">
+            <button onClick={() => setMobileTab('map')} className={`text-[11px] font-medium px-2.5 py-1 rounded-md transition-colors ${mobileTab === 'map' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Hartă</button>
+            <button onClick={() => setMobileTab('list')} className={`text-[11px] font-medium px-2.5 py-1 rounded-md transition-colors ${mobileTab === 'list' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Șoferi</button>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel */}
-        <div className="w-72 flex-shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto">
+        <div className={`${mobileTab === 'list' ? 'flex' : 'hidden'} md:flex w-full md:w-72 flex-shrink-0 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto`}>
 
           {selected ? (
             /* Driver detail view */
@@ -737,7 +744,7 @@ export default function Dashboard() {
         </div>
 
         {/* Map */}
-        <div className="flex-1 relative">
+        <div className={`${mobileTab === 'map' ? 'flex-1' : 'hidden'} md:flex-1 relative`}>
           <MapContainer
             center={CHISINAU}
             zoom={13}

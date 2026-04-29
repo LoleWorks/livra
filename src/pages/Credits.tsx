@@ -173,7 +173,7 @@ export default function Credits() {
         </div>
 
         <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 space-y-4">
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-brand-orange rounded-xl p-4 flex flex-col justify-between">
               <div className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider">Sold curent</div>
               <div>
@@ -204,7 +204,7 @@ export default function Credits() {
           {/* Packages */}
           <div>
             <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Pachete</p>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {PACKAGES.map(pkg => (
                 <button
                   key={pkg.credits}

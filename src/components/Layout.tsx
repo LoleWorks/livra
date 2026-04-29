@@ -23,8 +23,9 @@ export default function Layout() {
   if (user.role !== 'admin') return <Navigate to="/sales" replace />
 
   return (
-    <div className="flex h-screen min-h-0 bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
-      <aside className={`flex-shrink-0 flex flex-col bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
+    <>
+    <div className="flex h-[calc(100dvh-3.5rem)] md:h-screen min-h-0 bg-zinc-50 dark:bg-zinc-950 overflow-hidden">
+      <aside className={`hidden md:flex flex-shrink-0 flex-col bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-200 ${collapsed ? 'w-14' : 'w-52'}`}>
 
         {/* Logo */}
         <div className={`flex items-center h-12 border-b border-zinc-100 dark:border-zinc-800 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
@@ -127,5 +128,30 @@ export default function Layout() {
         <Outlet />
       </main>
     </div>
+
+    {/* Mobile bottom nav */}
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 h-14 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center justify-around h-full px-2">
+        {nav.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors ${
+                isActive ? 'text-brand-orange' : 'text-zinc-500 dark:text-zinc-400'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Icon size={20} className={isActive ? 'text-brand-orange' : ''} />
+                <span className="text-[9px] font-medium leading-none">{label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
+    </nav>
+    </>
   )
 }

@@ -202,9 +202,11 @@ export default function Activity() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="flex items-center justify-between px-5 h-12 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <ActivityIcon size={14} className="text-zinc-500" />
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Activitate șoferi</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <ActivityIcon size={14} className="text-zinc-500 flex-shrink-0" />
+          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
+            <span>Activitate</span><span className="hidden md:inline"> șoferi</span>
+          </span>
         </div>
         <input
           type="date"
@@ -214,9 +216,21 @@ export default function Activity() {
         />
       </div>
 
+      {/* Mobile driver select */}
+      <div className="md:hidden px-4 py-2 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">
+        <select
+          value={selectedDriverId}
+          onChange={e => setSelectedDriverId(e.target.value)}
+          className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-[12px] rounded-lg px-3 py-2 focus:outline-none"
+        >
+          <option value="all">Toți șoferii</option>
+          {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+      </div>
+
       <div className="flex flex-1 overflow-hidden">
         {/* Left: driver picker */}
-        <div className="w-56 flex-shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto py-3">
+        <div className="hidden md:block w-56 flex-shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto py-3">
           <button
             onClick={() => setSelectedDriverId('all')}
             className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
