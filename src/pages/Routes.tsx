@@ -1387,7 +1387,9 @@ export default function RoutesPage() {
               <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2.5">Setări</p>
               <div className="space-y-2.5">
                 <label className="flex items-center justify-between gap-2.5">
-                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400">Începutul turei</span>
+                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400 underline decoration-dotted decoration-zinc-400 underline-offset-2 cursor-help" title="Ora la care șoferii pleacă din depozit. Optimizatorul calculează pauza de masă și ferestrele de timp pornind de la acest moment.">
+                    Începutul turei
+                  </span>
                   <TimeInput24
                     value={shiftStart}
                     onChange={setShiftStart}
@@ -1395,7 +1397,9 @@ export default function RoutesPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between gap-2.5">
-                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400">Timp / livrare (min)</span>
+                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400 underline decoration-dotted decoration-zinc-400 underline-offset-2 cursor-help" title="Cât durează un colet livrat unui client (predare + semnătură). Implicit 5 min. Mai puțin = mai multe livrări încap într-o zi, dar șoferii pot fi grăbiți.">
+                    Timp / livrare (min)
+                  </span>
                   <input
                     type="number" min={1} max={60}
                     value={serviceTimeMin}
@@ -1404,7 +1408,9 @@ export default function RoutesPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between gap-2.5 cursor-pointer">
-                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400">Permite ore suplimentare (până la 10h)</span>
+                  <span className="text-[12px] text-zinc-600 dark:text-zinc-400 underline decoration-dotted decoration-zinc-400 underline-offset-2 cursor-help" title="Permite extinderea zilei de lucru de la 8h la 10h pentru zilele aglomerate. Folosește cu moderație — implică ore suplimentare plătite șoferilor.">
+                    Permite ore suplimentare (până la 10h)
+                  </span>
                   <button
                     type="button"
                     onClick={() => setAllowOvertime(v => !v)}
@@ -1417,7 +1423,7 @@ export default function RoutesPage() {
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2.5">Optimizează pentru</p>
+              <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2.5 underline decoration-dotted decoration-zinc-400 underline-offset-2 cursor-help inline-block" title="Data pentru care se generează rutele. Selectează ziua de mâine seara pentru a pregăti programul în avans — șoferii văd ruta abia când începe ziua respectivă.">Optimizează pentru</p>
               <input
                 type="date"
                 value={optimizeDate}
