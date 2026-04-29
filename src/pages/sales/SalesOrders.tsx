@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
-import { useState, useEffect } from 'react'
-import { Package, Phone, Search, Plus } from 'lucide-react'
+import { useState, useEffect, useRef, Fragment } from 'react'
+import { Package, Phone, Search, Plus, Check, CalendarDays } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { getUser } from '../../lib/auth'
@@ -42,11 +42,82 @@ function fmtWindow(start: string | null, end: string | null) {
   return `${start.slice(0, 5)}–${(end ?? '').slice(0, 5)}`
 }
 
+function TimeInput24({ value, onChange, className }: {
+  value: string; onChange: (v: string) => void; className?: string;
+}) {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const hourColRef = useRef<HTMLDivElement>(null)
+  const minColRef = useRef<HTMLDivElement>(null)
+  const [h, m] = (value && value.includes(':')) ? value.split(':') : ['', '']
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const scrollTo = (col: HTMLDivElement | null, val: string) => {
+      if (!col) return
+      const el = col.querySelector(`[data-v="${val}"]`) as HTMLElement | null
+      if (el) col.scrollTop = el.offsetTop - col.clientHeight / 2 + el.clientHeight / 2
+    }
+    setTimeout(() => {
+      scrollTo(hourColRef.current, h || '09')
+      scrollTo(minColRef.current, m || '00')
+    }, 0)
+  }, [open, h, m])
+
+  function setHour(hh: string) { onChange(`${hh}:${m || '00'}`) }
+  function setMinute(mm: string) { onChange(`${h || '09'}:${mm}`); setOpen(false) }
+
+  const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+  const minutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55']
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <input
+        type="text" readOnly onClick={() => setOpen(o => !o)} value={value || ''}
+        placeholder="HH:MM"
+        className={`${className} cursor-pointer`}
+      />
+      {open && (
+        <div className="absolute z-[100] top-full mt-1 left-0 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-xl flex overflow-hidden">
+          <div ref={hourColRef} className="max-h-44 overflow-y-auto py-1 border-r border-zinc-100 dark:border-zinc-800">
+            {hours.map(hh => (
+              <button key={hh} type="button" data-v={hh} onClick={() => setHour(hh)}
+                className={`block w-12 px-3 py-1 text-[12px] text-center font-mono transition-colors ${hh === h ? 'bg-brand-orange text-white' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+                {hh}
+              </button>
+            ))}
+          </div>
+          <div ref={minColRef} className="max-h-44 overflow-y-auto py-1">
+            {minutes.map(mm => (
+              <button key={mm} type="button" data-v={mm} onClick={() => setMinute(mm)}
+                className={`block w-12 px-3 py-1 text-[12px] text-center font-mono transition-colors ${mm === m ? 'bg-brand-orange text-white' : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+                {mm}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function SalesOrders() {
   const [orders, setOrders] = useState<Delivery[]>([])
   const [filter, setFilter] = useState('toate')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editDraft, setEditDraft] = useState({ delivery_date: '', time_window_start: '', time_window_end: '', package_description: '' })
+  const [saving, setSaving] = useState(false)
 
   const managerId = getUser()?.id
 
@@ -86,12 +157,44 @@ export default function SalesOrders() {
     return () => { supabase.removeChannel(channel) }
   }, [managerId])
 
+  function startEdit(o: Delivery) {
+    setEditingId(o.id)
+    setEditDraft({
+      delivery_date: o.delivery_date ?? '',
+      time_window_start: o.time_window_start ?? '',
+      time_window_end: o.time_window_end ?? '',
+      package_description: o.package_description ?? '',
+    })
+  }
+
+  async function saveSchedule() {
+    if (!editingId || !editDraft.delivery_date) return
+    setSaving(true)
+    await supabase.from('livra_deliveries').update({
+      delivery_date: editDraft.delivery_date,
+      time_window_start: editDraft.time_window_start || null,
+      time_window_end: editDraft.time_window_end || null,
+      package_description: editDraft.package_description || null,
+    }).eq('id', editingId)
+    setOrders(prev => prev.map(o => o.id === editingId ? {
+      ...o,
+      delivery_date: editDraft.delivery_date,
+      time_window_start: editDraft.time_window_start || null,
+      time_window_end: editDraft.time_window_end || null,
+      package_description: editDraft.package_description || null,
+    } : o))
+    setEditingId(null)
+    setSaving(false)
+  }
+
   const visible = orders.filter(o => {
     const matchStatus = filter === 'toate' || o.status === filter
     const q = search.toLowerCase()
     const matchSearch = !q || o.customer.toLowerCase().includes(q) || o.address.toLowerCase().includes(q) || o.phone.includes(q)
     return matchStatus && matchSearch
   })
+
+  const unscheduled = orders.filter(o => !o.delivery_date && o.status === 'upcoming').length
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -103,7 +206,10 @@ export default function SalesOrders() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[18px] font-semibold text-zinc-900 dark:text-zinc-50">Comenzi</h1>
-          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">{orders.length} comenzi asignate</p>
+          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+            {orders.length} comenzi asignate
+            {unscheduled > 0 && <span className="ml-2 text-orange-500 font-medium">{unscheduled} neprogramate</span>}
+          </p>
         </div>
         <Link
           to="/sales/nou"
@@ -130,9 +236,7 @@ export default function SalesOrders() {
               key={s}
               onClick={() => setFilter(s)}
               className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors ${
-                filter === s
-                  ? 'bg-brand-orange text-white'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
+                filter === s ? 'bg-brand-orange text-white' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
               }`}
             >
               {STATUS_LABELS_FILTER[s]}
@@ -165,34 +269,102 @@ export default function SalesOrders() {
               </tr>
             ) : visible.map(o => {
               const cfg = STATUS_CONFIG[o.status] ?? STATUS_CONFIG.upcoming
+              const isEditing = editingId === o.id
+              const canSchedule = o.status === 'upcoming'
               return (
-                <tr key={o.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-zinc-800 dark:text-zinc-200">{o.customer}</div>
-                    {o.notes && <div className="text-[11px] text-zinc-400 mt-0.5 truncate max-w-[160px]">{o.notes}</div>}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 max-w-[200px]">
-                    <div className="truncate">{o.address}</div>
-                    {o.package_description && <div className="text-[11px] text-zinc-400 mt-0.5">{o.package_description}</div>}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{fmtDate(o.delivery_date)}</td>
-                  <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{fmtWindow(o.time_window_start, o.time_window_end)}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full ${cfg.badge}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                      {cfg.label}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <a
-                      href={`tel:${o.phone}`}
-                      className="inline-flex items-center gap-1 text-[12px] text-zinc-400 hover:text-brand-orange dark:hover:text-orange-400 transition-colors px-2 py-1 rounded-md hover:bg-orange-50 dark:hover:bg-orange-950/40"
-                    >
-                      <Phone size={12} />
-                      {o.phone}
-                    </a>
-                  </td>
-                </tr>
+                <Fragment key={o.id}>
+                  <tr
+                    onClick={() => canSchedule ? (isEditing ? setEditingId(null) : startEdit(o)) : undefined}
+                    className={`transition-colors ${canSchedule ? 'cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50' : ''} ${isEditing ? 'bg-orange-50/40 dark:bg-orange-950/20' : ''}`}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-zinc-800 dark:text-zinc-200">{o.customer}</div>
+                      {o.notes && <div className="text-[11px] text-zinc-400 mt-0.5 truncate max-w-[160px]">{o.notes}</div>}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 max-w-[200px]">
+                      <div className="truncate">{o.address}</div>
+                      {o.package_description && <div className="text-[11px] text-zinc-400 mt-0.5">{o.package_description}</div>}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+                      {o.delivery_date
+                        ? fmtDate(o.delivery_date)
+                        : canSchedule
+                          ? <span className="flex items-center gap-1 text-orange-500 text-[11px] font-medium"><CalendarDays size={11} />Programează</span>
+                          : '—'
+                      }
+                    </td>
+                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{fmtWindow(o.time_window_start, o.time_window_end)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                        {cfg.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <a
+                        href={`tel:${o.phone}`}
+                        onClick={e => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 text-[12px] text-zinc-400 hover:text-brand-orange dark:hover:text-orange-400 transition-colors px-2 py-1 rounded-md hover:bg-orange-50 dark:hover:bg-orange-950/40"
+                      >
+                        <Phone size={12} />
+                        {o.phone}
+                      </a>
+                    </td>
+                  </tr>
+                  {isEditing && (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20" onClick={e => e.stopPropagation()}>
+                        <div className="space-y-2 max-w-md">
+                          <div>
+                            <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Data livrării *</label>
+                            <input
+                              type="date"
+                              value={editDraft.delivery_date}
+                              onChange={e => setEditDraft(p => ({ ...p, delivery_date: e.target.value }))}
+                              className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil de la</label>
+                              <TimeInput24
+                                value={editDraft.time_window_start}
+                                onChange={v => setEditDraft(p => ({ ...p, time_window_start: v }))}
+                                className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Disponibil până la</label>
+                              <TimeInput24
+                                value={editDraft.time_window_end}
+                                onChange={v => setEditDraft(p => ({ ...p, time_window_end: v }))}
+                                className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                              />
+                            </div>
+                          </div>
+                          <input
+                            value={editDraft.package_description}
+                            onChange={e => setEditDraft(p => ({ ...p, package_description: e.target.value }))}
+                            placeholder="Descriere pachet (opțional)"
+                            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400 placeholder:text-zinc-400"
+                          />
+                          <div className="flex gap-2 pt-1">
+                            <button
+                              onClick={saveSchedule}
+                              disabled={!editDraft.delivery_date || saving}
+                              className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-3 py-1 rounded-lg transition-colors"
+                            >
+                              <Check size={11} /> Programează
+                            </button>
+                            <button onClick={() => setEditingId(null)} className="text-[11px] text-zinc-400 hover:text-zinc-600 px-2 py-1">
+                              Închide
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               )
             })}
           </tbody>
