@@ -1005,26 +1005,54 @@ export default function RoutesPage() {
             </div>
 
             <div className={`${resultsTab === 'routes' ? 'flex w-full' : 'hidden'} md:flex md:w-72 flex-shrink-0 flex-col border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto`}>
-              {result.deferred?.length > 0 && (
-                <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <AlertTriangle size={12} className="text-amber-700 dark:text-amber-400 flex-shrink-0" />
-                    <span className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
-                      {result.deferred.length} {result.deferred.length === 1 ? 'livrare amânată' : 'livrări amânate'} pentru mâine
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-amber-600/70 dark:text-amber-500/70 mb-2">
-                    Nu încap în 8h cu șoferii activi. Adaugă un șofer sau acceptă amânarea.
-                  </div>
-                  <div className="space-y-0.5 max-h-24 overflow-y-auto">
-                    {result.deferred.map(d => (
-                      <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
-                        • {d.customer} | {d.address}
+              {result.deferred?.length > 0 && (() => {
+                const geocodeFails = result.deferred.filter(d => d.reason === 'geocode_failed' || d.reason === 'geocode failed')
+                const noCapacity = result.deferred.filter(d => d.reason === 'no_capacity' || d.reason === 'no capacity')
+                return (
+                  <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50 space-y-2">
+                    {geocodeFails.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle size={12} className="text-red-600 dark:text-red-400 flex-shrink-0" />
+                          <span className="text-[12px] font-semibold text-red-600 dark:text-red-400">
+                            {geocodeFails.length} {geocodeFails.length === 1 ? 'adresă negăsită' : 'adrese negăsite'}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-amber-700/80 dark:text-amber-500/80 mb-1">
+                          Verifică ortografia adresei sau editează-o manual.
+                        </div>
+                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
+                          {geocodeFails.map(d => (
+                            <div key={d.delivery_id} className="text-[11px] text-zinc-700 dark:text-zinc-300 truncate">
+                              • {d.customer} | <span className="text-red-600 dark:text-red-400">{d.address}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
+                    )}
+                    {noCapacity.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle size={12} className="text-amber-700 dark:text-amber-400 flex-shrink-0" />
+                          <span className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
+                            {noCapacity.length} {noCapacity.length === 1 ? 'livrare amânată' : 'livrări amânate'} pentru mâine
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-amber-600/70 dark:text-amber-500/70 mb-1">
+                          Nu încap în 8h cu șoferii activi. Adaugă un șofer sau acceptă amânarea.
+                        </div>
+                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
+                          {noCapacity.map(d => (
+                            <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
+                              • {d.customer} | {d.address}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                )
+              })()}
               {result.routes.map(route => (
                 <div key={route.driver_id}>
                   <button onClick={() => setSelectedId(route.driver_id)}
