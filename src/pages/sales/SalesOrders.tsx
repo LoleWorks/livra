@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Package, Phone, Search, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { getUser } from '../../lib/auth'
 
 type Delivery = {
   id: string
@@ -16,10 +17,11 @@ type Delivery = {
   time_window_start: string | null
   time_window_end: string | null
   created_at: string
+  assigned_to: string | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
-  upcoming:   { label: 'Nou',      dot: 'bg-orange-500',    badge: 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' },
+  upcoming:   { label: 'Nou',      dot: 'bg-orange-500',  badge: 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' },
   dispatched: { label: 'Expediat', dot: 'bg-amber-500',   badge: 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' },
   delivered:  { label: 'Livrat',   dot: 'bg-emerald-500', badge: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' },
   failed:     { label: 'Eșuat',    dot: 'bg-red-500',     badge: 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300' },
@@ -46,18 +48,43 @@ export default function SalesOrders() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
 
+  const managerId = getUser()?.id
+
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from('livra_deliveries')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100)
-      if (data) setOrders(data as Delivery[])
-      setLoading(false)
-    }
-    load()
-  }, [])
+    if (!managerId) { setLoading(false); return }
+
+    supabase
+      .from('livra_deliveries')
+      .select('*')
+      .eq('assigned_to', managerId)
+      .order('created_at', { ascending: false })
+      .limit(200)
+      .then(({ data }) => {
+        if (data) setOrders(data as Delivery[])
+        setLoading(false)
+      })
+
+    const channel = supabase
+      .channel('sales_orders_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_deliveries' }, payload => {
+        if (payload.eventType === 'INSERT') {
+          const r = payload.new as Delivery
+          if (r.assigned_to === managerId) setOrders(prev => [r, ...prev])
+        } else if (payload.eventType === 'UPDATE') {
+          const r = payload.new as Delivery
+          if (r.assigned_to === managerId) {
+            setOrders(prev => prev.map(o => o.id === r.id ? r : o))
+          } else {
+            setOrders(prev => prev.filter(o => o.id !== r.id))
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setOrders(prev => prev.filter(o => o.id !== payload.old.id))
+        }
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [managerId])
 
   const visible = orders.filter(o => {
     const matchStatus = filter === 'toate' || o.status === filter
@@ -73,22 +100,20 @@ export default function SalesOrders() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[18px] font-semibold text-zinc-900 dark:text-zinc-50">Comenzi</h1>
-          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">{orders.length} comenzi total</p>
+          <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">{orders.length} comenzi asignate</p>
         </div>
         <Link
           to="/sales/nou"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[13px] font-medium rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[13px] font-medium rounded-lg transition-colors"
         >
           <Plus size={14} />
           Comandă nouă
         </Link>
       </div>
 
-      {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-xs">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -96,7 +121,7 @@ export default function SalesOrders() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Caută după nume, adresă, telefon..."
-            className="w-full pl-8 pr-3 py-2 text-[13px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400"
+            className="w-full pl-8 pr-3 py-2 text-[13px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400"
           />
         </div>
         <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1">
@@ -106,7 +131,7 @@ export default function SalesOrders() {
               onClick={() => setFilter(s)}
               className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors ${
                 filter === s
-                  ? 'bg-violet-600 text-white'
+                  ? 'bg-brand-orange text-white'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
               }`}
             >
@@ -116,7 +141,6 @@ export default function SalesOrders() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
         <table className="w-full text-[13px]">
           <thead>
@@ -162,7 +186,7 @@ export default function SalesOrders() {
                   <td className="px-4 py-3 text-right">
                     <a
                       href={`tel:${o.phone}`}
-                      className="inline-flex items-center gap-1 text-[12px] text-zinc-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors px-2 py-1 rounded-md hover:bg-violet-50 dark:hover:bg-violet-950/40"
+                      className="inline-flex items-center gap-1 text-[12px] text-zinc-400 hover:text-brand-orange dark:hover:text-orange-400 transition-colors px-2 py-1 rounded-md hover:bg-orange-50 dark:hover:bg-orange-950/40"
                     >
                       <Phone size={12} />
                       {o.phone}

@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Phone, MapPin, MoreHorizontal, X, Check, Pencil, Trash2, Smartphone, Eye, EyeOff, Copy, Mail, ShoppingBag, KeyRound, AlertTriangle, Truck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getUser } from '../lib/auth'
 
 // ── Sales Manager types ───────────────────────────────────────────────────────
 
@@ -358,7 +359,7 @@ export default function Drivers() {
           return
         }
         const { data, error } = await supabase.functions.invoke('create-manager', {
-          body: { name: mgrForm.name, phone: mgrForm.phone, email: mgrForm.email, status: mgrForm.status, password: mgrForm.password },
+          body: { name: mgrForm.name, phone: mgrForm.phone, email: mgrForm.email, status: mgrForm.status, password: mgrForm.password, admin_id: getUser()?.id },
         })
         if (error || !data) { setMgrError((data as { error?: string })?.error ?? error?.message ?? 'Eroare la creare'); return }
         setManagers(prev => [...prev, data as SalesManager])
