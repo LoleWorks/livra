@@ -3,7 +3,7 @@
  * Plugin Name: Livra – Delivery Integration
  * Plugin URI:  https://livra.md
  * Description: Trimite comenzile WooCommerce automat către platforma Livra pentru optimizare trasee.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Livra
  * License:     GPL-2.0+
  * Text Domain: livra
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'LIVRA_VERSION', '1.0.0' );
+define( 'LIVRA_VERSION', '1.0.1' );
 define( 'LIVRA_OPTION_URL', 'livra_webhook_url' );
 define( 'LIVRA_OPTION_KEY', 'livra_api_key' );
 
@@ -126,7 +126,7 @@ function livra_send_order( $order_id ) {
     $headers = [ 'Content-Type' => 'application/json' ];
     $api_key = get_option( LIVRA_OPTION_KEY );
     if ( ! empty( $api_key ) ) {
-        $headers['X-Livra-Key'] = $api_key;
+        $headers['X-Api-Key'] = $api_key;
     }
 
     $response = wp_remote_post( $webhook_url, [

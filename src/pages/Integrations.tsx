@@ -211,6 +211,7 @@ export default function Integrations() {
         status: 'connected',
         last_sync: new Date().toISOString(),
         orders_synced: 0,
+        company_id: user?.id,
       })
       .select()
       .single()
@@ -221,9 +222,15 @@ export default function Integrations() {
   async function syncNow(id: string) {
     setSyncing(id)
     try {
-      await supabase.functions.invoke('sync-connection', { body: { connection_id: id } })
+      const { data } = await supabase.functions.invoke('sync-connection', { body: { connection_id: id } })
+      if (data?.inserted > 0) {
+        setConnections(prev => prev.map(c => c.id === id ? {
+          ...c, lastSync: 'acum', ordersSynced: c.ordersSynced + (data.inserted ?? 0),
+        } : c))
+      } else {
+        setConnections(prev => prev.map(c => c.id === id ? { ...c, lastSync: 'acum' } : c))
+      }
     } catch { /* ignore */ }
-    setConnections(prev => prev.map(c => c.id === id ? { ...c, lastSync: 'acum' } : c))
     setTimeout(() => setSyncing(null), 1200)
   }
 

@@ -51,7 +51,7 @@ class ControllerExtensionModuleLivra extends Controller {
         $headers = ['Content-Type: application/json'];
         $api_key = $this->config->get('module_livra_api_key');
         if (!empty($api_key)) {
-            $headers[] = 'X-Livra-Key: ' . $api_key;
+            $headers[] = 'X-Api-Key: ' . $api_key;
         }
 
         $ch = curl_init($webhook_url);
