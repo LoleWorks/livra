@@ -95,9 +95,6 @@ export default function Integrations() {
   const [testError, setTestError] = useState('')
   const [syncing, setSyncing] = useState<string | null>(null)
   const [copied, setCopied] = useState<'url' | 'payload' | 'key' | null>(null)
-  const [pendingCount, setPendingCount] = useState<number | null>(null)
-  const [importing, setImporting] = useState(false)
-  const [importToast, setImportToast] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState<string | null>(null)
   const [apiKeyId, setApiKeyId] = useState<string | null>(null)
   const [lastUsedAt, setLastUsedAt] = useState<string | null | undefined>(undefined)
@@ -130,13 +127,6 @@ export default function Integrations() {
       supabase
         .from('livra_webhook_orders')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
-        .eq('company_id', user.id)
-        .then(({ count }) => setPendingCount(count ?? 0))
-
-      supabase
-        .from('livra_webhook_orders')
-        .select('*', { count: 'exact', head: true })
         .eq('company_id', user.id)
         .then(({ count }) => setTotalReceived(count ?? 0))
     }
@@ -158,34 +148,6 @@ export default function Integrations() {
     navigator.clipboard.writeText(text)
     setCopied(key)
     setTimeout(() => setCopied(null), 2000)
-  }
-
-  async function importPending() {
-    if (!user?.id) return
-    setImporting(true)
-    try {
-      const { data: pending } = await supabase
-        .from('livra_webhook_orders')
-        .select('*')
-        .eq('status', 'pending')
-        .eq('company_id', user.id)
-      const rows = (pending ?? []).map((o: any) => ({
-        customer: o.customer_name, phone: o.customer_phone,
-        address: o.delivery_address, notes: o.notes, status: 'upcoming',
-      }))
-      if (rows.length) {
-        await supabase.from('livra_deliveries').insert(rows)
-        await supabase
-          .from('livra_webhook_orders')
-          .update({ status: 'imported' })
-          .eq('status', 'pending')
-          .eq('company_id', user.id)
-        setPendingCount(0)
-        setImportToast(`${rows.length} livrări importate în Comenzi noi`)
-        setTimeout(() => setImportToast(null), 3000)
-      }
-    } catch { setImportToast('Eroare la import') }
-    setImporting(false)
   }
 
   async function regenerateKey() {
@@ -581,27 +543,12 @@ export default function Integrations() {
                 </div>
               </div>
 
-              {pendingCount !== null && (
-                <div className={`flex items-center justify-between rounded-xl px-4 py-3 ${pendingCount > 0 ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900' : 'bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700'}`}>
-                  <div>
-                    <div className="text-[12px] font-semibold text-zinc-800 dark:text-zinc-200">
-                      {pendingCount > 0 ? `${pendingCount} comenzi în așteptare` : 'Nicio comandă în așteptare'}
-                    </div>
-                    <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">primite prin webhook, neimportate încă</div>
-                  </div>
-                  {pendingCount > 0 && (
-                    <button onClick={importPending} disabled={importing} className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                      {importing ? 'Se importă…' : <><ChevronRight size={11} /> Importă</>}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {importToast && (
-                <div className="text-[12px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-lg px-3 py-2">
-                  {importToast}
-                </div>
-              )}
+              <div className="flex items-start gap-2 bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800 rounded-lg px-3 py-2.5">
+                <Route size={13} className="text-zinc-400 dark:text-zinc-500 flex-shrink-0 mt-0.5" />
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Comenzile primite apar instant în <span className="font-semibold text-zinc-700 dark:text-zinc-300">Rute → Comenzi noi</span>. Nu este necesar niciun import manual.
+                </p>
+              </div>
             </div>
           </div>
 
