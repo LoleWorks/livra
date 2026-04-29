@@ -160,7 +160,8 @@ export default function Drivers() {
   const [copiedPinId, setCopiedPinId] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [editTarget, setEditTarget] = useState<Driver | null>(null)
-  const [form, setForm] = useState({ name: '', phone: '', pin: '' })
+  const [form, setForm] = useState({ name: '', phone: '', pin: '', home_warehouse_id: '' as string | '' })
+  const [warehouses, setWarehouses] = useState<{ id: string, name: string, is_default: boolean }[]>([])
   const [pinError, setPinError] = useState('')
 
   // ── Sales managers state ───────────────────────────────────────────────────
@@ -221,6 +222,10 @@ export default function Drivers() {
     supabase.from('livra_sales_managers').select('*').order('created_at')
       .then(({ data }) => { if (data) setManagers(data as SalesManager[]) })
 
+    // Load warehouses for home-warehouse dropdown
+    supabase.from('livra_warehouses').select('id, name, is_default').order('is_default', { ascending: false })
+      .then(({ data }) => { if (data) setWarehouses(data as { id: string, name: string, is_default: boolean }[]) })
+
     const refresh = setInterval(fetchAll, 30_000)
 
     // Also tick once a second so the "acum 12s" text stays accurate
@@ -253,14 +258,14 @@ export default function Drivers() {
 
   function openAdd() {
     setEditTarget(null)
-    setForm({ name: '', phone: '', pin: '' })
+    setForm({ name: '', phone: '', pin: '', home_warehouse_id: warehouses.find(w => w.is_default)?.id ?? '' })
     setPinError('')
     setShowModal(true)
   }
 
   function openEdit(d: Driver) {
     setEditTarget(d)
-    setForm({ name: d.name, phone: d.phone, pin: '' })
+    setForm({ name: d.name, phone: d.phone, pin: '', home_warehouse_id: (d as Driver & { home_warehouse_id?: string | null }).home_warehouse_id ?? '' })
     setPinError('')
     setShowModal(true)
   }
@@ -280,7 +285,7 @@ export default function Drivers() {
     setPinError('')
     const ini = initials(form.name)
     if (editTarget) {
-      const updates: Record<string, unknown> = { name: form.name, phone: form.phone, initials: ini }
+      const updates: Record<string, unknown> = { name: form.name, phone: form.phone, initials: ini, home_warehouse_id: form.home_warehouse_id || null }
       if (form.pin.length >= 4) {
         const unique = await checkPinUnique(form.pin, editTarget.id)
         if (!unique) { setPinError('Acest PIN este deja folosit de alt șofer.'); return }
@@ -303,7 +308,7 @@ export default function Drivers() {
       const colorKey = COLOR_KEYS[drivers.length % COLOR_KEYS.length]
       const { data } = await supabase
         .from('livra_drivers')
-        .insert({ name: form.name, phone: form.phone, pin: form.pin, status: 'offline', total: 0, today: 0, goal: 0, initials: ini, color: colorKey, admin_id: getUser()?.id })
+        .insert({ name: form.name, phone: form.phone, pin: form.pin, status: 'offline', total: 0, today: 0, goal: 0, initials: ini, color: colorKey, admin_id: getUser()?.id, home_warehouse_id: form.home_warehouse_id || null })
         .select()
         .single()
       if (data) setDrivers(prev => [...prev, mapRow(data as Record<string, unknown>)])
@@ -432,6 +437,21 @@ export default function Drivers() {
                   className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-orange-500 placeholder:text-zinc-400 transition-colors"
                 />
               </div>
+              {warehouses.length > 0 && (
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">Depozit</label>
+                  <select
+                    value={form.home_warehouse_id}
+                    onChange={e => setForm(p => ({ ...p, home_warehouse_id: e.target.value }))}
+                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[13px] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    {warehouses.map(w => (
+                      <option key={w.id} value={w.id}>{w.name}{w.is_default ? ' (implicit)' : ''}</option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">De aici pleacă șoferul în fiecare zi cu coletele încărcate.</p>
+                </div>
+              )}
               <div>
                 <label className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">
                   PIN aplicație {editTarget ? '(lasă gol pentru a păstra)' : '*'}
