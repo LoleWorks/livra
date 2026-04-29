@@ -142,7 +142,7 @@ export default function Integrations() {
     setShowModal(false)
   }
 
-  function copyToClipboard(text: string, key: 'url' | 'payload') {
+  function copyToClipboard(text: string, key: 'url' | 'payload' | 'key') {
     navigator.clipboard.writeText(text)
     setCopied(key)
     setTimeout(() => setCopied(null), 2000)
