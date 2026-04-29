@@ -1,9 +1,13 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, useRef, Fragment } from 'react'
-import { Package, Phone, Search, Plus, Check, CalendarDays, Banknote, Truck, AlertTriangle, Ban } from 'lucide-react'
+import { Package, Phone, Search, Plus, Check, CalendarDays, Banknote, Truck, AlertTriangle, Ban, Bell, BellOff } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { getUser } from '../../lib/auth'
+import {
+  unlockAudio, playDing, requestNotificationPermission, showNotification,
+  getNotificationsEnabled, setNotificationsEnabled,
+} from '../../lib/notifications'
 
 type Delivery = {
   id: string
@@ -157,6 +161,37 @@ export default function SalesOrders() {
 
   const managerId = getUser()?.id
 
+  // Notification state — persists across reloads. The toggle handles
+  // permission request + audio unlock on first enable.
+  const [notifEnabled, setNotifEnabled] = useState(false)
+  const [notifSupported, setNotifSupported] = useState(true)
+  const initialLoadDone = useRef(false)
+
+  useEffect(() => {
+    setNotifSupported('Notification' in window)
+    if (getNotificationsEnabled() && (typeof Notification === 'undefined' || Notification.permission === 'granted')) {
+      setNotifEnabled(true)
+      unlockAudio()
+    }
+  }, [])
+
+  async function toggleNotifications() {
+    if (notifEnabled) {
+      setNotifEnabled(false)
+      setNotificationsEnabled(false)
+      return
+    }
+    unlockAudio()
+    const perm = await requestNotificationPermission()
+    if (perm !== 'granted') {
+      alert('Permite notificările din browser pentru a primi alerte sonore la comenzi noi.')
+      return
+    }
+    setNotifEnabled(true)
+    setNotificationsEnabled(true)
+    playDing()
+  }
+
   useEffect(() => {
     if (!managerId) { setLoading(false); return }
 
@@ -169,6 +204,7 @@ export default function SalesOrders() {
       .then(({ data }) => {
         if (data) setOrders(data as Delivery[])
         setLoading(false)
+        initialLoadDone.current = true
       })
 
     // Load company info + active driver count for capacity checks
@@ -193,7 +229,18 @@ export default function SalesOrders() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_deliveries' }, payload => {
         if (payload.eventType === 'INSERT') {
           const r = payload.new as Delivery
-          if (r.assigned_to === managerId) setOrders(prev => [r, ...prev])
+          if (r.assigned_to === managerId) {
+            setOrders(prev => [r, ...prev])
+            // Skip notifications during the initial backfill to avoid a burst of dings on page load.
+            if (initialLoadDone.current && getNotificationsEnabled()) {
+              playDing()
+              const total = (r.order_value ?? 0) + (r.shipping_cost ?? 0)
+              const body = total > 0
+                ? `${r.customer} — ${total.toFixed(2)} lei · ${r.address}`
+                : `${r.customer} — ${r.address}`
+              showNotification('Comandă nouă', body)
+            }
+          }
         } else if (payload.eventType === 'UPDATE') {
           const r = payload.new as Delivery
           if (r.assigned_to === managerId) {
@@ -319,13 +366,30 @@ export default function SalesOrders() {
             {unscheduled > 0 && <span className="ml-2 text-orange-500 font-medium">{unscheduled} neprogramate</span>}
           </p>
         </div>
-        <Link
-          to="/sales/nou"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[13px] font-medium rounded-lg transition-colors"
-        >
-          <Plus size={14} />
-          Comandă nouă
-        </Link>
+        <div className="flex items-center gap-2">
+          {notifSupported && (
+            <button
+              type="button"
+              onClick={toggleNotifications}
+              title={notifEnabled ? 'Dezactivează alerta sonoră la comenzi noi' : 'Activează alerta sonoră la comenzi noi'}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-lg border transition-colors ${
+                notifEnabled
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50'
+                  : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {notifEnabled ? <Bell size={14} /> : <BellOff size={14} />}
+              <span className="hidden sm:inline">{notifEnabled ? 'Alerte pornite' : 'Alerte oprite'}</span>
+            </button>
+          )}
+          <Link
+            to="/sales/nou"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-orange hover:bg-orange-500 text-white text-[13px] font-medium rounded-lg transition-colors"
+          >
+            <Plus size={14} />
+            Comandă nouă
+          </Link>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
