@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, useRef, Fragment } from 'react'
-import { Package, Phone, Search, Plus, Check, CalendarDays } from 'lucide-react'
+import { Package, Phone, Search, Plus, Check, CalendarDays, ShoppingCart, Banknote, Truck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { getUser } from '../../lib/auth'
@@ -18,6 +18,9 @@ type Delivery = {
   time_window_end: string | null
   created_at: string
   assigned_to: string | null
+  order_items: string | null
+  order_value: number | null
+  shipping_cost: number | null
 }
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
@@ -116,7 +119,7 @@ export default function SalesOrders() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editDraft, setEditDraft] = useState({ delivery_date: '', time_window_start: '', time_window_end: '', package_description: '' })
+  const [editDraft, setEditDraft] = useState({ delivery_date: '', time_window_start: '', time_window_end: '', package_description: '', order_items: '', order_value: '', shipping_cost: '' })
   const [saving, setSaving] = useState(false)
 
   const managerId = getUser()?.id
@@ -164,6 +167,9 @@ export default function SalesOrders() {
       time_window_start: o.time_window_start ?? '',
       time_window_end: o.time_window_end ?? '',
       package_description: o.package_description ?? '',
+      order_items: o.order_items ?? '',
+      order_value: o.order_value != null ? String(o.order_value) : '',
+      shipping_cost: o.shipping_cost != null ? String(o.shipping_cost) : '',
     })
   }
 
@@ -171,17 +177,23 @@ export default function SalesOrders() {
     if (!editingId || !editDraft.delivery_date) return
     setSaving(true)
     await supabase.from('livra_deliveries').update({
-      delivery_date: editDraft.delivery_date,
+      delivery_date:    editDraft.delivery_date,
       time_window_start: editDraft.time_window_start || null,
-      time_window_end: editDraft.time_window_end || null,
+      time_window_end:   editDraft.time_window_end   || null,
       package_description: editDraft.package_description || null,
+      order_items:   editDraft.order_items   || null,
+      order_value:   editDraft.order_value   ? parseFloat(editDraft.order_value)   : null,
+      shipping_cost: editDraft.shipping_cost ? parseFloat(editDraft.shipping_cost) : null,
     }).eq('id', editingId)
     setOrders(prev => prev.map(o => o.id === editingId ? {
       ...o,
-      delivery_date: editDraft.delivery_date,
+      delivery_date:    editDraft.delivery_date,
       time_window_start: editDraft.time_window_start || null,
-      time_window_end: editDraft.time_window_end || null,
+      time_window_end:   editDraft.time_window_end   || null,
       package_description: editDraft.package_description || null,
+      order_items:   editDraft.order_items   || null,
+      order_value:   editDraft.order_value   ? parseFloat(editDraft.order_value)   : null,
+      shipping_cost: editDraft.shipping_cost ? parseFloat(editDraft.shipping_cost) : null,
     } : o))
     setEditingId(null)
     setSaving(false)
@@ -279,7 +291,14 @@ export default function SalesOrders() {
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium text-zinc-800 dark:text-zinc-200">{o.customer}</div>
-                      {o.notes && <div className="text-[11px] text-zinc-400 mt-0.5 truncate max-w-[160px]">{o.notes}</div>}
+                      {o.order_items && <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 truncate max-w-[160px]">{o.order_items}</div>}
+                      {o.notes && <div className="text-[11px] text-zinc-400 mt-0.5 italic truncate max-w-[160px]">{o.notes}</div>}
+                      {(o.order_value != null || o.shipping_cost != null) && (
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {o.order_value != null && <span className="text-[10px] text-zinc-400">Val: <span className="font-medium text-zinc-600 dark:text-zinc-300">{o.order_value} lei</span></span>}
+                          {o.shipping_cost != null && <span className="text-[10px] text-zinc-400">Liv: <span className="font-medium text-zinc-600 dark:text-zinc-300">{o.shipping_cost} lei</span></span>}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 max-w-[200px]">
                       <div className="truncate">{o.address}</div>
@@ -339,6 +358,33 @@ export default function SalesOrders() {
                                 value={editDraft.time_window_end}
                                 onChange={v => setEditDraft(p => ({ ...p, time_window_end: v }))}
                                 className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                              />
+                            </div>
+                          </div>
+                          <textarea
+                            value={editDraft.order_items}
+                            onChange={e => setEditDraft(p => ({ ...p, order_items: e.target.value }))}
+                            placeholder="Produse comandate (ex. 2x Tricou alb M)"
+                            rows={2}
+                            className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400 placeholder:text-zinc-400 resize-none"
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 flex items-center gap-1 block"><Banknote size={9} />Valoare comandă (lei)</label>
+                              <input type="number" min="0" step="0.01"
+                                value={editDraft.order_value}
+                                onChange={e => setEditDraft(p => ({ ...p, order_value: e.target.value }))}
+                                placeholder="ex. 450.00"
+                                className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400 placeholder:text-zinc-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 flex items-center gap-1 block"><Truck size={9} />Cost livrare (lei)</label>
+                              <input type="number" min="0" step="0.01"
+                                value={editDraft.shipping_cost}
+                                onChange={e => setEditDraft(p => ({ ...p, shipping_cost: e.target.value }))}
+                                placeholder="ex. 35.00"
+                                className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400 placeholder:text-zinc-400"
                               />
                             </div>
                           </div>

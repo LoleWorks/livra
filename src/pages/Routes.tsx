@@ -14,7 +14,7 @@ import { getUser } from '../lib/auth'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type Delivery = { id: string; customer: string; phone: string; address: string; notes: string; package_description?: string; time_window_start?: string; time_window_end?: string; delivery_date?: string; status?: 'upcoming' | 'dispatched' | 'delivered' | 'failed' }
+type Delivery = { id: string; customer: string; phone: string; address: string; notes: string; package_description?: string; time_window_start?: string; time_window_end?: string; delivery_date?: string; status?: 'upcoming' | 'dispatched' | 'delivered' | 'failed'; order_items?: string; order_value?: number; shipping_cost?: number }
 type RouteStop = { order: number; delivery_id: string; customer: string; address: string; phone: string; lat: number; lng: number; type: string; break_duration_min: number; package_description?: string; arrival_time?: string }
 type DriverRoute = { driver_id: string; driver_name: string; color: string; stops: RouteStop[]; total_distance_km: number; total_duration_min: number; path?: [number, number][]; start_lat: number; start_lng: number }
 type DeferredDelivery = { delivery_id: string; customer: string; address: string; reason: string }
@@ -527,6 +527,9 @@ export default function RoutesPage() {
       time_window_end:   r.time_window_end   ?? undefined,
       delivery_date:     r.delivery_date     ?? undefined,
       status:            r.status            ?? 'upcoming',
+      order_items:       r.order_items       ?? undefined,
+      order_value:       r.order_value       ?? undefined,
+      shipping_cost:     r.shipping_cost     ?? undefined,
     })
 
     supabase
@@ -1342,7 +1345,14 @@ export default function RoutesPage() {
                             <div className="flex items-center gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
                               <MapPin size={9} />{d.address}
                             </div>
+                            {d.order_items && <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{d.order_items}</div>}
                             {d.notes && <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 italic">{d.notes}</div>}
+                            {(d.order_value != null || d.shipping_cost != null) && (
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {d.order_value != null && <span className="text-[10px] text-zinc-400">Valoare: <span className="font-medium text-zinc-600 dark:text-zinc-300">{d.order_value} lei</span></span>}
+                                {d.shipping_cost != null && <span className="text-[10px] text-zinc-400">Livrare: <span className="font-medium text-zinc-600 dark:text-zinc-300">{d.shipping_cost} lei</span></span>}
+                              </div>
+                            )}
                           </div>
                           <span className="text-[11px] text-zinc-400 dark:text-zinc-500 flex-shrink-0">{d.phone}</span>
                           <button
