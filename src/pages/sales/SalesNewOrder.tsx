@@ -244,7 +244,7 @@ export default function SalesNewOrder() {
           const here = invBySku.get(sku)
           if (!here?.length) { allFound = false; break }
           const ids = new Set(here.map(h => h.warehouseId))
-          candidates = candidates ? new Set([...candidates].filter(id => ids.has(id))) : ids
+          candidates = candidates ? new Set<string>(Array.from<string>(candidates).filter(id => ids.has(id))) : ids
           if (!candidates.size) { allFound = false; break }
         }
         if (allFound && candidates?.size) {

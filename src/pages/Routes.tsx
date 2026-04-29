@@ -670,7 +670,7 @@ export default function RoutesPage() {
           const here = invBySku.get(sku)
           if (!here || here.length === 0) return { warehouseId: null, reason: 'unmatched' }
           const ids = new Set(here.map(h => h.warehouseId))
-          candidates = candidates ? new Set([...candidates].filter(id => ids.has(id))) : ids
+          candidates = candidates ? new Set<string>(Array.from<string>(candidates).filter(id => ids.has(id))) : ids
           if (!candidates.size) return { warehouseId: null, reason: 'unmatched' }
         }
         if (!candidates || !candidates.size) return { warehouseId: null, reason: 'unmatched' }
