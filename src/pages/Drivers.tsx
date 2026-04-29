@@ -181,8 +181,8 @@ export default function Drivers() {
     const fetchAll = async () => {
       const today = new Date().toISOString().slice(0, 10)
       const [dRes, lRes, sRes] = await Promise.all([
-        supabase.from('livra_drivers').select('*').order('created_at'),
-        supabase.from('livra_driver_locations').select('driver_id, lat, lng, updated_at'),
+        supabase.from('livra_drivers').select('*').eq('admin_id', getUser()?.id).order('created_at'),
+        supabase.from('livra_driver_locations').select('driver_id, lat, lng, updated_at, livra_drivers!inner(admin_id)').eq('livra_drivers.admin_id', getUser()?.id),
         // Completed delivery stops joined via routes for the per-driver counts
         supabase.from('livra_route_stops')
           .select('route_id, status, type, livra_routes!inner(driver_id, date)')
@@ -303,7 +303,7 @@ export default function Drivers() {
       const colorKey = COLOR_KEYS[drivers.length % COLOR_KEYS.length]
       const { data } = await supabase
         .from('livra_drivers')
-        .insert({ name: form.name, phone: form.phone, pin: form.pin, status: 'offline', total: 0, today: 0, goal: 0, initials: ini, color: colorKey })
+        .insert({ name: form.name, phone: form.phone, pin: form.pin, status: 'offline', total: 0, today: 0, goal: 0, initials: ini, color: colorKey, admin_id: getUser()?.id })
         .select()
         .single()
       if (data) setDrivers(prev => [...prev, mapRow(data as Record<string, unknown>)])

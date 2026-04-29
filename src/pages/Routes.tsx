@@ -10,6 +10,7 @@ import {
   Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Phone, Truck,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getUser } from '../lib/auth'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -512,6 +513,8 @@ export default function RoutesPage() {
   const [finishedStops, setFinishedStops]   = useState<FinishedStop[]>([])
   const [resultsTab, setResultsTab]         = useState<'map' | 'routes'>('map')
 
+  const adminId = getUser()?.id
+
   useEffect(() => {
     const mapDelivery = (r: any) => ({
       id: r.id,
@@ -529,6 +532,7 @@ export default function RoutesPage() {
     supabase
       .from('livra_deliveries')
       .select('*')
+      .eq('company_id', adminId)
       .in('status', ['upcoming', 'dispatched'])
       .order('created_at')
       .then(({ data }) => {
@@ -540,12 +544,12 @@ export default function RoutesPage() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'livra_deliveries' }, payload => {
         if (payload.eventType === 'INSERT') {
           const r = payload.new
-          if (['upcoming', 'dispatched'].includes(r.status)) {
+          if (r.company_id === adminId && ['upcoming', 'dispatched'].includes(r.status)) {
             setDeliveries(prev => [...prev, mapDelivery(r)])
           }
         } else if (payload.eventType === 'UPDATE') {
           const r = payload.new
-          if (['upcoming', 'dispatched'].includes(r.status)) {
+          if (r.company_id === adminId && ['upcoming', 'dispatched'].includes(r.status)) {
             setDeliveries(prev => prev.map(d => d.id === r.id ? mapDelivery(r) : d))
           } else {
             setDeliveries(prev => prev.filter(d => d.id !== r.id))
@@ -559,6 +563,7 @@ export default function RoutesPage() {
     supabase
       .from('livra_drivers')
       .select('id, name, status')
+      .eq('admin_id', adminId)
       .order('created_at')
       .then(({ data }) => {
         if (data) setDrivers(data.map(r => ({
@@ -572,9 +577,10 @@ export default function RoutesPage() {
     // Last 30 days only so the list doesn't grow unbounded.
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000).toISOString().slice(0, 10)
     supabase.from('livra_route_stops')
-      .select('id, client_name, address, status, completed_at, fail_reason, package_description, livra_routes!inner(date, driver_id, livra_drivers!inner(name))')
+      .select('id, client_name, address, status, completed_at, fail_reason, package_description, livra_routes!inner(date, driver_id, admin_id, livra_drivers!inner(name))')
       .in('status', ['completed', 'failed'])
       .eq('type', 'delivery')
+      .eq('livra_routes.admin_id', adminId)
       .gte('livra_routes.date', thirtyDaysAgo)
       .order('completed_at', { ascending: false })
       .then(({ data }) => {
@@ -611,7 +617,7 @@ export default function RoutesPage() {
       // Persist to Supabase WITHOUT a delivery_date so they land in "Comenzi noi"
       const rows = parsed.map(p => ({
         customer: p.customer, phone: p.phone, address: p.address, notes: p.notes,
-        status: 'upcoming',
+        status: 'upcoming', company_id: adminId,
       }))
       const { data } = await supabase.from('livra_deliveries').insert(rows).select()
       if (data?.length) {
@@ -665,6 +671,7 @@ export default function RoutesPage() {
         time_window_end:     newDel.time_window_end     || null,
         delivery_date:       date,
         status: 'upcoming',
+        company_id: adminId,
       })
       .select()
       .single()
@@ -815,6 +822,7 @@ export default function RoutesPage() {
             status: 'pending',
             total_distance_km: route.total_distance_km,
             total_duration_min: route.total_duration_min,
+            admin_id: adminId,
           })
           .select('id')
           .single()
