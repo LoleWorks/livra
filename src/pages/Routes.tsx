@@ -7,7 +7,7 @@ import L from 'leaflet'
 import {
   Wand2, Trash2, MapPin, Clock,
   ChevronRight, CheckCircle2, X, Check, Radio,
-  Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Truck, User,
+  Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Truck, User, Upload,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getUser } from '../lib/auth'
@@ -1494,41 +1494,76 @@ export default function RoutesPage() {
       </div>
 
       {showInvGate && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowInvGate(false)}>
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Inventar pe depozite</h2>
-            {lastInvUpload ? (
-              <p className="text-[13px] text-zinc-600 dark:text-zinc-400 mb-4">
-                Ultima încărcare a inventarului a fost <span className="font-semibold">{new Date(lastInvUpload.uploaded_at).toLocaleString('ro-MD')}</span> ({lastInvUpload.row_count} rânduri).
-                <br /><br />
-                Dacă stocurile nu s-au schimbat între depozite de atunci, poți continua cu inventarul existent. Altfel, încarcă varianta nouă pentru ca optimizatorul să atribuie corect comenzile.
-              </p>
-            ) : (
-              <p className="text-[13px] text-zinc-600 dark:text-zinc-400 mb-4">
-                Nu ai încărcat încă inventarul pe depozite. Optimizatorul are nevoie de această listă pentru a ști de unde se încarcă fiecare comandă. Încarcă-l înainte de a optimiza rutele.
-              </p>
-            )}
-            <div className="flex justify-end gap-2 mt-5">
-              <button
-                onClick={() => setShowInvGate(false)}
-                className="px-3 py-2 text-[13px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
-              >
-                Anulează
-              </button>
-              <a
-                href="/warehouses"
-                className="px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700"
-              >
-                Mergi la depozite
-              </a>
-              {lastInvUpload && (
-                <button
-                  onClick={() => handleOptimize()}
-                  className="px-3 py-2 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-[13px] rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-300"
-                >
-                  Folosește inventarul existent
-                </button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowInvGate(false)}>
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Brand accent bar */}
+            <div className="h-1 bg-gradient-to-r from-brand-orange via-orange-500 to-orange-300" />
+
+            <div className="p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-11 h-11 rounded-xl bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                  <Package size={20} className="text-brand-orange" />
+                </div>
+                <div className="flex-1 pt-0.5">
+                  <h2 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">Verifică inventarul</h2>
+                  <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                    Optimizatorul folosește stocul pe depozite pentru a atribui corect fiecare comandă.
+                  </p>
+                </div>
+              </div>
+
+              {lastInvUpload ? (
+                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3.5">
+                  <div className="flex items-start gap-2.5">
+                    <Clock size={14} className="text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                    <div className="text-[12px] text-amber-900 dark:text-amber-200 leading-relaxed">
+                      Ultima încărcare:{' '}
+                      <span className="font-semibold">
+                        {new Date(lastInvUpload.uploaded_at).toLocaleString('ro-MD', {
+                          day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+                        })}
+                      </span>{' '}
+                      <span className="text-amber-700/80 dark:text-amber-300/80">({lastInvUpload.row_count} rânduri)</span>
+                      <p className="text-amber-800/90 dark:text-amber-200/90 mt-1.5">
+                        Dacă stocurile s-au schimbat între depozite, încarcă varianta de azi. Altfel, poți continua cu cea existentă.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl p-3.5">
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle size={14} className="text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-[12px] text-red-900 dark:text-red-200 leading-relaxed">
+                      Nu ai încărcat încă inventarul pe depozite. Fără el, optimizatorul nu știe de unde pleacă fiecare comandă.
+                    </p>
+                  </div>
+                </div>
               )}
+
+              <div className="flex flex-col gap-2 mt-5">
+                <a
+                  href="/warehouses"
+                  className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-orange hover:bg-orange-500 text-white text-[13px] font-medium rounded-lg transition-colors"
+                >
+                  <Upload size={14} />
+                  {lastInvUpload ? 'Încarcă inventar nou' : 'Mergi la depozite'}
+                </a>
+                {lastInvUpload && (
+                  <button
+                    onClick={() => handleOptimize()}
+                    className="w-full px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-[13px] font-medium rounded-lg transition-colors"
+                  >
+                    Folosește inventarul existent
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowInvGate(false)}
+                  className="w-full text-[12px] text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 py-1 transition-colors"
+                >
+                  Anulează
+                </button>
+              </div>
             </div>
           </div>
         </div>
