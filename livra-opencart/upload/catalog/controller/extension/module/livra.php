@@ -40,18 +40,27 @@ class ControllerExtensionModuleLivra extends Controller {
         $shipping_name = trim($order['shipping_firstname'] . ' ' . $order['shipping_lastname']);
         $payment_name  = trim($order['payment_firstname']  . ' ' . $order['payment_lastname']);
 
+        $products = $this->model_checkout_order->getOrderProducts($order_id);
+        $items = [];
+        foreach ($products as $product) {
+            $items[] = $product['quantity'] . 'x ' . $product['name'];
+        }
+
         $payload = json_encode([
             'order_id'         => (string)$order_id,
             'customer_name'    => $shipping_name ?: $payment_name ?: 'Client',
             'customer_phone'   => $order['telephone'] ?? '',
             'delivery_address' => $address,
             'notes'            => $order['comment'] ?? '',
+            'order_items'      => implode(', ', $items),
+            'order_value'      => (float)$order['total'],
+            'shipping_cost'    => (float)($order['shipping_cost'] ?? 0),
         ]);
 
         $headers = ['Content-Type: application/json'];
         $api_key = $this->config->get('module_livra_api_key');
         if (!empty($api_key)) {
-            $headers[] = 'X-Livra-Key: ' . $api_key;
+            $headers[] = 'X-Api-Key: ' . $api_key;
         }
 
         $ch = curl_init($webhook_url);
