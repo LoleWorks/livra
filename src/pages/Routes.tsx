@@ -463,6 +463,8 @@ export default function RoutesPage() {
   const [serviceTimeMin, setServiceTimeMin] = useState(5)
   const [allowOvertime, setAllowOvertime] = useState(false)
   const [managers, setManagers]     = useState<{ id: string; name: string }[]>([])
+  const [lastInvUpload, setLastInvUpload] = useState<{ uploaded_at: string; row_count: number } | null>(null)
+  const [showInvGate, setShowInvGate] = useState(false)
 
   const [step, setStep]         = useState<'input' | 'loading' | 'results'>('input')
   const [, setLoadingMsg] = useState('')
@@ -580,6 +582,13 @@ export default function RoutesPage() {
       .eq('admin_id', adminId)
       .then(({ data }) => { if (data) setManagers(data) })
 
+    supabase
+      .from('livra_inventory_uploads')
+      .select('uploaded_at, row_count')
+      .order('uploaded_at', { ascending: false })
+      .limit(1)
+      .then(({ data }) => { if (data?.[0]) setLastInvUpload(data[0] as { uploaded_at: string; row_count: number }) })
+
     return () => { supabase.removeChannel(channel) }
   }, [])
 
@@ -587,15 +596,28 @@ export default function RoutesPage() {
 
   // ── Optimize ────────────────────────────────────────────────────────────────
 
-  async function handleOptimize() {
-    // Optimize for the selected date | defaults to today, but the manager can
-    // build tomorrow's routes the evening before by switching the date.
+  function startOptimize() {
     const todayDeliveries = deliveries.filter(d => d.delivery_date === optimizeDate)
     if (!todayDeliveries.length) {
       setToast(`Nicio livrare programată pentru ${fmtDateRO(optimizeDate)}`)
       return
     }
     if (!activeDrivers.length) return
+
+    // Mandatory inventory gate — block if never uploaded; warn if older than today.
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
+    const uploadedToday = lastInvUpload && new Date(lastInvUpload.uploaded_at).getTime() >= todayStart.getTime()
+    if (!lastInvUpload || !uploadedToday) {
+      setShowInvGate(true)
+      return
+    }
+    handleOptimize()
+  }
+
+  async function handleOptimize() {
+    setShowInvGate(false)
+    const todayDeliveries = deliveries.filter(d => d.delivery_date === optimizeDate)
+    if (!todayDeliveries.length || !activeDrivers.length) return
     setStep('loading')
     setDispatched(false)
     setLoadingMsg('Se geocodifică adresele…')
@@ -1456,7 +1478,7 @@ export default function RoutesPage() {
             })()}
 
             <button
-              onClick={handleOptimize}
+              onClick={startOptimize}
               disabled={!deliveries.filter(d => d.delivery_date === optimizeDate).length || !activeDrivers.length}
               className="w-full flex items-center justify-center gap-2 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors"
             >
@@ -1465,6 +1487,47 @@ export default function RoutesPage() {
           </div>
         </div>
       </div>
+
+      {showInvGate && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowInvGate(false)}>
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Inventar pe depozite</h2>
+            {lastInvUpload ? (
+              <p className="text-[13px] text-zinc-600 dark:text-zinc-400 mb-4">
+                Ultima încărcare a inventarului a fost <span className="font-semibold">{new Date(lastInvUpload.uploaded_at).toLocaleString('ro-MD')}</span> ({lastInvUpload.row_count} rânduri).
+                <br /><br />
+                Dacă stocurile nu s-au schimbat între depozite de atunci, poți continua cu inventarul existent. Altfel, încarcă varianta nouă pentru ca optimizatorul să atribuie corect comenzile.
+              </p>
+            ) : (
+              <p className="text-[13px] text-zinc-600 dark:text-zinc-400 mb-4">
+                Nu ai încărcat încă inventarul pe depozite. Optimizatorul are nevoie de această listă pentru a ști de unde se încarcă fiecare comandă. Încarcă-l înainte de a optimiza rutele.
+              </p>
+            )}
+            <div className="flex justify-end gap-2 mt-5">
+              <button
+                onClick={() => setShowInvGate(false)}
+                className="px-3 py-2 text-[13px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
+              >
+                Anulează
+              </button>
+              <a
+                href="/inventory"
+                className="px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700"
+              >
+                Încarcă inventarul
+              </a>
+              {lastInvUpload && (
+                <button
+                  onClick={() => handleOptimize()}
+                  className="px-3 py-2 bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 text-[13px] rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-300"
+                >
+                  Folosește inventarul existent
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
