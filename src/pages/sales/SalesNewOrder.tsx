@@ -1,11 +1,14 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle, MapPin, Phone, User, FileText, Package, Clock, Calendar, Loader2, ShoppingCart, Banknote, Truck } from 'lucide-react'
+import { CheckCircle, MapPin, Phone, User, FileText, Package, Clock, Calendar, Loader2, ShoppingCart, Banknote, Truck, Search, X, Plus, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getUser } from '../../lib/auth'
 
 type NominatimResult = { place_id: number; display_name: string; lat: string; lon: string }
+type InventoryRow = { sku: string; product_name: string | null; quantity: number; warehouse_id: string }
+type InventoryHit = { sku: string; name: string; stock: { warehouseId: string; warehouseName: string; qty: number }[]; totalQty: number }
+type Line = { sku: string; name: string; qty: number }
 
 function useAddressSuggestions(query: string) {
   const [results, setResults] = useState<NominatimResult[]>([])
@@ -40,7 +43,6 @@ type Form = {
   phone: string
   address: string
   notes: string
-  order_items: string
   order_value: string
   shipping_cost: string
   package_description: string
@@ -51,7 +53,7 @@ type Form = {
 
 const EMPTY: Form = {
   customer: '', phone: '', address: '', notes: '',
-  order_items: '', order_value: '', shipping_cost: '',
+  order_value: '', shipping_cost: '',
   package_description: '',
   delivery_date: new Date().toISOString().slice(0, 10),
   time_window_start: '', time_window_end: '',
@@ -83,6 +85,7 @@ const inputCls = 'w-full px-3 py-2 text-[13px] bg-white dark:bg-zinc-900 border 
 
 export default function SalesNewOrder() {
   const navigate = useNavigate()
+  const user = getUser()
   const [form, setForm] = useState<Form>(EMPTY)
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
@@ -91,13 +94,106 @@ export default function SalesNewOrder() {
   const addrRef = useRef<HTMLDivElement>(null)
   const { results: addrSuggestions, loading: addrLoading } = useAddressSuggestions(addrOpen ? form.address : '')
 
+  // SKU picker state
+  const [lines, setLines] = useState<Line[]>([])
+  const [skuQuery, setSkuQuery] = useState('')
+  const [skuOpen, setSkuOpen] = useState(false)
+  const [skuLoading, setSkuLoading] = useState(false)
+  const [skuHits, setSkuHits] = useState<InventoryHit[]>([])
+  const [warehouseNames, setWarehouseNames] = useState<Record<string, string>>({})
+  const [hasInventory, setHasInventory] = useState<boolean | null>(null)
+  const skuRef = useRef<HTMLDivElement>(null)
+  const skuTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (addrRef.current && !addrRef.current.contains(e.target as Node)) setAddrOpen(false)
+      if (skuRef.current && !skuRef.current.contains(e.target as Node)) setSkuOpen(false)
     }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
+
+  // Load warehouse names + check inventory existence once
+  useEffect(() => {
+    if (!user?.company_id) return
+    supabase.from('livra_warehouses')
+      .select('id, name')
+      .eq('company_id', user.company_id)
+      .then(({ data }) => {
+        const map: Record<string, string> = {}
+        for (const w of (data ?? []) as { id: string; name: string }[]) map[w.id] = w.name
+        setWarehouseNames(map)
+      })
+    supabase.from('livra_inventory')
+      .select('id', { count: 'exact', head: true })
+      .eq('company_id', user.company_id)
+      .then(({ count }) => setHasInventory((count ?? 0) > 0))
+  }, [user?.company_id])
+
+  // SKU search (debounced)
+  useEffect(() => {
+    if (!skuOpen || !user?.company_id) return
+    if (skuTimer.current) clearTimeout(skuTimer.current)
+    const q = skuQuery.trim()
+    skuTimer.current = setTimeout(async () => {
+      setSkuLoading(true)
+      try {
+        let query = supabase
+          .from('livra_inventory')
+          .select('sku, product_name, quantity, warehouse_id')
+          .eq('company_id', user.company_id)
+          .gt('quantity', 0)
+          .limit(60)
+        if (q.length >= 1) {
+          const safe = q.replace(/[%,()]/g, ' ')
+          query = query.or(`sku.ilike.%${safe}%,product_name.ilike.%${safe}%`)
+        }
+        const { data } = await query
+        const rows = (data ?? []) as InventoryRow[]
+        const bySku = new Map<string, InventoryHit>()
+        for (const r of rows) {
+          const hit = bySku.get(r.sku) ?? {
+            sku: r.sku,
+            name: r.product_name ?? r.sku,
+            stock: [],
+            totalQty: 0,
+          }
+          hit.stock.push({
+            warehouseId: r.warehouse_id,
+            warehouseName: warehouseNames[r.warehouse_id] ?? '—',
+            qty: r.quantity,
+          })
+          hit.totalQty += r.quantity
+          if (!bySku.has(r.sku)) bySku.set(r.sku, hit)
+        }
+        setSkuHits(Array.from(bySku.values()).slice(0, 10))
+      } finally {
+        setSkuLoading(false)
+      }
+    }, 250)
+  }, [skuQuery, skuOpen, user?.company_id, warehouseNames])
+
+  function addLine(hit: InventoryHit) {
+    setLines(prev => {
+      const existing = prev.find(l => l.sku === hit.sku)
+      if (existing) {
+        return prev.map(l => l.sku === hit.sku ? { ...l, qty: l.qty + 1 } : l)
+      }
+      return [...prev, { sku: hit.sku, name: hit.name, qty: 1 }]
+    })
+    setSkuQuery('')
+    setSkuOpen(false)
+  }
+
+  function updateLineQty(sku: string, qty: number) {
+    if (qty <= 0) { setLines(prev => prev.filter(l => l.sku !== sku)); return }
+    setLines(prev => prev.map(l => l.sku === sku ? { ...l, qty } : l))
+  }
+
+  function removeLine(sku: string) {
+    setLines(prev => prev.filter(l => l.sku !== sku))
+  }
 
   function set(key: keyof Form, value: string) {
     setForm(f => ({ ...f, [key]: value }))
@@ -120,13 +216,17 @@ export default function SalesNewOrder() {
     if (err) { setError(err); return }
 
     setSaving(true)
-    const user = getUser()
+    const itemsText = lines.length
+      ? lines.map(l => `${l.qty}x ${l.name} [${l.sku}]`).join(', ')
+      : null
+    const itemsJson = lines.length ? lines.map(l => ({ sku: l.sku, name: l.name, qty: l.qty })) : null
     const { error: dbErr } = await supabase.from('livra_deliveries').insert({
       customer:            form.customer.trim(),
       phone:               form.phone.trim(),
       address:             form.address.trim(),
       notes:               form.notes.trim() || null,
-      order_items:         form.order_items.trim() || null,
+      order_items:         itemsText,
+      order_items_json:    itemsJson,
       order_value:         form.order_value ? parseFloat(form.order_value) : null,
       shipping_cost:       form.shipping_cost ? parseFloat(form.shipping_cost) : null,
       package_description: form.package_description.trim() || null,
@@ -135,7 +235,7 @@ export default function SalesNewOrder() {
       time_window_end:     form.time_window_end || null,
       status:              'upcoming',
       assigned_to:         user?.id ?? null,
-      company_id:          null, // sales managers don't have a direct company_id lookup here
+      company_id:          user?.company_id ?? null,
     })
     setSaving(false)
 
@@ -232,9 +332,84 @@ export default function SalesNewOrder() {
             <div className="text-[12px] font-semibold text-zinc-400 uppercase tracking-wide">Detalii comandă</div>
 
             <Field label="Produse comandate" icon={ShoppingCart}>
-              <textarea className={`${inputCls} resize-none`} rows={2}
-                placeholder="ex. 2x Tricou alb M, 1x Pantaloni negri L"
-                value={form.order_items} onChange={e => set('order_items', e.target.value)} />
+              {hasInventory === false && (
+                <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-lg px-3 py-2 mb-2 text-[12px] text-amber-700 dark:text-amber-300">
+                  <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
+                  <span>Niciun inventar încărcat încă. Cere managerului să încarce fișierul de inventar din ecranul „Inventar".</span>
+                </div>
+              )}
+              <div ref={skuRef} className="relative">
+                <div className="relative">
+                  <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    className={`${inputCls} pl-9`}
+                    placeholder="Caută produs după SKU sau denumire…"
+                    value={skuQuery}
+                    onFocus={() => setSkuOpen(true)}
+                    onChange={e => { setSkuQuery(e.target.value); setSkuOpen(true) }}
+                  />
+                  {skuLoading && <Loader2 size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 animate-spin" />}
+                </div>
+                {skuOpen && (
+                  <ul className="absolute z-50 left-0 right-0 top-full mt-1 max-h-72 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg">
+                    {skuHits.length === 0 && !skuLoading && (
+                      <li className="px-3 py-3 text-[12px] text-zinc-400 text-center">
+                        {hasInventory === false ? 'Niciun produs disponibil' : 'Niciun rezultat'}
+                      </li>
+                    )}
+                    {skuHits.map(hit => (
+                      <li key={hit.sku}>
+                        <button type="button"
+                          className="w-full text-left px-3 py-2 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors"
+                          onMouseDown={e => { e.preventDefault(); addLine(hit) }}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-[13px] text-zinc-800 dark:text-zinc-200 truncate">{hit.name}</div>
+                              <div className="text-[11px] text-zinc-400 font-mono">{hit.sku}</div>
+                            </div>
+                            <div className="flex flex-col items-end flex-shrink-0">
+                              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">{hit.totalQty} în stoc</span>
+                              <span className="text-[10px] text-zinc-400 truncate max-w-[160px]">
+                                {hit.stock.map(s => `${s.warehouseName}: ${s.qty}`).join(' · ')}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              {lines.length > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                  {lines.map(l => (
+                    <li key={l.sku} className="flex items-center gap-2 px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[12px] text-zinc-800 dark:text-zinc-200 truncate">{l.name}</div>
+                        <div className="text-[10px] text-zinc-400 font-mono">{l.sku}</div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button type="button" onClick={() => updateLineQty(l.sku, l.qty - 1)}
+                          className="w-6 h-6 flex items-center justify-center rounded text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700">−</button>
+                        <input type="number" min="1" value={l.qty}
+                          onChange={e => updateLineQty(l.sku, parseInt(e.target.value || '0', 10))}
+                          className="w-12 text-center text-[12px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-orange-400" />
+                        <button type="button" onClick={() => updateLineQty(l.sku, l.qty + 1)}
+                          className="w-6 h-6 flex items-center justify-center rounded text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700">
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                      <button type="button" onClick={() => removeLine(l.sku)}
+                        className="w-6 h-6 flex items-center justify-center rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30">
+                        <X size={13} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Field>
 
             <div className="grid grid-cols-2 gap-3">

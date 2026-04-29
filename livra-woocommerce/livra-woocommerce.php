@@ -3,7 +3,7 @@
  * Plugin Name: Livra – Delivery Integration
  * Plugin URI:  https://livra.md
  * Description: Trimite comenzile WooCommerce automat către platforma Livra pentru optimizare trasee.
- * Version:     1.0.1
+ * Version:     1.0.2
  * Author:      Livra
  * License:     GPL-2.0+
  * Text Domain: livra
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'LIVRA_VERSION', '1.0.1' );
+define( 'LIVRA_VERSION', '1.0.2' );
 define( 'LIVRA_OPTION_URL', 'livra_webhook_url' );
 define( 'LIVRA_OPTION_KEY', 'livra_api_key' );
 
@@ -115,9 +115,21 @@ function livra_send_order( $order_id ) {
     // Order notes
     $notes = $order->get_customer_note();
 
-    $items = [];
+    // Build structured items list with SKU (variations return their own SKU).
+    $items_json = [];
+    $items_text = [];
     foreach ( $order->get_items() as $item ) {
-        $items[] = $item->get_quantity() . 'x ' . $item->get_name();
+        $product = $item->get_product();
+        $sku     = $product ? $product->get_sku() : '';
+        $qty     = (int) $item->get_quantity();
+        $line    = (float) $item->get_total();
+        $items_json[] = [
+            'sku'   => $sku !== '' ? $sku : null,
+            'name'  => $item->get_name(),
+            'qty'   => $qty,
+            'price' => $line,
+        ];
+        $items_text[] = $qty . 'x ' . $item->get_name() . ( $sku !== '' ? " [$sku]" : '' );
     }
 
     $payload = [
@@ -126,7 +138,8 @@ function livra_send_order( $order_id ) {
         'customer_phone'   => $phone,
         'delivery_address' => $address,
         'notes'            => $notes,
-        'order_items'      => implode( ', ', $items ),
+        'order_items'      => implode( ', ', $items_text ),
+        'order_items_json' => $items_json,
         'order_value'      => (float) $order->get_total(),
         'shipping_cost'    => (float) $order->get_shipping_total(),
     ];

@@ -11,6 +11,7 @@ export type AppUser = {
   color: string
   must_change_password: boolean
   role: 'admin' | 'sales'
+  company_id: string
 }
 
 const KEY = 'livra_user'
@@ -53,6 +54,7 @@ export async function signIn(email: string, password: string): Promise<AppUser> 
       color: admin.color ?? '#7c3aed',
       must_change_password: admin.must_change_password ?? false,
       role: 'admin',
+      company_id: admin.id,
     }
     setUser(user)
     return user
@@ -79,6 +81,7 @@ export async function signIn(email: string, password: string): Promise<AppUser> 
       color: sales.color ?? '#7c3aed',
       must_change_password: sales.must_change_password ?? false,
       role: 'sales',
+      company_id: sales.admin_id,
     }
     setUser(user)
     return user
