@@ -502,7 +502,7 @@ export default function RoutesPage() {
   const [editingId, setEditingId]       = useState<string | null>(null)
   const [editDraft, setEditDraft]       = useState({ time_window_start: '', time_window_end: '', package_description: '', delivery_date: '' })
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set())
-  const [activeTab, setActiveTab]           = useState<'new' | 'scheduled' | 'finished'>('scheduled')
+  const [activeTab, setActiveTab]           = useState<'new' | 'scheduled' | 'finished'>('new')
   // Date the dispatcher is optimizing for. Defaults to today; manager can pick
   // tomorrow (or any future date) the evening before to plan ahead.
   const [optimizeDate, setOptimizeDate]     = useState<string>(() => {
