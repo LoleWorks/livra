@@ -8,11 +8,20 @@ type Transaction = { id: string; type: 'deduct' | 'topup'; desc: string; date: s
 type Package = { credits: number; price: string; per: string; popular: boolean }
 
 const PACKAGES: Package[] = [
-  { credits: 100,  price: '2,000 MDL', per: '20 MDL/credit', popular: false },
-  { credits: 300,  price: '5,400 MDL', per: '18 MDL/credit', popular: false },
-  { credits: 500,  price: '8,500 MDL', per: '17 MDL/credit', popular: true  },
-  { credits: 1000, price: '15,000 MDL', per: '15 MDL/credit', popular: false },
+  { credits: 100,  price: '1,700 MDL',  per: '17 MDL/credit', popular: false },
+  { credits: 300,  price: '4,200 MDL',  per: '14 MDL/credit', popular: false },
+  { credits: 500,  price: '6,000 MDL',  per: '12 MDL/credit', popular: true  },
+  { credits: 1000, price: '10,000 MDL', per: '10 MDL/credit', popular: false },
 ]
+
+const CUSTOM_MIN = 1500
+const CUSTOM_MAX = 10000
+const CUSTOM_STEP = 500
+
+function calcPricePerCredit(n: number): number {
+  // 10 MDL at 1000 credits → 6 MDL at 10 000 credits, linear
+  return Math.round((10 - ((n - 1000) / 9000) * 4) * 10) / 10
+}
 
 function formatTxDate(iso: string): string {
   const d = new Date(iso)
@@ -27,6 +36,7 @@ export default function Credits() {
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [customCredits, setCustomCredits] = useState(CUSTOM_MIN)
 
   const [adminId] = useState(() => getUser()?.company_id)
 
@@ -93,6 +103,17 @@ export default function Credits() {
     setSelectedPkg(pkg)
     setShowConfirm(true)
     setShowSuccess(false)
+  }
+
+  function openCustomPurchase() {
+    const ppc = calcPricePerCredit(customCredits)
+    const total = Math.round(customCredits * ppc)
+    openPurchase({
+      credits: customCredits,
+      price: `${total.toLocaleString()} MDL`,
+      per: `${ppc} MDL/credit`,
+      popular: false,
+    })
   }
 
   async function handlePurchase() {
@@ -306,6 +327,48 @@ export default function Credits() {
                   <div className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5">{pkg.per}</div>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Custom credits slider */}
+          <div>
+            <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Credite personalizate</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
+              <div className="flex items-end justify-between mb-5">
+                <div>
+                  <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 tabular-nums">{customCredits.toLocaleString()}</div>
+                  <div className="text-[12px] text-zinc-400 dark:text-zinc-500 mt-0.5">credite</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[20px] font-bold text-zinc-900 dark:text-zinc-50 tabular-nums">
+                    {Math.round(customCredits * calcPricePerCredit(customCredits)).toLocaleString()} MDL
+                  </div>
+                  <div className="text-[11px] text-brand-orange dark:text-orange-400 font-semibold mt-0.5">
+                    {calcPricePerCredit(customCredits)} MDL/credit
+                  </div>
+                </div>
+              </div>
+
+              <input
+                type="range"
+                min={CUSTOM_MIN}
+                max={CUSTOM_MAX}
+                step={CUSTOM_STEP}
+                value={customCredits}
+                onChange={e => setCustomCredits(Number(e.target.value))}
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-brand-orange bg-zinc-200 dark:bg-zinc-700"
+              />
+              <div className="flex justify-between text-[10px] text-zinc-400 dark:text-zinc-500 mt-1.5">
+                <span>{CUSTOM_MIN.toLocaleString()} credite · {calcPricePerCredit(CUSTOM_MIN)} MDL/cr</span>
+                <span>{calcPricePerCredit(CUSTOM_MAX)} MDL/cr · {CUSTOM_MAX.toLocaleString()} credite</span>
+              </div>
+
+              <button
+                onClick={openCustomPurchase}
+                className="mt-4 w-full flex items-center justify-center gap-2 bg-brand-orange hover:bg-orange-500 text-white text-[13px] font-semibold py-2.5 rounded-lg transition-colors"
+              >
+                <Plus size={13} /> Cumpără {customCredits.toLocaleString()} credite
+              </button>
             </div>
           </div>
 
