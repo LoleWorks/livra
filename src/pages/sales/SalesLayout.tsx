@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { NavLink, Outlet, Navigate } from 'react-router-dom'
-import { LayoutDashboard, Plus, Package, RotateCcw, Sun, Moon, ChevronLeft, ChevronRight, LogOut, CreditCard } from 'lucide-react'
+import { LayoutDashboard, Plus, Package, RotateCcw, Sun, Moon, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 import { getUser, signOut } from '../../lib/auth'
-import { supabase } from '../../lib/supabase'
 
 const nav = [
   { to: '/sales',          icon: LayoutDashboard, label: 'Prezentare',   end: true },
@@ -19,25 +18,6 @@ export default function SalesLayout() {
   // (e.g. theme changes re-render all context consumers; re-running the role
   // check here would spuriously redirect admin accounts visiting /sales)
   const [user] = useState(() => getUser())
-  const [creditBalance, setCreditBalance] = useState<number | null>(null)
-
-  useEffect(() => {
-    if (!user?.company_id) return
-    supabase
-      .from('livra_credits')
-      .select('balance')
-      .eq('company_id', user.company_id)
-      .maybeSingle()
-      .then(({ data }) => { if (data) setCreditBalance(data.balance ?? 0) })
-
-    const channel = supabase
-      .channel('sales_layout_credits')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'livra_credits' }, payload => {
-        if (payload.new.company_id === user.company_id) setCreditBalance(payload.new.balance ?? 0)
-      })
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [user?.company_id])
 
   if (!user) return <Navigate to="/login" replace />
   if (user.must_change_password) return <Navigate to="/change-password" replace />
@@ -128,29 +108,6 @@ export default function SalesLayout() {
                 <LogOut size={12} />
               </button>
             </div>
-          )}
-
-          {/* Company credit balance */}
-          {creditBalance !== null && (
-            collapsed ? (
-              <div className="flex justify-center py-2" title={`${creditBalance} credite companie`}>
-                <CreditCard size={13} className={creditBalance < 0 ? 'text-red-400' : creditBalance < 20 ? 'text-amber-400' : 'text-zinc-400'} />
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 px-2.5 py-2 rounded-lg">
-                <CreditCard size={13} className="text-zinc-400 flex-shrink-0" />
-                <span className="text-[12px] text-zinc-500 dark:text-zinc-400 flex-1">Credite companie</span>
-                <span className={`text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-full ${
-                  creditBalance < 0
-                    ? 'bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400'
-                    : creditBalance < 20
-                      ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-                }`}>
-                  {creditBalance}
-                </span>
-              </div>
-            )
           )}
 
           <button
