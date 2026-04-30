@@ -19,7 +19,7 @@ export default function Layout() {
   const { theme, toggle } = useTheme()
   const [collapsed, setCollapsed] = useState(false)
   const [creditBalance, setCreditBalance] = useState<number | null>(null)
-  const user = getUser()
+  const [user] = useState(() => getUser())
 
   useEffect(() => {
     if (!user?.id) return
