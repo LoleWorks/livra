@@ -14,7 +14,10 @@ const nav = [
 export default function SalesLayout() {
   const { theme, toggle } = useTheme()
   const [collapsed, setCollapsed] = useState(false)
-  const user = getUser()
+  // Read user once at mount — guards must not re-evaluate on every render
+  // (e.g. theme changes re-render all context consumers; re-running the role
+  // check here would spuriously redirect admin accounts visiting /sales)
+  const [user] = useState(() => getUser())
 
   if (!user) return <Navigate to="/login" replace />
   if (user.must_change_password) return <Navigate to="/change-password" replace />
