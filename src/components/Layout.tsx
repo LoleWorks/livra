@@ -163,21 +163,21 @@ export default function Layout() {
 
     {/* Mobile bottom nav */}
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 h-14 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
-      <div className="flex items-center justify-around h-full px-2">
+      <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${nav.length}, 1fr)` }}>
         {nav.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors ${
+              `flex flex-col items-center justify-center gap-0.5 py-1.5 transition-colors ${
                 isActive ? 'text-brand-orange' : 'text-zinc-500 dark:text-zinc-400'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <Icon size={20} className={isActive ? 'text-brand-orange' : ''} />
-                <span className="text-[9px] font-medium leading-none">{label}</span>
+                <Icon size={18} className={isActive ? 'text-brand-orange' : ''} />
+                <span className="text-[8px] font-medium leading-none truncate w-full text-center px-0.5">{label}</span>
               </>
             )}
           </NavLink>
