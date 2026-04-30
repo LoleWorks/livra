@@ -1567,8 +1567,8 @@ export default function RoutesPage() {
             </div>
           </div>
 
-          {/* Config sidebar — desktop only */}
-          <div className="hidden md:flex md:w-64 md:flex-shrink-0 flex-col border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-5 overflow-y-auto">
+          {/* Config sidebar */}
+          <div className="flex flex-col max-h-[42vh] md:max-h-none md:w-64 flex-shrink-0 border-t md:border-t-0 md:border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-5 overflow-y-auto">
             <div>
               <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2.5">Șoferi activi</p>
               <div className="space-y-2">
