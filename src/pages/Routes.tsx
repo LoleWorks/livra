@@ -473,6 +473,7 @@ export default function RoutesPage() {
 
   const [toast, setToast]           = useState<string | null>(null)
   const [dispatched, setDispatched] = useState(false)
+  const [recalling, setRecalling]   = useState(false)
   const [traffic, setTraffic]       = useState(false)
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab]           = useState<'new' | 'scheduled' | 'finished'>('new')
@@ -921,6 +922,38 @@ export default function RoutesPage() {
     }
   }
 
+  // ── Recall dispatched route ──────────────────────────────────────────────────
+
+  async function handleRecall() {
+    if (!result || !adminId) return
+    if (!confirm('Anulezi ruta trimisă? Livrările vor reveni la starea "Nou".')) return
+    setRecalling(true)
+    try {
+      // Find all routes dispatched for this date by this admin
+      const { data: routes } = await supabase
+        .from('livra_routes')
+        .select('id')
+        .eq('admin_id', adminId)
+        .eq('date', optimizeDate)
+      if (routes?.length) {
+        const ids = routes.map((r: { id: string }) => r.id)
+        await supabase.from('livra_route_stops').delete().in('route_id', ids)
+        await supabase.from('livra_routes').delete().in('id', ids)
+      }
+      // Reset delivery statuses
+      const deliveryIds = result.routes.flatMap(r => r.stops.filter(s => s.type === 'delivery').map(s => s.delivery_id))
+      if (deliveryIds.length) {
+        await supabase.from('livra_deliveries').update({ status: 'upcoming' }).in('id', deliveryIds)
+      }
+      setDispatched(false)
+      setRecalling(false)
+      setToast('Ruta a fost anulată. Livrările au revenit la "Nou".')
+    } catch {
+      setToast('Eroare la anularea rutei')
+      setRecalling(false)
+    }
+  }
+
   // ── Loading state ────────────────────────────────────────────────────────────
 
   if (step === 'loading') {
@@ -951,18 +984,30 @@ export default function RoutesPage() {
               <button onClick={() => setResultsTab('map')} className={`px-3 py-1 text-[11px] font-semibold rounded-md transition-colors ${resultsTab === 'map' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Hartă</button>
               <button onClick={() => setResultsTab('routes')} className={`px-3 py-1 text-[11px] font-semibold rounded-md transition-colors ${resultsTab === 'routes' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Rute</button>
             </div>
-            <button
-              onClick={handleDispatch}
-              disabled={dispatched}
-              className={`flex items-center gap-1.5 text-white text-[12px] font-semibold px-3 py-2 rounded-lg transition-colors flex-shrink-0 ${
-                dispatched ? 'bg-emerald-700 opacity-70 cursor-default' : 'bg-emerald-600 hover:bg-emerald-500'
-              }`}
-            >
-              <CheckCircle2 size={13} />
-              <span className="hidden sm:inline">{dispatched ? 'Trimis' : 'Trimite la șoferi'}</span>
-              <span className="sm:hidden">{dispatched ? 'Trimis' : 'Trimite'}</span>
-              {!dispatched && <ChevronRight size={12} />}
-            </button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {dispatched && (
+                <button
+                  onClick={handleRecall}
+                  disabled={recalling}
+                  className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-lg border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50"
+                >
+                  <X size={13} />
+                  <span>{recalling ? 'Se anulează…' : 'Anulează ruta'}</span>
+                </button>
+              )}
+              <button
+                onClick={handleDispatch}
+                disabled={dispatched}
+                className={`flex items-center gap-1.5 text-white text-[12px] font-semibold px-3 py-2 rounded-lg transition-colors ${
+                  dispatched ? 'bg-emerald-700 opacity-70 cursor-default' : 'bg-emerald-600 hover:bg-emerald-500'
+                }`}
+              >
+                <CheckCircle2 size={13} />
+                <span className="hidden sm:inline">{dispatched ? 'Trimis' : 'Trimite la șoferi'}</span>
+                <span className="sm:hidden">{dispatched ? 'Trimis' : 'Trimite'}</span>
+                {!dispatched && <ChevronRight size={12} />}
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-1 overflow-hidden">
