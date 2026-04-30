@@ -26,14 +26,14 @@ export default function Layout() {
     supabase
       .from('livra_credits')
       .select('balance')
-      .eq('company_id', user.id)
+      .eq('company_id', user.company_id)
       .maybeSingle()
       .then(({ data }) => { if (data) setCreditBalance(data.balance ?? 0) })
 
     const channel = supabase
       .channel('layout_credits')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'livra_credits' }, payload => {
-        if (payload.new.company_id === user.id) setCreditBalance(payload.new.balance ?? 0)
+        if (payload.new.company_id === user.company_id) setCreditBalance(payload.new.balance ?? 0)
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }

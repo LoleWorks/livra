@@ -21,14 +21,14 @@ function formatTxDate(iso: string): string {
 }
 
 export default function Credits() {
-  const [balance, setBalance]         = useState(0)
+  const [balance, setBalance]         = useState<number | null>(null)
   const [creditsId, setCreditsId]     = useState<string | null>(null)
   const [txs, setTxs]                 = useState<Transaction[]>([])
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  const adminId = getUser()?.id
+  const [adminId] = useState(() => getUser()?.company_id)
 
   useEffect(() => {
     if (!adminId) return
@@ -97,7 +97,7 @@ export default function Credits() {
 
   async function handlePurchase() {
     if (!selectedPkg || !adminId) return
-    const newBalance = balance + selectedPkg.credits
+    const newBalance = (balance ?? 0) + selectedPkg.credits
     const desc = `Reîncărcare · ${selectedPkg.credits} credite`
     const now = new Date().toISOString()
 
@@ -231,7 +231,7 @@ export default function Credits() {
         <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 space-y-4">
 
           {/* Low balance warning */}
-          {balance >= 0 && balance < 20 && (
+          {balance !== null && balance >= 0 && balance < 20 && (
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[13px] text-amber-700 dark:text-amber-400">
               <Zap size={14} className="flex-shrink-0" />
               <span>Sold scăzut — mai ai <strong>{balance}</strong> credite. Reîncarcă pentru a putea expedia rute noi.</span>
@@ -240,7 +240,7 @@ export default function Credits() {
               </button>
             </div>
           )}
-          {balance < 0 && (
+          {balance !== null && balance < 0 && (
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-[13px] text-red-700 dark:text-red-400">
               <Zap size={14} className="flex-shrink-0" />
               <span>Sold negativ (<strong>{balance}</strong> credite). Livrările au fost expediate dar contul trebuie reîncărcat.</span>
@@ -251,11 +251,11 @@ export default function Credits() {
           )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className={`rounded-xl p-4 flex flex-col justify-between ${balance < 0 ? 'bg-red-500' : 'bg-brand-orange'}`}>
+            <div className={`rounded-xl p-4 flex flex-col justify-between ${balance !== null && balance < 0 ? 'bg-red-500' : 'bg-brand-orange'}`}>
               <div className="text-[11px] font-semibold text-white/70 uppercase tracking-wider">Sold curent</div>
               <div>
-                <div className="text-4xl font-bold text-white">{balance}</div>
-                <div className="text-[12px] text-white/70 mt-0.5">credite · ≈ {(balance * 20).toLocaleString()} MDL</div>
+                <div className="text-4xl font-bold text-white">{balance ?? '—'}</div>
+                <div className="text-[12px] text-white/70 mt-0.5">credite · ≈ {balance !== null ? (balance * 20).toLocaleString() : '—'} MDL</div>
               </div>
               <button
                 onClick={() => openPurchase(PACKAGES[2])}
