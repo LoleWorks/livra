@@ -1568,25 +1568,8 @@ export default function RoutesPage() {
             </div>
           </div>
 
-          {/* Config sidebar — collapsible on mobile, fixed on desktop */}
-          <div className="flex-shrink-0 md:w-64 border-t md:border-t-0 md:border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col md:overflow-y-auto">
-            {/* Mobile toggle header */}
-            <button
-              className="md:hidden flex items-center justify-between px-4 py-3 text-left w-full"
-              onClick={() => setSidebarOpen(o => !o)}
-            >
-              <div className="flex items-center gap-2">
-                <Wand2 size={13} className="text-brand-orange" />
-                <span className="text-[13px] font-semibold text-zinc-800 dark:text-zinc-200">Configurare & Optimizare</span>
-                {activeDrivers.length > 0 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">{activeDrivers.length} șoferi</span>
-                )}
-              </div>
-              <ChevronDown size={15} className={`text-zinc-400 transition-transform duration-200 ${sidebarOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* Sidebar content */}
-            <div className={`${sidebarOpen ? 'flex' : 'hidden'} md:flex flex-col p-4 space-y-5 overflow-y-auto max-h-[60vh] md:max-h-none`}>
+          {/* Config sidebar */}
+          <div className="flex flex-col max-h-[42vh] md:max-h-none md:w-64 flex-shrink-0 border-t md:border-t-0 md:border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-5 overflow-y-auto">
             <div>
               <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2.5">Șoferi activi</p>
               <div className="space-y-2">
