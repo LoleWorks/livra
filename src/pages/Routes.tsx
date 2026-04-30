@@ -1019,7 +1019,7 @@ export default function RoutesPage() {
               </MapContainer>
 
               {/* Traffic toggle */}
-              <div className="absolute top-4 right-4 z-[1000]">
+              <div className="absolute top-4 right-4 md:top-4 z-[1000]">
                 <button
                   onClick={() => setTraffic(t => !t)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium border shadow-sm transition-colors ${
@@ -1032,14 +1032,14 @@ export default function RoutesPage() {
                 </button>
               </div>
 
-              <div className="absolute bottom-4 left-4 z-[1000] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 flex flex-col gap-1.5 shadow-sm">
+              <div className="absolute bottom-4 left-4 z-[1000] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 flex flex-col gap-1.5 shadow-sm max-w-[calc(50vw-1rem)]">
                 {result.routes.map(r => (
                   <button key={r.driver_id} onClick={() => setSelectedId(r.driver_id)}
-                    className={`flex items-center gap-2 text-left px-2 py-1 rounded-lg transition-colors ${r.driver_id === selectedId ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'}`}
+                    className={`flex items-center gap-2 text-left px-2 py-1 rounded-lg transition-colors min-w-0 ${r.driver_id === selectedId ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'}`}
                   >
                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: r.color }} />
-                    <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300">{r.driver_name.split(' ')[0]}</span>
-                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500">{r.stops.length} opriri · {r.total_distance_km} km</span>
+                    <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 truncate">{r.driver_name.split(' ')[0]}</span>
+                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500 hidden sm:inline flex-shrink-0">{r.stops.length} opriri · {r.total_distance_km} km</span>
                   </button>
                 ))}
               </div>
