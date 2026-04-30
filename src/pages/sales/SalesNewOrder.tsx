@@ -298,7 +298,7 @@ export default function SalesNewOrder() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6">
       <Helmet>
         <title>Comandă nouă | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
@@ -478,7 +478,7 @@ export default function SalesNewOrder() {
             </Field>
 
             <Field label="Interval orar preferat de client" icon={Clock}>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {TIME_WINDOWS.map(tw => {
                   const active = form.time_window_start === tw.start && form.time_window_end === tw.end
                   return (

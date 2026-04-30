@@ -81,14 +81,14 @@ export default function SalesDashboard() {
   const recent = deliveries.slice(0, 5)
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
       <Helmet>
         <title>Prezentare | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[18px] font-semibold text-zinc-900 dark:text-zinc-50">Prezentare generală</h1>
           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -97,7 +97,7 @@ export default function SalesDashboard() {
         </div>
         <Link
           to="/sales/nou"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[13px] font-medium rounded-lg transition-colors"
+          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[13px] font-medium rounded-lg transition-colors"
         >
           <Plus size={14} />
           Comandă nouă
@@ -105,7 +105,7 @@ export default function SalesDashboard() {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'De livrat azi', value: pending,    icon: Package,      color: 'text-brand-orange dark:text-orange-400',    bg: 'bg-orange-50 dark:bg-orange-950/40' },
           { label: 'În curs',       value: dispatched, icon: Clock,        color: 'text-amber-600 dark:text-amber-400',  bg: 'bg-amber-50 dark:bg-amber-950/40' },
@@ -124,10 +124,10 @@ export default function SalesDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 
         {/* Recent orders */}
-        <div className="col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+        <div className="md:col-span-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
             <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200">Comenzi recente</span>
             <Link to="/sales/comenzi" className="text-[12px] text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1">
@@ -168,7 +168,7 @@ export default function SalesDashboard() {
         </div>
 
         {/* Returns / attention */}
-        <div className="col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+        <div className="md:col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
             <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200">Retururi active</span>
             <Link to="/sales/retururi" className="text-[12px] text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1">

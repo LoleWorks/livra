@@ -352,13 +352,13 @@ export default function SalesOrders() {
   const unscheduled = orders.filter(o => !o.delivery_date && o.status === 'upcoming').length
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
       <Helmet>
         <title>Comenzi | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[18px] font-semibold text-zinc-900 dark:text-zinc-50">Comenzi</h1>
           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -392,8 +392,8 @@ export default function SalesOrders() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             value={search}
@@ -402,40 +402,43 @@ export default function SalesOrders() {
             className="w-full pl-8 pr-3 py-2 text-[13px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400"
           />
         </div>
-        <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1">
-          {ALL_STATUSES.map(s => (
-            <button
-              key={s}
-              onClick={() => setFilter(s)}
-              className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors ${
-                filter === s ? 'bg-brand-orange text-white' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
-              }`}
-            >
-              {STATUS_LABELS_FILTER[s]}
-            </button>
-          ))}
+        <div className="overflow-x-auto">
+          <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1 w-max">
+            {ALL_STATUSES.map(s => (
+              <button
+                key={s}
+                onClick={() => setFilter(s)}
+                className={`px-3 py-1 rounded-md text-[12px] font-medium transition-colors whitespace-nowrap ${
+                  filter === s ? 'bg-brand-orange text-white' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
+                }`}
+              >
+                {STATUS_LABELS_FILTER[s]}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-[13px]">
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800">
               <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Client</th>
-              <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Produse</th>
-              <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Adresă</th>
+              <th className="hidden sm:table-cell text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Produse</th>
+              <th className="hidden md:table-cell text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Adresă</th>
               <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Data</th>
-              <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Valoare</th>
+              <th className="hidden sm:table-cell text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Valoare</th>
               <th className="text-left px-4 py-2.5 text-[11px] font-medium text-zinc-400 uppercase tracking-wide">Status</th>
               <th className="px-4 py-2.5" />
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {loading ? (
-              <tr><td colSpan={7} className="py-12 text-center text-zinc-400">Se încarcă...</td></tr>
+              <tr><td colSpan={5} className="py-12 text-center text-zinc-400">Se încarcă...</td></tr>
             ) : visible.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-12 text-center">
+                <td colSpan={5} className="py-12 text-center">
                   <Package size={24} className="text-zinc-300 dark:text-zinc-600 mx-auto mb-2" />
                   <p className="text-zinc-400 text-[13px]">Nicio comandă găsită</p>
                 </td>
@@ -456,7 +459,7 @@ export default function SalesOrders() {
                       {o.notes && <div className="text-[11px] text-zinc-400 mt-0.5 italic truncate max-w-[140px]">{o.notes}</div>}
                     </td>
                     {/* Produse */}
-                    <td className="px-4 py-3 max-w-[180px]">
+                    <td className="hidden sm:table-cell px-4 py-3 max-w-[180px]">
                       {o.order_items
                         ? <div className="text-[12px] text-zinc-700 dark:text-zinc-300 leading-snug">{o.order_items}</div>
                         : <span className="text-[11px] text-zinc-300 dark:text-zinc-600">—</span>
@@ -464,7 +467,7 @@ export default function SalesOrders() {
                       {o.package_description && <div className="text-[11px] text-zinc-400 mt-0.5">{o.package_description}</div>}
                     </td>
                     {/* Adresă */}
-                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 max-w-[180px]">
+                    <td className="hidden md:table-cell px-4 py-3 text-zinc-500 dark:text-zinc-400 max-w-[180px]">
                       <div className="truncate">{o.address}</div>
                     </td>
                     {/* Data */}
@@ -477,7 +480,7 @@ export default function SalesOrders() {
                       }
                     </td>
                     {/* Valoare */}
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="hidden sm:table-cell px-4 py-3 whitespace-nowrap">
                       {o.order_value != null || o.shipping_cost != null ? (
                         <div className="space-y-0.5">
                           {o.order_value != null && (
@@ -531,7 +534,7 @@ export default function SalesOrders() {
 
                     return (
                     <tr>
-                      <td colSpan={7} className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20" onClick={e => e.stopPropagation()}>
+                      <td colSpan={5} className="px-4 py-3 border-b border-orange-100 dark:border-orange-900/40 bg-orange-50/40 dark:bg-orange-950/20" onClick={e => e.stopPropagation()}>
                         <div className="space-y-2 max-w-md">
                           <div>
                             <label className="text-[10px] text-zinc-500 dark:text-zinc-400 mb-0.5 block">Data livrării *</label>
@@ -636,6 +639,7 @@ export default function SalesOrders() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

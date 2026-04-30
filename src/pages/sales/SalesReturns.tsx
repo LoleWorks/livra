@@ -93,14 +93,14 @@ export default function SalesReturns() {
   const openCount = items.filter(i => i.status === 'open').length
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
       <Helmet>
         <title>Retururi | Livra Sales</title>
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[18px] font-semibold text-zinc-900 dark:text-zinc-50">Retururi</h1>
           <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -192,7 +192,7 @@ export default function SalesReturns() {
 
                   {/* Actions */}
                   {item.status === 'open' && (
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-shrink-0 mt-1 sm:mt-0">
                       <a
                         href={`tel:${item.phone}`}
                         className="flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
@@ -200,20 +200,22 @@ export default function SalesReturns() {
                         <Phone size={12} />
                         {item.phone}
                       </a>
-                      <button
-                        onClick={() => setRescheduleOpen(rescheduleOpen === item.id ? null : item.id)}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition-colors"
-                      >
-                        <RotateCcw size={12} />
-                        Reprogramează
-                      </button>
-                      <button
-                        onClick={() => doCancel(item)}
-                        title="Anulează comanda"
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                      >
-                        <Ban size={13} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setRescheduleOpen(rescheduleOpen === item.id ? null : item.id)}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition-colors"
+                        >
+                          <RotateCcw size={12} />
+                          Reprogramează
+                        </button>
+                        <button
+                          onClick={() => doCancel(item)}
+                          title="Anulează comanda"
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        >
+                          <Ban size={13} />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -229,7 +231,7 @@ export default function SalesReturns() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 mb-1.5">
                         <Calendar size={11} /> Dată nouă
