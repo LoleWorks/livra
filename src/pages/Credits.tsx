@@ -102,21 +102,24 @@ export default function Credits() {
     const now = new Date().toISOString()
 
     if (creditsId) {
-      await supabase.from('livra_credits').update({ balance: newBalance }).eq('id', creditsId)
+      const { error } = await supabase.from('livra_credits').update({ balance: newBalance }).eq('id', creditsId)
+      if (error) { console.error('Credits update failed:', error); return }
     } else {
-      const { data: newRow } = await supabase
+      const { data: newRow, error } = await supabase
         .from('livra_credits')
         .insert({ balance: newBalance, company_id: adminId })
         .select()
         .single()
+      if (error) { console.error('Credits insert failed:', error); return }
       if (newRow) setCreditsId(newRow.id)
     }
 
-    const { data: txData } = await supabase
+    const { data: txData, error: txError } = await supabase
       .from('livra_transactions')
       .insert({ type: 'topup', description: desc, amount: selectedPkg.credits, company_id: adminId })
       .select()
       .single()
+    if (txError) console.error('Transaction insert failed:', txError)
 
     setBalance(newBalance)
     if (txData) {
