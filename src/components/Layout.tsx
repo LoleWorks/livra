@@ -6,13 +6,13 @@ import { getUser, signOut } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 
 const nav = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/routes',    icon: RouteIcon,        label: 'Rute' },
-  { to: '/drivers',   icon: UserCog,          label: 'Utilizatori' },
-  { to: '/warehouses', icon: Warehouse,       label: 'Depozite' },
-  { to: '/activity',  icon: Activity,         label: 'Activitate' },
-  { to: '/integrations', icon: Plug,          label: 'Integrări' },
-  { to: '/credits',   icon: CreditCard,       label: 'Credite' },
+  { to: '/dashboard',    icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/routes',       icon: RouteIcon,       label: 'Rute' },
+  { to: '/drivers',      icon: UserCog,         label: 'Utilizatori' },
+  { to: '/warehouses',   icon: Warehouse,       label: 'Depozite' },
+  { to: '/activity',     icon: Activity,        label: 'Activitate' },
+  { to: '/integrations', icon: Plug,            label: 'Integrări', desktopOnly: true },
+  { to: '/credits',      icon: CreditCard,      label: 'Credite' },
 ]
 
 export default function Layout() {
@@ -163,8 +163,8 @@ export default function Layout() {
 
     {/* Mobile bottom nav */}
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 h-14 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
-      <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${nav.length}, 1fr)` }}>
-        {nav.map(({ to, icon: Icon, label }) => (
+      <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${nav.filter(n => !n.desktopOnly).length}, 1fr)` }}>
+        {nav.filter(n => !n.desktopOnly).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
