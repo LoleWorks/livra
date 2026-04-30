@@ -28,7 +28,7 @@ export default function Credits() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  const [adminId] = useState(() => getUser()?.id)
+  const [adminId] = useState(() => getUser()?.company_id)
 
   useEffect(() => {
     if (!adminId) return
