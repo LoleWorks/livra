@@ -1212,6 +1212,23 @@ export default function RoutesPage() {
           <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Rute</span>
         </div>
 
+        {/* Mobile-only compact optimize bar */}
+        <div className="md:hidden flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">
+          <input
+            type="date"
+            value={optimizeDate}
+            onChange={e => setOptimizeDate(e.target.value)}
+            className="flex-1 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-[12px] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-orange"
+          />
+          <button
+            onClick={startOptimize}
+            disabled={!deliveries.filter(d => d.delivery_date === optimizeDate).length || !activeDrivers.length}
+            className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+          >
+            <Wand2 size={12} /> Optimizează
+          </button>
+        </div>
+
         <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
           {/* Delivery list */}
           <div className="flex-1 min-h-0 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4">
@@ -1567,7 +1584,7 @@ export default function RoutesPage() {
               </div>
               <ChevronDown size={15} className={`text-zinc-400 transition-transform duration-200 ${sidebarOpen ? 'rotate-180' : ''}`} />
             </button>
-            <div className={`${sidebarOpen ? 'flex' : 'hidden'} md:flex flex-col p-4 space-y-5 overflow-y-auto overscroll-contain max-h-[55vh] md:max-h-none`}>
+            <div className={`${sidebarOpen ? 'flex' : 'hidden'} md:flex flex-col p-4 space-y-5 overflow-y-auto max-h-[60vh] md:max-h-none`}>
             <div>
               <p className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2.5">Șoferi activi</p>
               <div className="space-y-2">
