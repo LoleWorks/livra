@@ -239,7 +239,8 @@ export default function WarehouseDetail() {
   return (
     <>
       <Helmet><title>{warehouse?.name ?? 'Depozit'} — Livra</title></Helmet>
-      <div className="p-6 space-y-6 max-w-5xl">
+      <div className="h-full overflow-y-auto">
+      <div className="p-4 md:p-6 space-y-6 max-w-5xl">
         <div>
           <Link to="/warehouses" className="inline-flex items-center gap-1.5 text-[12px] text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 mb-2">
             <ArrowLeft size={13} /> Toate depozitele
@@ -257,7 +258,7 @@ export default function WarehouseDetail() {
 
         {/* Status + upload card */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
                 <Package size={18} className="text-blue-600 dark:text-blue-400" />
@@ -280,7 +281,7 @@ export default function WarehouseDetail() {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-[12px] rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-[12px] rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               <Upload size={14} /> Încarcă inventar
             </button>
@@ -298,14 +299,14 @@ export default function WarehouseDetail() {
         {/* Preview before commit */}
         {preview && (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
               <div>
                 <div className="text-[14px] font-medium text-zinc-900 dark:text-zinc-100">Previzualizare: {preview.fileName}</div>
                 <div className="text-[12px] text-zinc-500 mt-0.5">
                   {preview.rows.length} rânduri vor înlocui inventarul curent ({inventory.length} rânduri).
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button onClick={() => setPreview(null)} disabled={busy} className="px-3 py-2 text-[12px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">Anulează</button>
                 <button onClick={commitUpload} disabled={busy} className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-[12px] rounded-lg hover:bg-blue-700 disabled:opacity-50">
                   {busy ? 'Se salvează…' : 'Confirmă și salvează'}
@@ -342,15 +343,15 @@ export default function WarehouseDetail() {
 
         {/* Inventory list */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-[13px] font-semibold text-zinc-700 dark:text-zinc-300">Produse în depozit</h2>
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-[13px] font-semibold text-zinc-700 dark:text-zinc-300 flex-1">Produse în depozit</h2>
+            <div className="relative w-full sm:w-56">
               <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Caută SKU sau denumire…"
-                className="pl-7 pr-3 py-1.5 text-[12px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md w-56 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="pl-7 pr-3 py-1.5 text-[12px] bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -394,6 +395,7 @@ export default function WarehouseDetail() {
           )}
         </div>
       </div>
+      </div>
 
       {/* Field mapping modal */}
       {showMappingModal && rawFile && (
@@ -411,8 +413,8 @@ export default function WarehouseDetail() {
 
             <div className="space-y-3">
               {mappingFields.map(({ field, label, required, hint }) => (
-                <div key={field} className="flex items-center gap-4">
-                  <div className="w-40 flex-shrink-0">
+                <div key={field} className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4">
+                  <div className="sm:w-40 sm:flex-shrink-0">
                     <div className="text-[12px] font-medium text-zinc-700 dark:text-zinc-300">
                       {label}{required && <span className="text-red-500 ml-0.5">*</span>}
                     </div>

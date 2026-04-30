@@ -135,9 +135,10 @@ export default function Warehouses() {
   return (
     <>
       <Helmet><title>Depozite — Livra</title></Helmet>
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="h-full overflow-y-auto">
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
             <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Depozite</h1>
             <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-1">
               Locațiile de unde șoferii încarcă coletele înainte de livrare. Optimizatorul plănuiește rutele pornind de la depozitul fiecărui șofer.
@@ -145,7 +146,7 @@ export default function Warehouses() {
           </div>
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700"
+            className="flex-shrink-0 flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-[13px] rounded-lg hover:bg-blue-700"
           >
             <Plus size={16} /> Adaugă depozit
           </button>
@@ -218,7 +219,7 @@ export default function Warehouses() {
         )}
 
         {showModal && (
-          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => !busy && setShowModal(false)}>
+          <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-4 sm:p-4" onClick={() => !busy && setShowModal(false)}>
             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
               <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
                 {editingId ? 'Editează depozit' : 'Adaugă depozit'}
@@ -281,6 +282,7 @@ export default function Warehouses() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </>
   )
