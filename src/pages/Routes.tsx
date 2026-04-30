@@ -911,6 +911,7 @@ export default function RoutesPage() {
         supabase.rpc('send_route_push', {
           p_driver_id: driverId,
           p_stop_count: stopCount,
+          p_route_id: r?.id ?? null,
         }).then(({ data, error }) => {
           if (error) console.warn('[push] rpc failed:', error)
           else       console.log('[push] queued via supabase rpc:', data)

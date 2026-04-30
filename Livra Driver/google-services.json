@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "346513162468",
+    "project_id": "livra-driver",
+    "storage_bucket": "livra-driver.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346513162468:android:a406750797a3d557d7ecf1",
+        "android_client_info": {
+          "package_name": "md.livra.driver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9EJlBt8YWaJPwDntJQUXdQLHyreWs7yo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
