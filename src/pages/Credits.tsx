@@ -8,9 +8,9 @@ type Transaction = { id: string; type: 'deduct' | 'topup'; desc: string; date: s
 type Package = { credits: number; price: string; per: string; popular: boolean }
 
 const PACKAGES: Package[] = [
-  { credits: 100,  price: '2,000 MDL',  per: '20 MDL/credit', popular: false },
-  { credits: 300,  price: '5,100 MDL',  per: '17 MDL/credit', popular: false },
-  { credits: 500,  price: '7,000 MDL',  per: '14 MDL/credit', popular: true  },
+  { credits: 100,  price: '1,700 MDL',  per: '17 MDL/credit', popular: false },
+  { credits: 300,  price: '4,200 MDL',  per: '14 MDL/credit', popular: false },
+  { credits: 500,  price: '6,000 MDL',  per: '12 MDL/credit', popular: true  },
   { credits: 1000, price: '10,000 MDL', per: '10 MDL/credit', popular: false },
 ]
 
