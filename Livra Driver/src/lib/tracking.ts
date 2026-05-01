@@ -27,8 +27,14 @@ export async function startTracking(driverId: string) {
   }
 }
 
+// Call when driver logs out — stops GPS and marks offline.
 export async function stopTracking(driverId: string) {
+  await stopLocationTask()
+  await supabase.from('livra_drivers').update({ status: 'offline' }).eq('id', driverId)
+}
+
+// Call when route completes — stops GPS broadcast but keeps driver status as 'done'.
+export async function stopLocationTask() {
   const running = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK).catch(() => false)
   if (running) await Location.stopLocationUpdatesAsync(LOCATION_TASK)
-  await supabase.from('livra_drivers').update({ status: 'offline' }).eq('id', driverId)
 }

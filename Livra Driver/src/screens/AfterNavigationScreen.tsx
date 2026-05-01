@@ -8,6 +8,7 @@ import { Feather, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icon
 import { supabase } from '../lib/supabase'
 import { openGoogleMaps, openWaze } from '../lib/nav'
 import { logEvent } from '../lib/events'
+import { stopLocationTask } from '../lib/tracking'
 import { T } from '../lib/tokens'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RouteProp } from '@react-navigation/native'
@@ -61,10 +62,11 @@ export default function AfterNavigationScreen({ navigation, route: navRoute }: P
         totalStops,
       })
     } else {
-      // All stops done — complete the route
+      // All stops done — complete the route and stop GPS
       await supabase.from('livra_routes').update({ status: 'completed' }).eq('id', routeId)
       await supabase.from('livra_drivers').update({ status: 'done' }).eq('id', driverId)
       logEvent({ driverId, routeId, eventType: 'route_completed' })
+      await stopLocationTask()
       navigation.replace('Home', { driverId, driverName })
     }
   }

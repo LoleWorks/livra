@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Feather } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
 import { logEvent } from '../lib/events'
+import { stopLocationTask } from '../lib/tracking'
 import { T } from '../lib/tokens'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RouteProp } from '@react-navigation/native'
@@ -102,6 +103,7 @@ export default function FailureReasonScreen({ navigation, route: navRoute }: Pro
       await supabase.from('livra_routes').update({ status: 'completed' }).eq('id', routeId)
       await supabase.from('livra_drivers').update({ status: 'done' }).eq('id', driverId)
       logEvent({ driverId, routeId, eventType: 'route_completed' })
+      await stopLocationTask()
       navigation.replace('Home', { driverId, driverName })
     }
   }
