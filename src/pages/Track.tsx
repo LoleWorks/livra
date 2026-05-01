@@ -124,12 +124,6 @@ function fmtAgo(iso: string) {
   return `acum ${Math.round(sec / 3600)} h`
 }
 
-function fmtTime(iso: string) {
-  const date = new Date(iso)
-  const h = String(date.getHours()).padStart(2, '0')
-  const m = String(date.getMinutes()).padStart(2, '0')
-  return `${h}:${m}`
-}
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 

@@ -74,7 +74,7 @@ function TimeDropdown({ options, value, onChange, placeholder }: { options: stri
   )
 }
 
-function TimeSelect({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+function TimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   const [h, m] = value ? value.split(':') : ['', '']
   return (
     <div className="flex items-center gap-1.5 flex-1">
@@ -89,6 +89,7 @@ function TimeSelect({ value, onChange, placeholder }: { value: string; onChange:
 type Return = {
   id: string
   stop_id: string | null
+  delivery_id: string | null
   customer: string
   address: string
   phone: string
