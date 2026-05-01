@@ -283,7 +283,17 @@ export default function Track() {
 
   useEffect(() => {
     load()
-    const id = setInterval(load, 10_000)
+    const id = setInterval(() => {
+      // stop polling once delivery is finished
+      setData(prev => {
+        if (prev?.status === 'completed' || prev?.status === 'failed') {
+          clearInterval(id)
+          return prev
+        }
+        return prev
+      })
+      load()
+    }, 10_000)
     return () => clearInterval(id)
   }, [token])
 
@@ -295,8 +305,8 @@ export default function Track() {
     data?.lat && data?.lng ? [data.lat, data.lng] : null
 
   const mapCenter: [number, number] = driverPos ?? destPos ?? [47.026, 28.838]
-  const isOnRoute = data?.status === 'dispatched'
-  const isDelivered = data?.status === 'delivered'
+  const isOnRoute = data?.status === 'pending'
+  const isDelivered = data?.status === 'completed'
   const isFailed = data?.status === 'failed'
   const stopsAhead = isOnRoute && data?.stop_order != null ? data.stop_order - 1 : 0
   const isNextStop = isOnRoute && stopsAhead === 0
@@ -318,6 +328,78 @@ export default function Track() {
   const clampedBubbleLeft = bubblePos
     ? Math.max(8, Math.min(bubblePos.x - 120, window.innerWidth - 248))
     : 0
+
+  // Delivery finished — show static confirmation, no map, no polling
+  if (data && (isDelivered || isFailed)) {
+    const storeUrl = getStoreUrl()
+    const ctaInner = (
+      <>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#ff5c2c' }}>
+          <Download size={16} className="text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] font-bold text-white leading-none mb-0.5">Descarcă aplicația Livra</p>
+          <p className="text-[10px] text-zinc-400 leading-none">Urmărește toate comenzile tale live</p>
+        </div>
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" className="flex-shrink-0">
+          <path d="M1 1l4 4-4 4" stroke="#ff5c2c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </>
+    )
+    const ctaCls = "flex items-center gap-3 bg-[#161513] rounded-2xl px-4 py-3 shadow-lg shadow-black/10 active:opacity-90 transition-opacity"
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 px-6 py-12">
+        <Helmet>
+          <title>{isDelivered ? 'Comandă livrată' : 'Livrare nereușită'} | Livra</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <div className="w-full max-w-sm space-y-6">
+          {/* Brand */}
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[13px] font-bold text-[#161513] tracking-widest uppercase">Livra</span>
+            <svg width="28" height="3" viewBox="0 0 28 3"><line x1="0" y1="1.5" x2="22" y2="1.5" stroke="#ff5c2c" strokeWidth="1.5"/><polygon points="22,0 28,1.5 22,3" fill="#ff5c2c"/></svg>
+          </div>
+
+          {/* Status icon */}
+          <div className="flex flex-col items-center gap-3">
+            {isDelivered ? (
+              <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center">
+                <CheckCircle2 size={40} className="text-emerald-500" />
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertCircle size={40} className="text-red-500" />
+              </div>
+            )}
+            <div className="text-center">
+              <p className="text-[20px] font-bold text-zinc-900">
+                {isDelivered ? 'Comandă livrată!' : 'Livrare nereușită'}
+              </p>
+              <p className="text-[13px] text-zinc-500 mt-1">
+                {isDelivered
+                  ? `Bună ziua, ${data.customer}! Coletul tău a fost livrat cu succes.`
+                  : `Bună ziua, ${data.customer}! Nu am reușit să livrăm coletul. Te vom contacta în curând.`}
+              </p>
+            </div>
+          </div>
+
+          {/* Address */}
+          <div className="flex items-start gap-2.5 bg-white rounded-2xl px-4 py-3 border border-zinc-100 shadow-sm">
+            <MapPin size={14} className="text-[#ff5c2c] flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[10px] text-zinc-400 mb-0.5">Adresa de livrare</p>
+              <p className="text-[13px] font-medium text-zinc-800 leading-snug">{data.address}</p>
+            </div>
+          </div>
+
+          {/* App CTA */}
+          {storeUrl
+            ? <a href={storeUrl} target="_blank" rel="noopener noreferrer" className={ctaCls}>{ctaInner}</a>
+            : <Link to="/app" className={ctaCls}>{ctaInner}</Link>}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
