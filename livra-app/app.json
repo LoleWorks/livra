@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Livra",
+    "slug": "livra-app",
+    "version": "1.0.0",
+    "scheme": "livra",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f4f3ef"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "md.livra.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f4f3ef"
+      },
+      "package": "md.livra.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FF5C2C"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "ndkVersion": "25.1.8937393"
+          }
+        }
+      ],
+      "expo-secure-store",
+      "expo-router",
+      "expo-font",
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}

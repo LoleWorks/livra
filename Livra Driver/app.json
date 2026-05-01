@@ -1,0 +1,72 @@
+{
+  "expo": {
+    "name": "Livra Driver",
+    "slug": "livra-driver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FF5C2C"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "md.livra.driver",
+      "infoPlist": {
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Livra Driver transmite poziția ta GPS în timp ce ești pe rută.",
+        "NSLocationWhenInUseUsageDescription": "Livra Driver are nevoie de locația ta pentru navigare.",
+        "UIBackgroundModes": ["location", "fetch"],
+        "LSApplicationQueriesSchemes": [
+          "waze",
+          "comgooglemaps",
+          "googlemaps"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF5C2C"
+      },
+      "package": "md.livra.driver",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION"
+      ]
+    },
+    "notification": {
+      "iconColor": "#2563eb",
+      "androidMode": "default"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Livra Driver transmite poziția ta GPS în timp ce ești pe rută."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#FF5C2C"
+        }
+      ],
+      "./plugins/withNavAppQueries"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a1b42622-2a75-45d2-9002-185aa94917d5"
+      }
+    },
+    "owner": "livra_driver"
+  }
+}

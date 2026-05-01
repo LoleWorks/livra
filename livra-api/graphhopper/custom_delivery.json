@@ -1,0 +1,26 @@
+{
+  "priority": [
+    {"comment": "Prefer fast roads — consistent speed means less fuel and safer driving"},
+    {"if": "road_class == MOTORWAY || road_class == TRUNK", "multiply_by": "1.0"},
+    {"if": "road_class == PRIMARY", "multiply_by": "0.97"},
+    {"if": "road_class == SECONDARY", "multiply_by": "0.93"},
+    {"if": "road_class == TERTIARY", "multiply_by": "0.88"},
+
+    {"comment": "Penalise slow urban streets — stop-and-go traffic burns more fuel and raises accident risk"},
+    {"if": "road_class == RESIDENTIAL", "multiply_by": "0.75"},
+    {"if": "road_class == LIVING_STREET || road_class == SERVICE", "multiply_by": "0.65"},
+    {"if": "road_class == UNCLASSIFIED", "multiply_by": "0.80"},
+
+    {"comment": "Left-turn avoidance — waiting against oncoming traffic wastes fuel and increases accident exposure"},
+    {"if": "turn == LEFT", "multiply_by": "0.60"},
+    {"if": "turn == U_TURN", "multiply_by": "0.20"}
+  ],
+
+  "speed": [
+    {"comment": "Cap speed on slow streets to reflect real delivery conditions"},
+    {"if": "road_class == LIVING_STREET", "limit_to": "15"},
+    {"if": "road_class == SERVICE", "limit_to": "20"}
+  ],
+
+  "distance_influence": 65
+}

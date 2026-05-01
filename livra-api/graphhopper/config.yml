@@ -1,0 +1,32 @@
+graphhopper:
+  # OSM data file — placed in the same directory as this config
+  datareader.file: moldova-latest.osm.pbf
+
+  # Where the preprocessed graph gets stored (auto-created on first run)
+  graph.location: gh-graph
+
+  # ── Routing profiles ────────────────────────────────────────────────────────
+  profiles:
+    - name: delivery
+      vehicle: car
+      weighting: custom
+      turn_costs: true                        # respects OSM hard restrictions
+                                              # and enables turn-cost dimension
+      custom_model_files: [custom_delivery.json]
+
+  # Contraction Hierarchies — speeds up matrix queries dramatically
+  profiles_ch:
+    - profile: delivery
+
+  # Landmark-based fallback (used when CH can't answer a query)
+  profiles_lm:
+    - profile: delivery
+
+  # ── Server ──────────────────────────────────────────────────────────────────
+server:
+  application_connectors:
+    - type: http
+      port: 8989
+  admin_connectors:
+    - type: http
+      port: 8990
