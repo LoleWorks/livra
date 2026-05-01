@@ -6,9 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Feather } from '@expo/vector-icons'
 import { clearDriverId } from '../lib/storage'
 import { logEvent } from '../lib/events'
-import { supabase } from '../lib/supabase'
-import * as Location from 'expo-location'
-import { LOCATION_TASK } from '../lib/locationTask'
+import { stopTracking } from '../lib/tracking'
 import { T } from '../lib/tokens'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { RouteProp } from '@react-navigation/native'
@@ -42,9 +40,7 @@ export default function ProfileScreen({ navigation, route: navRoute }: Props) {
         style: 'destructive',
         onPress: async () => {
           logEvent({ driverId, eventType: 'logout' })
-          const running = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK).catch(() => false)
-          if (running) await Location.stopLocationUpdatesAsync(LOCATION_TASK)
-          await supabase.from('livra_drivers').update({ status: 'offline' }).eq('id', driverId)
+          await stopTracking(driverId)
           await clearDriverId()
           navigation.replace('Login')
         },

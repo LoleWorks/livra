@@ -9,6 +9,7 @@ import * as Device from 'expo-device'
 import Constants from 'expo-constants'
 import { supabase } from '../lib/supabase'
 import { saveDriverId } from '../lib/storage'
+import { startTracking } from '../lib/tracking'
 import { registerPushToken } from '../lib/notifications'
 import { logEvent } from '../lib/events'
 import { T } from '../lib/tokens'
@@ -63,6 +64,7 @@ export default function LoginScreen({ navigation }: Props) {
       await saveDriverId(data.id)
       registerPushToken(data.id).catch(err => console.warn('[push]', err))
       logEvent({ driverId: data.id, eventType: 'login' })
+      startTracking(data.id).catch(err => console.warn('[tracking]', err))
 
       supabase.from('livra_drivers').update({
         device_name:        Device.brand ?? null,

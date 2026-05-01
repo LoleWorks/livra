@@ -3,13 +3,12 @@ import { ActivityIndicator, AppState, View } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import * as Location from 'expo-location'
 import * as Device from 'expo-device'
 import './src/lib/locationTask'
-import { LOCATION_TASK } from './src/lib/locationTask'
 import Constants from 'expo-constants'
 import { loadDriverId } from './src/lib/storage'
 import { supabase } from './src/lib/supabase'
+import { startTracking } from './src/lib/tracking'
 import { registerPushToken } from './src/lib/notifications'
 import { T } from './src/lib/tokens'
 import LoginScreen from './src/screens/LoginScreen'
@@ -64,49 +63,16 @@ export default function App() {
     checkSession()
   }, [])
 
-  const startTracking = async (driverId: string) => {
+  const handleStartTracking = async (driverId: string) => {
     activeDriver.current = driverId
-    await supabase.from('livra_drivers').update({ status: 'active' }).eq('id', driverId)
-
-    const { status: fg } = await Location.requestForegroundPermissionsAsync()
-    if (fg !== 'granted') return
-
-    const { status: bg } = await Location.requestBackgroundPermissionsAsync()
-
-    const already = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK).catch(() => false)
-    if (!already) {
-      await Location.startLocationUpdatesAsync(LOCATION_TASK, {
-        accuracy: Location.Accuracy.Balanced,
-        timeInterval: 10000,
-        distanceInterval: 15,
-        showsBackgroundLocationIndicator: true,
-        foregroundService: {
-          notificationTitle: 'Livra Driver',
-          notificationBody: 'Transmitere locație GPS activă',
-          notificationColor: '#FF5C2C',
-        },
-        // falls back to foreground-only if background permission denied
-        ...(bg !== 'granted' ? { pausesUpdatesAutomatically: false } : {}),
-      })
-    }
+    await startTracking(driverId)
 
     AppState.addEventListener('change', (state) => {
       if (!activeDriver.current) return
-      if (state === 'background' || state === 'inactive') {
-        supabase.from('livra_drivers').update({ status: 'active' }).eq('id', activeDriver.current)
-      } else if (state === 'active') {
+      if (state === 'background' || state === 'inactive' || state === 'active') {
         supabase.from('livra_drivers').update({ status: 'active' }).eq('id', activeDriver.current)
       }
     })
-  }
-
-  const stopTracking = async () => {
-    const running = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK).catch(() => false)
-    if (running) await Location.stopLocationUpdatesAsync(LOCATION_TASK)
-    if (activeDriver.current) {
-      await supabase.from('livra_drivers').update({ status: 'offline' }).eq('id', activeDriver.current)
-      activeDriver.current = null
-    }
   }
 
   const checkSession = async () => {
@@ -119,7 +85,7 @@ export default function App() {
       .single()
     if (data) {
       registerPushToken(data.id).catch(err => console.warn('[push]', err))
-      startTracking(data.id)
+      handleStartTracking(data.id)
       supabase.from('livra_drivers').update({
         device_name:        Device.brand ?? null,
         device_model:       Device.modelName ?? null,
