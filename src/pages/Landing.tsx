@@ -1102,6 +1102,21 @@ export default function Landing() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
+  useEffect(() => {
+    const hash = window.location.hash
+    if (!hash) return
+    const el = document.querySelector(hash)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      // Retry once after a short delay in case content is still rendering
+      const t = setTimeout(() => {
+        document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' })
+      }, 300)
+      return () => clearTimeout(t)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
       <Helmet>
