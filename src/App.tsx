@@ -33,7 +33,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/app" element={<AppDownload />} />
-          <Route path="/get/driver-android-b4f9e2" element={<DriverDownload />} />
+          <Route path="/sofer" element={<DriverDownload />} />
           <Route path="/login" element={<Login />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/t/:token" element={<Track />} />
