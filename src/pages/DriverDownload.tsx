@@ -143,7 +143,6 @@ function DeliveryDetailSVG() {
       {/* Header */}
       <rect x="0" y="30" width="320" height="72" fill="#fff" />
       <line x1="0" y1="101" x2="320" y2="101" stroke="#E8E6E0" strokeWidth="1" />
-      {/* Back button */}
       <circle cx="42" cy="66" r="20" fill="#F4F3EF" stroke="#E8E6E0" strokeWidth="1.5" />
       <polyline points="47,58 38,66 47,74" fill="none" stroke="#161513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <text x="74" y="58" fontSize="9" fill="#8A8780" fontFamily="monospace" letterSpacing="0.5">OPRIRE 3 DIN 8</text>
@@ -155,48 +154,57 @@ function DeliveryDetailSVG() {
       {/* Destination card */}
       <rect x="20" y="118" width="280" height="148" rx="16" fill="#FF5C2C" />
       <text x="40" y="142" fontSize="9" fill="rgba(255,255,255,0.75)" fontFamily="monospace" letterSpacing="0.5">DESTINAȚIA</text>
-      {/* pin icon */}
-      <circle cx="40" cy="162" r="5" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" />
-      <line x1="40" y1="167" x2="40" y2="173" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" />
-      <text x="52" y="160" fontSize="14" fontWeight="700" fill="white">Str. Independenței 45,</text>
-      <text x="52" y="176" fontSize="14" fontWeight="700" fill="white">Chișinău</text>
+      {/* pin icon — Feather map-pin scaled */}
+      <g transform="translate(32,150) scale(0.62)" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+      </g>
+      <text x="52" y="162" fontSize="14" fontWeight="700" fill="white">Str. Independenței 45,</text>
+      <text x="52" y="178" fontSize="14" fontWeight="700" fill="white">Chișinău</text>
 
-      <line x1="40" y1="190" x2="300" y2="190" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+      <line x1="40" y1="192" x2="300" y2="192" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
 
-      <text x="40" y="207" fontSize="8" fill="rgba(255,255,255,0.75)">RECIPIENT</text>
-      <text x="40" y="222" fontSize="12" fontWeight="700" fill="white">Andrei Popescu</text>
-      <text x="180" y="207" fontSize="8" fill="rgba(255,255,255,0.75)">TELEFON</text>
-      <text x="180" y="222" fontSize="12" fontWeight="700" fill="white">+373 69 123 456</text>
+      <text x="40" y="209" fontSize="8" fill="rgba(255,255,255,0.75)">RECIPIENT</text>
+      <text x="40" y="224" fontSize="12" fontWeight="700" fill="white">Andrei Popescu</text>
+      <text x="180" y="209" fontSize="8" fill="rgba(255,255,255,0.75)">TELEFON</text>
+      <text x="180" y="224" fontSize="12" fontWeight="700" fill="white">+373 69 123 456</text>
 
-      {/* Action buttons */}
-      <rect x="20" y="280" width="132" height="46" rx="12" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
-      {/* phone icon */}
-      <path d="M57 298 Q53 302 55 308 Q61 316 69 312 Q75 309 71 305 Q68 302 65 304 Q62 302 60 299 Q58 296 57 298Z" fill="none" stroke="#161513" strokeWidth="1.3" strokeLinejoin="round" />
-      <text x="80" y="308" fontSize="12" fontWeight="700" fill="#161513">Sună</text>
+      {/* Sună button */}
+      <rect x="20" y="280" width="132" height="48" rx="12" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
+      {/* Feather phone icon */}
+      <g transform="translate(43,292) scale(0.65)" fill="none" stroke="#161513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.95 12 19.79 19.79 0 01.87 3.38 2 2 0 012.86 1h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L7.09 8.65a16 16 0 006.29 6.29l1.92-1.92a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+      </g>
+      <text x="86" y="309" fontSize="12" fontWeight="700" fill="#161513" textAnchor="middle">Sună</text>
 
-      <rect x="168" y="280" width="132" height="46" rx="12" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
-      {/* message icon */}
-      <rect x="198" y="296" width="18" height="14" rx="3" fill="none" stroke="#161513" strokeWidth="1.3" />
-      <path d="M201 310 L198 316 L206 310" fill="#fff" stroke="#161513" strokeWidth="1" strokeLinejoin="round" />
-      <text x="222" y="308" fontSize="12" fontWeight="700" fill="#161513">SMS</text>
+      {/* SMS button */}
+      <rect x="168" y="280" width="132" height="48" rx="12" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
+      {/* Feather message-square icon */}
+      <g transform="translate(191,292) scale(0.65)" fill="none" stroke="#161513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </g>
+      <text x="234" y="309" fontSize="12" fontWeight="700" fill="#161513" textAnchor="middle">SMS</text>
 
       {/* Bottom bar */}
       <rect x="0" y="448" width="320" height="192" fill="#fff" />
       <line x1="0" y1="448" x2="320" y2="448" stroke="#E8E6E0" strokeWidth="1" />
 
-      {/* Google Maps button */}
+      {/* Google Maps button — opens app with route pre-loaded */}
       <rect x="20" y="464" width="280" height="52" rx="14" fill="#FF5C2C" />
-      {/* map icon simplified */}
-      <circle cx="46" cy="490" r="8" fill="rgba(255,255,255,0.25)" />
-      <path d="M42 490 Q46 485 50 490 Q46 497 42 490Z" fill="white" />
-      <text x="62" y="494" fontSize="13" fontWeight="700" fill="white">Deschide Google Maps</text>
+      {/* Google Maps "M" pin shape */}
+      <g transform="translate(38,474) scale(0.62)" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+      </g>
+      <text x="65" y="494" fontSize="13" fontWeight="700" fill="white">Deschide Google Maps</text>
 
       {/* Waze button */}
       <rect x="20" y="526" width="280" height="52" rx="14" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
-      <circle cx="46" cy="552" r="8" fill="#33CCFF" />
-      <circle cx="44" cy="550" r="2" fill="white" />
-      <circle cx="50" cy="548" r="1.5" fill="white" />
-      <text x="62" y="556" fontSize="13" fontWeight="700" fill="#161513">Deschide Waze</text>
+      {/* Waze-style icon */}
+      <ellipse cx="46" cy="549" rx="9" ry="8" fill="#33CCFF" />
+      <circle cx="43" cy="547" r="2" fill="white" />
+      <circle cx="49" cy="547" r="2" fill="white" />
+      <path d="M42 552 Q46 555 50 552" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="52" cy="556" r="2" fill="#33CCFF" stroke="white" strokeWidth="1" />
+      <text x="62" y="554" fontSize="13" fontWeight="700" fill="#161513">Deschide Waze</text>
     </svg>
   )
 }
@@ -237,20 +245,32 @@ function ConfirmSVG() {
 
       {/* Action row */}
       <rect x="20" y="264" width="132" height="44" rx="12" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
-      <path d="M57 283 Q53 287 55 293 Q61 301 69 297 Q75 294 71 290 Q68 287 65 289 Q62 287 60 284 Q58 281 57 283Z" fill="none" stroke="#161513" strokeWidth="1.3" />
-      <text x="80" y="291" fontSize="12" fontWeight="700" fill="#161513">Sună</text>
+      {/* Feather phone icon */}
+      <g transform="translate(43,274) scale(0.62)" fill="none" stroke="#161513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.95 12 19.79 19.79 0 01.87 3.38 2 2 0 012.86 1h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L7.09 8.65a16 16 0 006.29 6.29l1.92-1.92a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+      </g>
+      <text x="86" y="291" fontSize="12" fontWeight="700" fill="#161513" textAnchor="middle">Sună</text>
       <rect x="168" y="264" width="132" height="44" rx="12" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
-      <rect x="198" y="277" width="18" height="13" rx="3" fill="none" stroke="#161513" strokeWidth="1.3" />
-      <path d="M201 290 L198 296 L206 290" fill="#fff" stroke="#161513" strokeWidth="1" />
-      <text x="222" y="291" fontSize="12" fontWeight="700" fill="#161513">SMS</text>
+      {/* Feather message-square icon */}
+      <g transform="translate(191,274) scale(0.62)" fill="none" stroke="#161513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </g>
+      <text x="234" y="291" fontSize="12" fontWeight="700" fill="#161513" textAnchor="middle">SMS</text>
 
       {/* Map row */}
       <rect x="0" y="372" width="320" height="64" fill="#fff" />
       <line x1="0" y1="372" x2="320" y2="372" stroke="#E8E6E0" strokeWidth="1" />
       <rect x="20" y="382" width="132" height="44" rx="12" fill="#FF5C2C" />
-      <text x="86" y="409" fontSize="11" fontWeight="700" fill="white" textAnchor="middle">Google Maps</text>
+      <g transform="translate(32,392) scale(0.55)" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+      </g>
+      <text x="86" y="408" fontSize="11" fontWeight="700" fill="white" textAnchor="middle">Google Maps</text>
       <rect x="168" y="382" width="132" height="44" rx="12" fill="#fff" stroke="#D4D2CC" strokeWidth="1.5" />
-      <text x="234" y="409" fontSize="11" fontWeight="700" fill="#161513" textAnchor="middle">Waze</text>
+      <ellipse cx="184" cy="404" rx="8" ry="7" fill="#33CCFF" />
+      <circle cx="182" cy="402" r="1.5" fill="white" />
+      <circle cx="187" cy="402" r="1.5" fill="white" />
+      <path d="M181 406 Q184 409 188 406" fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
+      <text x="234" y="408" fontSize="11" fontWeight="700" fill="#161513" textAnchor="middle">Waze</text>
 
       {/* Outcome row — the key UI */}
       <rect x="0" y="436" width="320" height="204" fill="#fff" />
@@ -258,16 +278,21 @@ function ConfirmSVG() {
 
       {/* Green "Livrată" button */}
       <rect x="20" y="452" width="132" height="56" rx="14" fill="#1F9D55" />
-      {/* checkmark */}
-      <polyline points="44,480 52,488 64,470" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <text x="86" y="484" fontSize="13" fontWeight="700" fill="white" textAnchor="middle">Livrată</text>
+      {/* Feather check icon — left side of button */}
+      <g transform="translate(34,468) scale(0.72)" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20,6 9,17 4,12"/>
+      </g>
+      {/* Text right of icon */}
+      <text x="105" y="485" fontSize="13" fontWeight="700" fill="white" textAnchor="middle">Livrată</text>
 
       {/* Red "Nereușită" button */}
       <rect x="168" y="452" width="132" height="56" rx="14" fill="#D43A2F" />
-      {/* X */}
-      <line x1="192" y1="472" x2="204" y2="488" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="204" y1="472" x2="192" y2="488" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-      <text x="234" y="484" fontSize="13" fontWeight="700" fill="white" textAnchor="middle">Nereușită</text>
+      {/* Feather x icon — left side of button */}
+      <g transform="translate(182,468) scale(0.72)" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </g>
+      {/* Text right of icon */}
+      <text x="253" y="485" fontSize="13" fontWeight="700" fill="white" textAnchor="middle">Nereușită</text>
     </svg>
   )
 }
@@ -367,7 +392,7 @@ export default function DriverDownload() {
 
             <PhoneFrame
               title="Detalii livrare"
-              desc="Adresa, numele și telefonul clientului. Deschide navigația cu un singur tap."
+              desc="Adresa, clientul, telefonul. Un tap deschide Google Maps sau Waze cu ruta deja setată."
             >
               <DeliveryDetailSVG />
             </PhoneFrame>
