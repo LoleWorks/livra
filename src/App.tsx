@@ -22,6 +22,8 @@ import SalesNewOrder from './pages/sales/SalesNewOrder'
 import SalesReturns from './pages/sales/SalesReturns'
 import IndustryPage from './pages/industrii/IndustryPage'
 import UseCasePage from './pages/cazuri/UseCasePage'
+import Onboarding from './pages/Onboarding'
+import DriverDownload from './pages/DriverDownload'
 
 export default function App() {
   return (
@@ -31,9 +33,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/app" element={<AppDownload />} />
+          <Route path="/get/driver-android-b4f9e2" element={<DriverDownload />} />
           <Route path="/login" element={<Login />} />
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/t/:token" element={<Track />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/urmarire/:token" element={<Track />} />
           <Route path="/industrii/:slug" element={<IndustryPage />} />
           <Route path="/cazuri/:slug" element={<UseCasePage />} />
