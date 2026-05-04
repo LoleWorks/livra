@@ -324,12 +324,12 @@ export default function DriverDownload() {
       {/* Nav */}
       <nav className="bg-white dark:bg-[#161616] border-b border-gray-200 dark:border-white/10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
-              <rect width="40" height="40" rx="10" fill="#FF5C2C"/>
-              <path d="M8 26L14 14L20 22L26 16L32 26H8Z" fill="white" fillOpacity="0.9"/>
+          <div className="flex flex-col leading-none">
+            <span className="text-[15px] font-bold text-[#161513] dark:text-white tracking-widest uppercase">Livra</span>
+            <svg width="36" height="4" viewBox="0 0 36 4">
+              <line x1="0" y1="2" x2="28" y2="2" stroke="#FF5C2C" strokeWidth="1.5"/>
+              <polygon points="28,0 36,2 28,4" fill="#FF5C2C"/>
             </svg>
-            <span className="font-bold text-lg text-gray-900 dark:text-white">Livra</span>
           </div>
           <button
             onClick={toggle}
@@ -377,12 +377,11 @@ export default function DriverDownload() {
             </p>
           </div>
           <div className="flex-shrink-0">
-            <div className="w-36 h-36 bg-[#FF5C2C] rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-orange-500/30">
-              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                <path d="M12 56L26 26L38 46L54 30L68 56H12Z" fill="white" fillOpacity="0.95"/>
-                <rect x="16" y="60" width="48" height="5" rx="2.5" fill="white" fillOpacity="0.4"/>
-              </svg>
-            </div>
+            <img
+              src="/driver-icon.png"
+              alt="Livra Driver"
+              className="w-36 h-36 rounded-[2.5rem] shadow-2xl shadow-orange-500/30"
+            />
           </div>
         </div>
       </div>
