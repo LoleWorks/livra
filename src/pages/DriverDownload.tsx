@@ -3,7 +3,7 @@ import { PhoneFrame, HomeScreenSVG, DeliveryDetailSVG, ConfirmSVG } from '../com
 
 const APK_VERSION = '1.0.0'
 const APK_FILENAME = 'Livra-Driver.apk'
-const APK_PATH = 'https://github.com/LoleWorks/livra/releases/download/v1.0.0/Livra-Driver.apk'
+const APK_PATH = 'https://github.com/LoleWorks/livra-releases/releases/download/v1.0.0/Livra-Driver.apk'
 
 const STEPS = [
   {
