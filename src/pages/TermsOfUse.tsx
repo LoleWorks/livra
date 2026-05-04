@@ -38,7 +38,7 @@ export default function TermsOfUse() {
         <div className={`prose max-w-none ${isDark ? 'prose-invert' : ''} space-y-8`}>
 
           <Section title="1. Identificarea prestatorului de servicii" dark={isDark}>
-            <p>Platforma <strong>Livra</strong> este un brand operat de <strong>SRL Lole Works</strong> (în continuare „Societatea", „noi" sau „Lole Works"), înregistrată în Republica Moldova cu codul fiscal (IDNO) <strong>[IDNO]</strong>, cu sediul social la adresa <strong>[Adresă completă, Chișinău, Republica Moldova]</strong>.</p>
+            <p>Platforma <strong>Livra</strong> este un brand operat de <strong>SRL Lole Works</strong> (în continuare „Societatea", „noi" sau „Lole Works"), înregistrată în Republica Moldova cu codul fiscal (IDNO) <strong>1025600025216</strong>, cu sediul social la adresa <strong>mun. Chișinău, sec. Botanica, str. Decebal bd. 6, et. 4, Republica Moldova</strong>.</p>
             <p>Contact: <a href="mailto:contact@livra.loleworks.com" className="text-[#FF5C2C]">contact@livra.loleworks.com</a></p>
             <p>Prezentele Termeni și Condiții reglementează accesul și utilizarea platformei Livra, disponibilă la adresa <strong>livra.loleworks.com</strong> și prin aplicațiile mobile asociate, în conformitate cu <em>Legea nr. 284-XV/2004 privind comerțul electronic</em> și legislația Republicii Moldova.</p>
           </Section>

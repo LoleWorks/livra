@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
         <div className="space-y-8">
 
           <Section title="1. Operatorul de date cu caracter personal" dark={isDark}>
-            <p>Platforma <strong>Livra</strong> este un brand al <strong>SRL Lole Works</strong> (IDNO: <strong>[IDNO]</strong>), cu sediul la <strong>[Adresă completă, Chișinău, Republica Moldova]</strong>. SRL Lole Works este operatorul de date cu caracter personal prelucrate prin intermediul platformei Livra.</p>
+            <p>Platforma <strong>Livra</strong> este un brand al <strong>SRL Lole Works</strong> (IDNO: <strong>1025600025216</strong>), cu sediul la <strong>mun. Chișinău, sec. Botanica, str. Decebal bd. 6, et. 4, Republica Moldova</strong>. SRL Lole Works este operatorul de date cu caracter personal prelucrate prin intermediul platformei Livra.</p>
             <p>Email de contact: <a href="mailto:contact@livra.loleworks.com">contact@livra.loleworks.com</a></p>
             <p>Responsabil cu Protecția Datelor (DPO): <a href="mailto:dpo@livra.loleworks.com">dpo@livra.loleworks.com</a></p>
             <p>Prezenta Politică de Confidențialitate este elaborată în conformitate cu <em>Legea nr. 133/2011 privind protecția datelor cu caracter personal</em> și anticipând cerințele <em>Legii nr. 195/2024</em> (în vigoare din august 2026).</p>
