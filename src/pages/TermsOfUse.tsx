@@ -39,7 +39,7 @@ export default function TermsOfUse() {
 
           <Section title="1. Identificarea prestatorului de servicii" dark={isDark}>
             <p>Platforma <strong>Livra</strong> este un brand operat de <strong>SRL Lole Works</strong> (în continuare „Societatea", „noi" sau „Lole Works"), înregistrată în Republica Moldova cu codul fiscal (IDNO) <strong>1025600025216</strong>, cu sediul social la adresa <strong>mun. Chișinău, sec. Botanica, str. Decebal bd. 6, et. 4, Republica Moldova</strong>.</p>
-            <p>Contact: <a href="mailto:contact@livra.loleworks.com" className="text-[#FF5C2C]">contact@livra.loleworks.com</a></p>
+            <p>Contact: <a href="mailto:contact@loleworks.com" className="text-[#FF5C2C]">contact@loleworks.com</a></p>
             <p>Prezentele Termeni și Condiții reglementează accesul și utilizarea platformei Livra, disponibilă la adresa <strong>livra.loleworks.com</strong> și prin aplicațiile mobile asociate, în conformitate cu <em>Legea nr. 284-XV/2004 privind comerțul electronic</em> și legislația Republicii Moldova.</p>
           </Section>
 
@@ -134,7 +134,7 @@ export default function TermsOfUse() {
 
           <Section title="13. Soluționarea reclamațiilor" dark={isDark}>
             <p>În conformitate cu art. 19 din Legea nr. 284-XV/2004 privind comerțul electronic, orice reclamație referitoare la serviciile Livra va fi soluționată în termen de <strong>14 zile calendaristice</strong> de la primire.</p>
-            <p>Reclamațiile se transmit la: <a href="mailto:contact@livra.loleworks.com" className="text-[#FF5C2C]">contact@livra.loleworks.com</a></p>
+            <p>Reclamațiile se transmit la: <a href="mailto:contact@loleworks.com" className="text-[#FF5C2C]">contact@loleworks.com</a></p>
             <p>În cazul în care reclamația nu este soluționată satisfăcător, utilizatorul poate apela la instanțele judecătorești competente din Republica Moldova.</p>
           </Section>
 
@@ -157,7 +157,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className={`mt-12 pt-8 border-t ${isDark ? 'border-gray-800 text-gray-400' : 'border-gray-200 text-gray-500'} text-sm`}>
-          <p>Pentru întrebări privind prezentele condiții, ne puteți contacta la <a href="mailto:contact@livra.loleworks.com" className="text-[#FF5C2C]">contact@livra.loleworks.com</a>.</p>
+          <p>Pentru întrebări privind prezentele condiții, ne puteți contacta la <a href="mailto:contact@loleworks.com" className="text-[#FF5C2C]">contact@loleworks.com</a>.</p>
           <p className="mt-2">
             <a href="/confidentialitate" className="text-[#FF5C2C] hover:underline">Politica de Confidențialitate</a>
           </p>

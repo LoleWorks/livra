@@ -39,8 +39,8 @@ export default function PrivacyPolicy() {
 
           <Section title="1. Operatorul de date cu caracter personal" dark={isDark}>
             <p>Platforma <strong>Livra</strong> este un brand al <strong>SRL Lole Works</strong> (IDNO: <strong>1025600025216</strong>), cu sediul la <strong>mun. Chișinău, sec. Botanica, str. Decebal bd. 6, et. 4, Republica Moldova</strong>. SRL Lole Works este operatorul de date cu caracter personal prelucrate prin intermediul platformei Livra.</p>
-            <p>Email de contact: <a href="mailto:contact@livra.loleworks.com">contact@livra.loleworks.com</a></p>
-            <p>Responsabil cu Protecția Datelor (DPO): <a href="mailto:dpo@livra.loleworks.com">dpo@livra.loleworks.com</a></p>
+            <p>Email de contact: <a href="mailto:contact@loleworks.com">contact@loleworks.com</a></p>
+            <p>Responsabil cu Protecția Datelor (DPO): <a href="mailto:contact@loleworks.com">contact@loleworks.com</a></p>
             <p>Prezenta Politică de Confidențialitate este elaborată în conformitate cu <em>Legea nr. 133/2011 privind protecția datelor cu caracter personal</em> și anticipând cerințele <em>Legii nr. 195/2024</em> (în vigoare din august 2026).</p>
           </Section>
 
@@ -114,7 +114,7 @@ export default function PrivacyPolicy() {
               <li><strong>Servicii de cartografiere</strong> (Google Maps, OpenStreetMap) — pentru afișarea hărților și calculul rutelor;</li>
               <li><strong>Autorități publice</strong> — exclusiv la solicitarea legală expresă.</li>
             </ul>
-            <p>Lista completă a sub-procesatorilor este disponibilă la cerere la <a href="mailto:dpo@livra.loleworks.com">dpo@livra.loleworks.com</a>.</p>
+            <p>Lista completă a sub-procesatorilor este disponibilă la cerere la <a href="mailto:contact@loleworks.com">contact@loleworks.com</a>.</p>
           </Section>
 
           <Section title="6. Transferuri internaționale de date" dark={isDark}>
@@ -132,7 +132,7 @@ export default function PrivacyPolicy() {
               <li><strong>Dreptul la opoziție</strong> — dreptul de a vă opune prelucrării bazate pe interes legitim sau marketing direct;</li>
               <li><strong>Dreptul de a retrage consimțământul</strong> — fără a afecta legalitatea prelucrării anterioare retragerii.</li>
             </ul>
-            <p>Cererile privind exercitarea drepturilor se transmit la: <a href="mailto:dpo@livra.loleworks.com">dpo@livra.loleworks.com</a>. Vom răspunde în termen de <strong>30 de zile calendaristice</strong>.</p>
+            <p>Cererile privind exercitarea drepturilor se transmit la: <a href="mailto:contact@loleworks.com">contact@loleworks.com</a>. Vom răspunde în termen de <strong>30 de zile calendaristice</strong>.</p>
           </Section>
 
           <Section title="8. Perioadele de retenție a datelor" dark={isDark}>
@@ -187,7 +187,7 @@ export default function PrivacyPolicy() {
           <Section title="11. Responsabilul cu Protecția Datelor (DPO)" dark={isDark}>
             <p>Livra a desemnat un Responsabil cu Protecția Datelor, accesibil la:</p>
             <ul>
-              <li>Email: <a href="mailto:dpo@livra.loleworks.com">dpo@livra.loleworks.com</a></li>
+              <li>Email: <a href="mailto:contact@loleworks.com">contact@loleworks.com</a></li>
             </ul>
             <p>Puteți contacta DPO pentru orice întrebare privind prelucrarea datelor dumneavoastră cu caracter personal.</p>
           </Section>
@@ -201,7 +201,7 @@ export default function PrivacyPolicy() {
               <p>Email: <a href="mailto:centru@datepersonale.md">centru@datepersonale.md</a></p>
               <p>Web: <a href="https://www.datepersonale.md" target="_blank" rel="noopener noreferrer">datepersonale.md</a></p>
             </div>
-            <p className="mt-3">Vă încurajăm să ne contactați mai întâi la <a href="mailto:dpo@livra.loleworks.com">dpo@livra.loleworks.com</a> pentru a rezolva orice problemă direct.</p>
+            <p className="mt-3">Vă încurajăm să ne contactați mai întâi la <a href="mailto:contact@loleworks.com">contact@loleworks.com</a> pentru a rezolva orice problemă direct.</p>
           </Section>
 
           <Section title="13. Actualizarea politicii" dark={isDark}>
@@ -212,7 +212,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <div className={`mt-12 pt-8 border-t ${isDark ? 'border-gray-800 text-gray-400' : 'border-gray-200 text-gray-500'} text-sm`}>
-          <p>Pentru exercitarea drepturilor sau orice întrebare privind confidențialitatea datelor: <a href="mailto:dpo@livra.loleworks.com" className="text-[#FF5C2C]">dpo@livra.loleworks.com</a></p>
+          <p>Pentru exercitarea drepturilor sau orice întrebare privind confidențialitatea datelor: <a href="mailto:contact@loleworks.com" className="text-[#FF5C2C]">contact@loleworks.com</a></p>
           <p className="mt-2">
             <a href="/termeni" className="text-[#FF5C2C] hover:underline">Termeni și Condiții de Utilizare</a>
           </p>
