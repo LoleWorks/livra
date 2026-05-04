@@ -38,9 +38,9 @@ export default function TermsOfUse() {
         <div className={`prose max-w-none ${isDark ? 'prose-invert' : ''} space-y-8`}>
 
           <Section title="1. Identificarea prestatorului de servicii" dark={isDark}>
-            <p>Platforma <strong>Livra</strong> este operată de <strong>SRL Livra</strong> (în continuare „Societatea", „noi" sau „Livra"), înregistrată în Republica Moldova cu codul fiscal (IDNO) <strong>[IDNO]</strong>, cu sediul social la adresa <strong>[Adresă completă, Chișinău, Republica Moldova]</strong>.</p>
-            <p>Contact: <a href="mailto:contact@livra.md" className="text-[#FF5C2C]">contact@livra.md</a></p>
-            <p>Prezentele Termeni și Condiții reglementează accesul și utilizarea platformei Livra, disponibilă la adresa <strong>livra.md</strong> și prin aplicațiile mobile asociate, în conformitate cu <em>Legea nr. 284-XV/2004 privind comerțul electronic</em> și legislația Republicii Moldova.</p>
+            <p>Platforma <strong>Livra</strong> este un brand operat de <strong>SRL Lole Works</strong> (în continuare „Societatea", „noi" sau „Lole Works"), înregistrată în Republica Moldova cu codul fiscal (IDNO) <strong>[IDNO]</strong>, cu sediul social la adresa <strong>[Adresă completă, Chișinău, Republica Moldova]</strong>.</p>
+            <p>Contact: <a href="mailto:contact@livra.loleworks.com" className="text-[#FF5C2C]">contact@livra.loleworks.com</a></p>
+            <p>Prezentele Termeni și Condiții reglementează accesul și utilizarea platformei Livra, disponibilă la adresa <strong>livra.loleworks.com</strong> și prin aplicațiile mobile asociate, în conformitate cu <em>Legea nr. 284-XV/2004 privind comerțul electronic</em> și legislația Republicii Moldova.</p>
           </Section>
 
           <Section title="2. Natura serviciului" dark={isDark}>
@@ -71,7 +71,7 @@ export default function TermsOfUse() {
           </Section>
 
           <Section title="5. Tarife și plăți" dark={isDark}>
-            <p>Platforma Livra se oferă pe baza unui abonament lunar sau anual, conform planului tarifar ales la momentul înregistrării. Tarifele curente sunt disponibile la <a href="/preturi" className="text-[#FF5C2C]">livra.md/preturi</a>.</p>
+            <p>Platforma Livra se oferă pe baza unui abonament lunar sau anual, conform planului tarifar ales la momentul înregistrării. Tarifele curente sunt disponibile la <a href="/preturi" className="text-[#FF5C2C]">livra.loleworks.com/preturi</a>.</p>
             <ul>
               <li>Plata se efectuează anticipat, la începutul fiecărei perioade de facturare;</li>
               <li>Prețurile sunt exprimate în lei moldovenești (MDL) și includ TVA acolo unde este aplicabil;</li>
@@ -98,7 +98,7 @@ export default function TermsOfUse() {
           </Section>
 
           <Section title="8. Confidențialitatea datelor și prelucrarea datelor cu caracter personal" dark={isDark}>
-            <p>Prelucrarea datelor cu caracter personal în cadrul utilizării platformei este reglementată de <strong>Politica de Confidențialitate</strong> disponibilă la <a href="/confidentialitate" className="text-[#FF5C2C]">livra.md/confidentialitate</a>, care face parte integrantă din prezentul contract.</p>
+            <p>Prelucrarea datelor cu caracter personal în cadrul utilizării platformei este reglementată de <strong>Politica de Confidențialitate</strong> disponibilă la <a href="/confidentialitate" className="text-[#FF5C2C]">livra.loleworks.com/confidentialitate</a>, care face parte integrantă din prezentul contract.</p>
             <p>În cazul în care utilizatorul procesează date cu caracter personal ale terților prin intermediul platformei (ex. date ale destinatarilor de colete, date ale șoferilor), utilizatorul acționează în calitate de <strong>operator de date</strong>, iar Livra în calitate de <strong>persoană împuternicită</strong>, în sensul Legii nr. 133/2011 privind protecția datelor cu caracter personal și al Legii nr. 195/2024.</p>
             <p>Un <strong>Acord privind Prelucrarea Datelor (DPA)</strong> se consideră încheiat între părți prin acceptarea prezentelor Termeni și este disponibil la cerere.</p>
           </Section>
@@ -134,7 +134,7 @@ export default function TermsOfUse() {
 
           <Section title="13. Soluționarea reclamațiilor" dark={isDark}>
             <p>În conformitate cu art. 19 din Legea nr. 284-XV/2004 privind comerțul electronic, orice reclamație referitoare la serviciile Livra va fi soluționată în termen de <strong>14 zile calendaristice</strong> de la primire.</p>
-            <p>Reclamațiile se transmit la: <a href="mailto:contact@livra.md" className="text-[#FF5C2C]">contact@livra.md</a></p>
+            <p>Reclamațiile se transmit la: <a href="mailto:contact@livra.loleworks.com" className="text-[#FF5C2C]">contact@livra.loleworks.com</a></p>
             <p>În cazul în care reclamația nu este soluționată satisfăcător, utilizatorul poate apela la instanțele judecătorești competente din Republica Moldova.</p>
           </Section>
 
@@ -142,6 +142,7 @@ export default function TermsOfUse() {
             <p>Prezentele Termeni și Condiții sunt guvernate de legislația <strong>Republicii Moldova</strong>.</p>
             <p>Orice litigiu care nu poate fi soluționat pe cale amiabilă va fi supus jurisdicției exclusive a <strong>instanțelor judecătorești competente din municipiul Chișinău</strong>.</p>
             <p>Alternativ, părțile pot conveni prin acord scris soluționarea litigiilor prin arbitraj la <strong>Curtea de Arbitraj Internațional Comercial de pe lângă Camera de Comerț și Industrie a Republicii Moldova</strong>.</p>
+            <p>SRL Lole Works este entitatea juridică responsabilă pentru toate obligațiile contractuale asumate prin intermediul platformei Livra.</p>
           </Section>
 
           <Section title="15. Forța majoră" dark={isDark}>
@@ -156,7 +157,7 @@ export default function TermsOfUse() {
         </div>
 
         <div className={`mt-12 pt-8 border-t ${isDark ? 'border-gray-800 text-gray-400' : 'border-gray-200 text-gray-500'} text-sm`}>
-          <p>Pentru întrebări privind prezentele condiții, ne puteți contacta la <a href="mailto:contact@livra.md" className="text-[#FF5C2C]">contact@livra.md</a>.</p>
+          <p>Pentru întrebări privind prezentele condiții, ne puteți contacta la <a href="mailto:contact@livra.loleworks.com" className="text-[#FF5C2C]">contact@livra.loleworks.com</a>.</p>
           <p className="mt-2">
             <a href="/confidentialitate" className="text-[#FF5C2C] hover:underline">Politica de Confidențialitate</a>
           </p>
