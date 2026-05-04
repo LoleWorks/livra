@@ -29,8 +29,8 @@ const STEPS = [
 
 function PhoneFrame({ children, title, desc }: { children: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="flex flex-col items-center gap-5">
-      <div className="relative" style={{ width: 220 }}>
+    <div className="flex flex-col items-center gap-5 flex-shrink-0 snap-center" style={{ width: 220 }}>
+      <div className="relative w-full">
         {/* Phone body */}
         <div className="bg-[#111] rounded-[2.75rem] p-[10px] shadow-2xl shadow-black/40 ring-1 ring-white/10">
           {/* Dynamic island */}
@@ -40,14 +40,14 @@ function PhoneFrame({ children, title, desc }: { children: React.ReactNode; titl
             {children}
           </div>
         </div>
-        {/* Side button */}
+        {/* Side buttons */}
         <div className="absolute right-[-3px] top-24 w-[3px] h-10 bg-[#333] rounded-r-sm" />
         <div className="absolute left-[-3px] top-20 w-[3px] h-8 bg-[#333] rounded-l-sm" />
         <div className="absolute left-[-3px] top-32 w-[3px] h-8 bg-[#333] rounded-l-sm" />
       </div>
-      <div className="text-center">
+      <div className="text-center px-2">
         <p className="font-bold text-gray-900 dark:text-white text-base mb-1">{title}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-[180px] leading-snug">{desc}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">{desc}</p>
       </div>
     </div>
   )
@@ -350,22 +350,22 @@ export default function DriverDownload() {
 
       {/* Hero */}
       <div className="bg-white dark:bg-[#161616] border-b border-gray-200 dark:border-white/10">
-        <div className="max-w-5xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center gap-10">
-          <div className="flex-1 text-center md:text-left">
+        <div className="max-w-5xl mx-auto px-6 py-10 md:py-16 flex flex-col md:flex-row items-center gap-8 md:gap-10">
+          <div className="flex-1 text-center md:text-left w-full">
             <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 px-3 py-1 rounded-full text-sm font-medium mb-5">
               <span className="w-2 h-2 bg-[#FF5C2C] rounded-full animate-pulse" />
               Android · v{APK_VERSION}
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
               Livra Driver
             </h1>
-            <p className="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-md">
+            <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto md:mx-0">
               Aplicația pentru șoferi. Gestionează livrările, urmărește ruta și confirmă comenzile direct de pe telefon.
             </p>
             <a
               href={APK_PATH}
               download={APK_FILENAME}
-              className="inline-flex items-center gap-3 bg-[#FF5C2C] hover:bg-[#e64f22] active:bg-[#cc4520] text-white font-semibold px-8 py-4 rounded-2xl transition-colors shadow-lg shadow-orange-500/25 text-lg"
+              className="inline-flex w-full sm:w-auto justify-center items-center gap-3 bg-[#FF5C2C] hover:bg-[#e64f22] active:bg-[#cc4520] text-white font-semibold px-8 py-4 rounded-2xl transition-colors shadow-lg shadow-orange-500/25 text-lg"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -380,7 +380,7 @@ export default function DriverDownload() {
             <img
               src="/driver-icon.png"
               alt="Livra Driver"
-              className="w-52 h-52 rounded-[2.5rem] shadow-2xl shadow-orange-500/30"
+              className="w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[2.5rem] shadow-2xl shadow-orange-500/30"
             />
           </div>
         </div>
@@ -388,8 +388,8 @@ export default function DriverDownload() {
 
       {/* App UI Showcase */}
       <div className="bg-white dark:bg-[#161616] border-b border-gray-200 dark:border-white/10">
-        <div className="max-w-5xl mx-auto px-6 py-16">
-          <div className="text-center mb-14">
+        <div className="py-10 md:py-16">
+          <div className="text-center mb-10 px-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
               Cum arată aplicația
             </h2>
@@ -398,8 +398,8 @@ export default function DriverDownload() {
             </p>
           </div>
 
-          {/* Phone mockups */}
-          <div className="flex flex-col md:flex-row justify-center items-start gap-10 md:gap-8 overflow-x-auto pb-4">
+          {/* Phone mockups — horizontal scroll on mobile, centered row on desktop */}
+          <div className="flex flex-row gap-8 overflow-x-auto snap-x snap-mandatory md:snap-none md:justify-center md:overflow-x-visible px-6 pb-6">
             <PhoneFrame
               title="Ruta de azi"
               desc="Toate livrările zilei într-un singur card: distanță, timp estimat și primul punct de start."
@@ -421,11 +421,16 @@ export default function DriverDownload() {
               <ConfirmSVG />
             </PhoneFrame>
           </div>
+
+          {/* Scroll hint — only visible on mobile */}
+          <p className="md:hidden text-center text-xs text-gray-400 dark:text-gray-600 mt-2">
+            ← Glisează pentru mai multe →
+          </p>
         </div>
       </div>
 
       {/* Steps */}
-      <div className="max-w-5xl mx-auto px-6 py-16">
+      <div className="max-w-5xl mx-auto px-6 py-10 md:py-16">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
           Cum instalezi aplicația
         </h2>
