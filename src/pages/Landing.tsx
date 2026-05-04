@@ -3,9 +3,12 @@ import { useState, useEffect, Fragment } from 'react'
 import {
   Smartphone, Package, Users, User, Bell,
   CheckCircle, ArrowRight, Star, Globe, ChevronDown, ChevronUp,
-  Route, Gift, TrendingUp, Mail, MapPin, Clock, Zap,
+  Route, Gift, TrendingUp, Mail, MapPin, Clock, Zap, MessageSquare, Truck,
 } from 'lucide-react'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import L from 'leaflet'
 import LandingNav from '../components/LandingNav'
+import { PhoneFrame, HomeScreenSVG, DeliveryDetailSVG, ConfirmSVG } from '../components/DriverPhones'
 
 // ── Workflow diagram ───────────────────────────────────────────────────────────
 
@@ -439,6 +442,21 @@ const FEATURE_SECTIONS = [
     ],
     visual: 'sales' as const,
     flip: true,
+  },
+  {
+    tag: 'Localizare precisă',
+    headline: 'Fără adresă? Nicio\nproblemă.',
+    body: [
+      'Sute de mii de oameni din Moldova trăiesc în sate și zone periurbane fără adrese stradale oficiale. Șoferul nu știe unde să meargă, clientul nu poate explica, livrarea eșuează.',
+      'Cu Livra, agentul de vânzări îi trimite clientului un link direct. Clientul deschide aplicația Livra, marchează punctul exact pe hartă (poarta casei, intrarea în curte) și salvează. Șoferul ajunge la locul exact, fără apeluri, fără confuzii.',
+    ],
+    bullets: [
+      'Link de localizare trimis direct clientului via SMS sau WhatsApp',
+      'Clientul marchează coordonatele exacte de pe telefon',
+      'Șoferul navighează direct la pin, nu la o stradă inexistentă',
+    ],
+    visual: 'address' as const,
+    flip: false,
   },
 ]
 
@@ -981,6 +999,85 @@ function SalesVisual() {
   )
 }
 
+const PIN_LAT = 46.8267
+const PIN_LNG = 28.5897
+
+const orangePinIcon = L.divIcon({
+  html: `<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+      <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="#FF5C2C"/>
+      <circle cx="16" cy="16" r="7" fill="white"/>
+    </svg>
+  </div>`,
+  className: '',
+  iconSize: [32, 40],
+  iconAnchor: [16, 40],
+})
+
+function AddressVisual() {
+  return (
+    <div className="relative">
+      <div className="bg-blue-50 dark:bg-blue-950/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-900/30">
+        {/* Real Leaflet map */}
+        <div className="relative isolate rounded-xl overflow-hidden h-52 mb-4 border border-blue-100 dark:border-zinc-700">
+          <MapContainer
+            key={`${PIN_LAT},${PIN_LNG}`}
+            center={[PIN_LAT, PIN_LNG]}
+            zoom={15}
+            scrollWheelZoom={false}
+            dragging={false}
+            doubleClickZoom={false}
+            touchZoom={false}
+            keyboard={false}
+            boxZoom={false}
+            zoomControl={false}
+            attributionControl={false}
+            style={{ width: '100%', height: '100%' }}
+          >
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              maxZoom={19}
+            />
+            <Marker position={[PIN_LAT, PIN_LNG]} icon={orangePinIcon} />
+          </MapContainer>
+          {/* Transparent overlay — blocks all mouse/touch events from reaching Leaflet */}
+          <div className="absolute inset-0 z-[500]" style={{ cursor: 'default' }} />
+          {/* Coords badge */}
+          <div className="absolute bottom-3 left-3 z-[600] bg-white dark:bg-zinc-900 rounded-lg px-3 py-1.5 shadow text-[11px] font-mono text-zinc-600 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-700 pointer-events-none">
+            46.8267° N, 28.5897° E
+          </div>
+        </div>
+
+        {/* Flow steps */}
+        <div className="space-y-2">
+          {[
+            {
+              Icon: MessageSquare, label: 'Agentul trimite un link clientului prin SMS',
+              iconCls: 'text-violet-600 dark:text-violet-400',
+              bg: 'bg-violet-100 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800',
+            },
+            {
+              Icon: MapPin, label: 'Clientul marchează locul exact pe hartă',
+              iconCls: 'text-orange-500',
+              bg: 'bg-orange-100 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800',
+            },
+            {
+              Icon: Truck, label: 'Șoferul navighează direct la pin',
+              iconCls: 'text-emerald-600 dark:text-emerald-400',
+              bg: 'bg-emerald-100 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800',
+            },
+          ].map(({ Icon, label, iconCls, bg }) => (
+            <div key={label} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 border ${bg}`}>
+              <Icon size={15} className={`flex-shrink-0 ${iconCls}`} />
+              <span className="text-[13px] font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Misc components ───────────────────────────────────────────────────────────
 
 function Faq({ q, a }: { q: string; a: string }) {
@@ -1076,6 +1173,7 @@ export default function Landing() {
           : f.visual === 'activity'   ? ActivityVisual
           : f.visual === 'connectors' ? ConnectorsVisual
           : f.visual === 'sms'        ? SMSVisual
+          : f.visual === 'address'    ? AddressVisual
           : SalesVisual
 
         const textBlock = (
@@ -1125,6 +1223,45 @@ export default function Landing() {
           </section>
         )
       })}
+
+      {/* ── Driver App Showcase ── */}
+      <section className="py-20 bg-zinc-950">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800 text-[12px] font-medium text-zinc-400 mb-5">
+              Aplicație mobilă șofer
+            </div>
+            <h2 className="text-[36px] md:text-[44px] font-bold tracking-tight leading-[1.15] text-zinc-50 mb-4">
+              Ce văd șoferii tăi<br/>pe telefon
+            </h2>
+            <p className="text-[16px] text-zinc-400 max-w-lg mx-auto">
+              Interfață simplă, clară și rapidă, construită pentru oameni care lucrează în mișcare, nu în fața unui birou.
+            </p>
+          </div>
+
+          <div className="dark flex flex-row gap-8 overflow-x-auto snap-x snap-mandatory md:snap-none md:justify-center md:overflow-x-visible pb-4">
+            <PhoneFrame
+              title="Ruta de azi"
+              desc="Toate livrările zilei dintr-o privire: distanță totală, timp estimat, primul punct de start."
+            >
+              <HomeScreenSVG />
+            </PhoneFrame>
+            <PhoneFrame
+              title="Detalii livrare"
+              desc="Adresa, clientul, telefonul. Un tap deschide Google Maps sau Waze cu ruta deja setată."
+            >
+              <DeliveryDetailSVG />
+            </PhoneFrame>
+            <PhoneFrame
+              title="Confirmare livrare"
+              desc="Marchează livrarea ca reușită sau nereușită. Aplicația trece automat la următoarea oprire."
+            >
+              <ConfirmSVG />
+            </PhoneFrame>
+          </div>
+          <p className="md:hidden text-center text-xs text-zinc-600 mt-4">Glisează pentru mai multe</p>
+        </div>
+      </section>
 
       {/* ── Livra Network ── */}
       <section id="retea" className="py-20 bg-gradient-to-br from-brand-orange to-violet-700">
