@@ -1362,8 +1362,8 @@ export default function Landing() {
           </div>
           <p className="text-[12px] text-zinc-400">© {new Date().getFullYear()} Livra. Toate drepturile rezervate.</p>
           <div className="flex items-center gap-4 text-[12px] text-zinc-400">
-            <a href="#" className="hover:text-zinc-600 transition-colors">Confidențialitate</a>
-            <a href="#" className="hover:text-zinc-600 transition-colors">Termeni</a>
+            <a href="/confidentialitate" className="hover:text-zinc-600 transition-colors">Confidențialitate</a>
+            <a href="/termeni" className="hover:text-zinc-600 transition-colors">Termeni</a>
             <a href="mailto:contact@livra.md" className="hover:text-zinc-600 transition-colors">Contact</a>
           </div>
         </div>

@@ -24,6 +24,8 @@ import IndustryPage from './pages/industrii/IndustryPage'
 import UseCasePage from './pages/cazuri/UseCasePage'
 import Onboarding from './pages/Onboarding'
 import DriverDownload from './pages/DriverDownload'
+import TermsOfUse from './pages/TermsOfUse'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 
 export default function App() {
   return (
@@ -38,6 +40,8 @@ export default function App() {
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/t/:token" element={<Track />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/termeni" element={<TermsOfUse />} />
+          <Route path="/confidentialitate" element={<PrivacyPolicy />} />
           <Route path="/urmarire/:token" element={<Track />} />
           <Route path="/industrii/:slug" element={<IndustryPage />} />
           <Route path="/cazuri/:slug" element={<UseCasePage />} />
