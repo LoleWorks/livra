@@ -1,0 +1,174 @@
+<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" />
+      <mj-text font-size="15px" line-height="1.65" color="#5C5A55" />
+    </mj-attributes>
+    <mj-style>
+      .label { font-family: monospace; font-size: 11px; font-weight: 700; color: #FF5C2C; text-transform: uppercase; letter-spacing: 2px; }
+      .feature-title { font-size: 15px; font-weight: 700; color: #161513; margin: 0 0 4px; }
+    </mj-style>
+  </mj-head>
+
+  <mj-body background-color="#F4F3EF">
+
+    <!-- Container wrapper -->
+    <mj-section background-color="#F4F3EF" padding="32px 0 0">
+      <mj-column></mj-column>
+    </mj-section>
+
+    <!-- ── Header ── -->
+    <mj-section background-color="#ffffff" padding="24px 40px 20px" border-bottom="2px solid #FF5C2C">
+      <mj-column vertical-align="middle">
+        <mj-image src="https://livra.loleworks.com/livra-logo.png" alt="Livra" width="120px" align="left" padding="0" />
+      </mj-column>
+      <mj-column vertical-align="middle">
+        <mj-text align="right" font-family="monospace" font-size="11px" color="#8A8780" padding="0">
+          livra.loleworks.com
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── Hero ── -->
+    <mj-section background-color="#FFF4F0" padding="44px 40px" border-bottom="1px solid #FFD5C2">
+      <mj-column>
+        <mj-text css-class="label" padding-bottom="10px">
+          Prima platforma de livrari din Moldova
+        </mj-text>
+        <mj-text font-size="34px" font-weight="700" line-height="1.2" color="#161513" padding-bottom="18px">
+          Livrarile voastre,<br/>
+          <span style="color:#FF5C2C;">organizate complet.</span>
+        </mj-text>
+        <mj-text padding-bottom="30px">
+          Livra este prima platforma SaaS dedicata livrarilor de ultima mila din Moldova. Optimizare rute, monitorizare soferi in timp real si experienta premium pentru clientii dumneavoastra, fara abonament lunar.
+        </mj-text>
+        <mj-button background-color="#FF5C2C" color="#ffffff" font-size="15px" font-weight="700" border-radius="10px" inner-padding="14px 32px" href="https://livra.loleworks.com/#contact" align="left">
+          Rezerva o demonstratie gratuita
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── Problem ── -->
+    <mj-section background-color="#ffffff" padding="36px 40px 0">
+      <mj-column>
+        <mj-text css-class="label" padding-bottom="8px">
+          Problema pe care o rezolvam
+        </mj-text>
+        <mj-text font-size="20px" font-weight="700" color="#161513" line-height="1.3" padding-bottom="12px">
+          Cate ore pe zi pierdeti organizand livrarile manual?
+        </mj-text>
+        <mj-text>
+          Hartii, telefoane, soferi care nu stiu unde merg, clienti care suna sa intrebe unde e coletul. Stim exact cum arata dimineata asta. Livra o transforma complet, de la prima zi.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── Divider ── -->
+    <mj-section background-color="#ffffff" padding="24px 40px 0">
+      <mj-column>
+        <mj-divider border-color="#F0EDE8" border-width="1px" padding="0" />
+      </mj-column>
+    </mj-section>
+
+    <!-- ── Features heading ── -->
+    <mj-section background-color="#ffffff" padding="28px 40px 0">
+      <mj-column>
+        <mj-text css-class="label" padding-bottom="8px">
+          Ce primiti
+        </mj-text>
+        <mj-text font-size="20px" font-weight="700" color="#161513" line-height="1.3">
+          Tot ce aveti nevoie, inclus in fiecare livrare
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── Features ── -->
+    <mj-section background-color="#ffffff" padding="20px 40px 0">
+      <mj-column>
+        <mj-text font-weight="700" color="#161513" font-size="15px" padding-bottom="4px">Aplicatie web Logistica</mj-text>
+        <mj-text padding-bottom="20px">Rute optimizate automat, monitorizare soferi in timp real si rapoarte zilnice, dintr-un singur loc.</mj-text>
+
+        <mj-text font-weight="700" color="#161513" font-size="15px" padding-bottom="4px">Aplicatie mobila Sofer</mj-text>
+        <mj-text padding-bottom="20px">Soferii vad ruta zilei, detaliile fiecarei livrari si confirma cu fotografie sau semnatura.</mj-text>
+
+        <mj-text font-weight="700" color="#161513" font-size="15px" padding-bottom="4px">Aplicatie web Vanzari</mj-text>
+        <mj-text padding-bottom="20px">Agentii adauga comenzi, urmaresc livrarile si gestioneaza retururile fara sa deranjeze managementul.</mj-text>
+
+        <mj-text font-weight="700" color="#161513" font-size="15px" padding-bottom="4px">SMS automat pentru clienti</mj-text>
+        <mj-text>SMS la plecare si la 10 minute distanta, cu link de urmarire live. Clientii cu aplicatia Livra vad livrarea direct in aplicatie.</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── GPS callout ── -->
+    <mj-section background-color="#ffffff" padding="28px 40px 0">
+      <mj-column background-color="#FFF8F5" border="1px solid #FFD5C2" border-radius="10px" padding="20px 24px">
+        <mj-text css-class="label" padding-bottom="8px">
+          Localizare precisa
+        </mj-text>
+        <mj-text font-weight="700" color="#161513" font-size="15px" padding-bottom="8px">
+          Clienti fara adresa stradala? Nu mai e o problema.
+        </mj-text>
+        <mj-text>
+          Agentul de vanzari trimite clientului un link simplu. Clientul marcheaza locul exact pe harta, direct de pe telefonul sau. Soferul ajunge la pin, fara apeluri, fara confuzii.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── Pricing ── -->
+    <mj-section background-color="#ffffff" padding="20px 40px 0">
+      <mj-column background-color="#FFF4F0" border="1px solid #FFD5C2" border-radius="10px" padding="24px 28px">
+        <mj-text css-class="label" padding-bottom="6px">
+          Preturi transparente
+        </mj-text>
+        <mj-text font-size="15px" font-weight="700" color="#161513" padding-bottom="6px">
+          De la <span style="color:#FF5C2C; font-size:24px;">10 MDL</span> per livrare
+        </mj-text>
+        <mj-text font-size="13px" padding-bottom="16px">
+          Fara abonament lunar. Fara contract. Platesti doar pentru ce livrezi.
+        </mj-text>
+        <mj-button background-color="#FF5C2C" color="#ffffff" font-size="13px" font-weight="700" border-radius="8px" inner-padding="9px 20px" href="https://livra.loleworks.com/#preturi" align="left">
+          Vezi preturi
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── CTA ── -->
+    <mj-section background-color="#ffffff" padding="40px 40px 36px">
+      <mj-column>
+        <mj-text font-size="22px" font-weight="700" color="#161513" line-height="1.3" align="center" padding-bottom="12px">
+          Rezervati o demonstratie gratuita
+        </mj-text>
+        <mj-text align="center" padding-bottom="28px">
+          Va aratam cum functioneaza Livra pentru afacerea dumneavoastra,<br/>in mai putin de 30 de minute. Fara obligatii.
+        </mj-text>
+        <mj-button background-color="#FF5C2C" color="#ffffff" font-size="16px" font-weight="700" border-radius="10px" inner-padding="16px 44px" href="https://livra.loleworks.com/#contact" align="center">
+          Rezerva demo gratuit
+        </mj-button>
+        <mj-text align="center" font-size="13px" color="#8A8780" padding-top="20px">
+          Sau scrieti-ne la <a href="mailto:contact@loleworks.com" style="color:#FF5C2C; text-decoration:none; font-weight:600;">contact@loleworks.com</a>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ── Footer ── -->
+    <mj-section background-color="#F4F3EF" border-top="1px solid #E8E5DF" padding="24px 40px">
+      <mj-column>
+        <mj-image src="https://livra.loleworks.com/livra-logo.png" alt="Livra" width="80px" align="left" padding="0 0 8px" />
+        <mj-text font-size="12px" color="#8A8780" line-height="1.6" padding-bottom="16px">
+          Un produs al SRL Lole Works &nbsp;|&nbsp; mun. Chisinau, sec. Botanica, str. Decebal bd. 6, et. 4 &nbsp;|&nbsp; IDNO: 1025600025216
+        </mj-text>
+        <mj-divider border-color="#E8E5DF" border-width="1px" padding="0 0 14px" />
+        <mj-text font-size="11px" color="#B0ADA8" line-height="1.6">
+          Ati primit acest email deoarece compania dumneavoastra a fost identificata ca potential partener Livra.
+          Daca nu doriti sa primiti comunicari viitoare, <a href="#" style="color:#8A8780;">dezabonati-va aici</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Bottom spacing -->
+    <mj-section background-color="#F4F3EF" padding="0 0 32px">
+      <mj-column></mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>
