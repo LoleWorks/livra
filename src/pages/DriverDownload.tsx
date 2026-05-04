@@ -360,7 +360,7 @@ export default function DriverDownload() {
               Livra Driver
             </h1>
             <p className="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-md">
-              Aplicația pentru șoferi — gestionează livrările, urmărește ruta și confirmă comenzile direct de pe telefon.
+              Aplicația pentru șoferi. Gestionează livrările, urmărește ruta și confirmă comenzile direct de pe telefon.
             </p>
             <a
               href={APK_PATH}
@@ -380,7 +380,7 @@ export default function DriverDownload() {
             <img
               src="/driver-icon.png"
               alt="Livra Driver"
-              className="w-36 h-36 rounded-[2.5rem] shadow-2xl shadow-orange-500/30"
+              className="w-52 h-52 rounded-[2.5rem] shadow-2xl shadow-orange-500/30"
             />
           </div>
         </div>
@@ -394,7 +394,7 @@ export default function DriverDownload() {
               Cum arată aplicația
             </h2>
             <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-              Interfață simplă și clară — designată pentru șoferi care lucrează în mișcare.
+              Interfață simplă și clară, designată pentru șoferi care lucrează în mișcare.
             </p>
           </div>
 
@@ -402,7 +402,7 @@ export default function DriverDownload() {
           <div className="flex flex-col md:flex-row justify-center items-start gap-10 md:gap-8 overflow-x-auto pb-4">
             <PhoneFrame
               title="Ruta de azi"
-              desc="Toate livrările zilei într-un singur card — distanță, timp estimat și primul punct de start."
+              desc="Toate livrările zilei într-un singur card: distanță, timp estimat și primul punct de start."
             >
               <HomeScreenSVG />
             </PhoneFrame>
@@ -430,7 +430,7 @@ export default function DriverDownload() {
           Cum instalezi aplicația
         </h2>
         <p className="text-gray-500 dark:text-gray-400 text-center mb-10">
-          Urmează pașii de mai jos — durează mai puțin de 2 minute.
+          Urmează pașii de mai jos. Durează mai puțin de 2 minute.
         </p>
 
         <div className="grid md:grid-cols-2 gap-5">
