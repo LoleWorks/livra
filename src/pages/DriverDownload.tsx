@@ -6,7 +6,8 @@ const APK_FILENAME = 'Livra-Driver.apk'
 const APK_PATH = `/downloads/${APK_FILENAME}`
 
 export default function DriverDownload() {
-  const { isDark, toggleTheme } = useTheme()
+  const { theme, toggle } = useTheme()
+  const isDark = theme === 'dark'
   const [copied, setCopied] = useState(false)
 
   const handleCopyLink = () => {
@@ -31,7 +32,7 @@ export default function DriverDownload() {
             </span>
           </div>
           <button
-            onClick={toggleTheme}
+            onClick={toggle}
             className="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
           >
             {isDark ? (
