@@ -71,12 +71,14 @@ export default function TermsOfUse() {
           </Section>
 
           <Section title="5. Tarife și plăți" dark={isDark}>
-            <p>Platforma Livra se oferă pe baza unui abonament lunar sau anual, conform planului tarifar ales la momentul înregistrării. Tarifele curente sunt disponibile la <a href="/preturi" className="text-[#FF5C2C]">livra.loleworks.com/preturi</a>.</p>
+            <p>Platforma Livra funcționează pe baza unui sistem de <strong>credite preplatite</strong>. Creditele sunt utilizate pentru gestionarea rutelor și livrărilor — fiecare operațiune consumă un număr de credite conform tarifului în vigoare. Nu există abonament lunar sau anual obligatoriu.</p>
             <ul>
-              <li>Plata se efectuează anticipat, la începutul fiecărei perioade de facturare;</li>
-              <li>Prețurile sunt exprimate în lei moldovenești (MDL) și includ TVA acolo unde este aplicabil;</li>
-              <li>Livra își rezervă dreptul de a modifica tarifele cu notificarea prealabilă a clienților cu cel puțin <strong>30 de zile calendaristice</strong> înainte de intrarea în vigoare;</li>
-              <li>Plățile efectuate nu sunt rambursabile, cu excepția cazurilor expres prevăzute de lege sau de prezentele Termeni.</li>
+              <li>Utilizatorul achiziționează credite în avans, în funcție de necesități, și le consumă pe măsura utilizării platformei;</li>
+              <li>Plata se efectuează la momentul achiziției de credite, nu periodic;</li>
+              <li>Prețurile creditelor sunt exprimate în lei moldovenești (MDL) și includ TVA acolo unde este aplicabil;</li>
+              <li>Livra își rezervă dreptul de a modifica valoarea creditelor cu notificarea prealabilă a clienților cu cel puțin <strong>30 de zile calendaristice</strong> înainte de intrarea în vigoare;</li>
+              <li>Creditele achiziționate nu sunt rambursabile, cu excepția cazurilor expres prevăzute de lege sau de prezentele Termeni;</li>
+              <li>Creditele neutilizate nu expiră atât timp cât contul este activ.</li>
             </ul>
           </Section>
 
