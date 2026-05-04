@@ -1330,6 +1330,50 @@ export default function Landing() {
             </a>
           </div>
 
+          {/* What's included */}
+          <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 mb-6">
+            <h3 className="text-[18px] font-bold text-zinc-900 dark:text-zinc-50 mb-1">Tot ce ai nevoie, inclus în fiecare livrare</h3>
+            <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mb-6">Fără costuri ascunse. Fără module extra. Plătești per livrare și ai acces la întreaga platformă.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                {
+                  Icon: Globe,
+                  title: 'Aplicație web Logistică',
+                  desc: 'Planifică rute, monitorizează șoferii și gestionează toate comenzile dintr-un singur loc.',
+                  color: 'bg-orange-100 dark:bg-orange-950/40 text-brand-orange',
+                },
+                {
+                  Icon: Smartphone,
+                  title: 'Aplicație mobilă Șofer',
+                  desc: 'Șoferii văd ruta zilei, detaliile fiecărei livrări și confirmă direct de pe telefon.',
+                  color: 'bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400',
+                },
+                {
+                  Icon: Users,
+                  title: 'Aplicație web Vânzări',
+                  desc: 'Agenții tăi adaugă comenzi, urmăresc statusul livrărilor și gestionează retururile.',
+                  color: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400',
+                },
+                {
+                  Icon: Bell,
+                  title: 'SMS automat pentru clienți',
+                  desc: 'Un SMS când comanda pleacă la drum și unul când șoferul este la 10 minute distanță. Fiecare SMS include un link de urmărire live. Clienții cu aplicația Livra instalată văd livrarea direct în aplicație.',
+                  color: 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400',
+                },
+              ].map(({ Icon, title, desc, color }) => (
+                <div key={title} className="flex gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+                    <Icon size={16} />
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-50 mb-0.5">{title}</p>
+                    <p className="text-[12px] text-zinc-500 dark:text-zinc-400 leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* How credits work */}
           <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8">
             <h3 className="text-[18px] font-bold text-zinc-900 dark:text-zinc-50 mb-6">Cum funcționează creditele?</h3>
