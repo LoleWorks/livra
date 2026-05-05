@@ -18,52 +18,125 @@ interface UseCaseData {
   painPoints: Array<{ title: string; desc: string }>
   benefits: Array<{ title: string; desc: string }>
   stats: Array<{ value: string; label: string }>
+  howItWorks?: Array<{ step: string; title: string; desc: string }>
+  features?: Array<{ title: string; desc: string }>
+  faq?: Array<{ q: string; a: string }>
 }
 
 const USE_CASES: Record<string, UseCaseData> = {
   'optimizare-rute': {
     slug: 'optimizare-rute',
     seo: {
-      title: 'Optimizare Rute Livrare | Software Livra',
-      description: 'OR-Tools VRP cu OSRM. Timpi reali de parcurs, rute optimizate în secundă, 40% mai puțin combustibil.',
+      title: 'Optimizare Rute Livrare Moldova | Software Livra',
+      description: 'Livra calculeaza ruta optima pentru toti soferii tai in 5 secunde. Timpi reali de parcurs pe drumurile din Moldova, cu 30% mai putini km si 2 ore economisite zilnic.',
     },
-    badge: 'Inima Livra',
-    headline: 'Ruta optimă în 5 secunde. Nu în 2 ore.',
-    subline: 'Oamenii cu Excel și Google Maps pierd 2 ore zilnic. Livra calculează ruta optimă pentru 200 de livrări în 5 secunde. 30% mai puțin km. Punct. Gata.',
+    badge: 'Functionalitate principala',
+    headline: 'Ruta optima pentru toti soferii tai in 5 secunde.',
+    subline: 'Planificarea manuala cu Excel si Google Maps consuma 2 ore zilnic si produce rute ineficiente. Livra calculeaza ruta optima pentru 200 de livrari si toti soferii tai in 5 secunde, pe baza timpilor reali de parcurs din Moldova.',
     color: 'blue',
     icon: Route,
     painPoints: [
       {
-        title: 'Planificare manuală = pierdere de timp',
-        desc: 'Logistician stă 2 ore zilnic: «Pe cine trimit pe această rută?» Drag pe Google Maps, calcule pe hârtie, schimbări. Asta se întâmplă zilnic.',
+        title: 'Planificarea manuala consuma 2 ore din fiecare zi',
+        desc: 'Logisticianul sta in fiecare dimineata cu Google Maps deschis: ce sofer merge unde, in ce ordine, pe ce strada. Calcule pe hartie, modificari, apeluri. Doua ore pierdute inainte sa inceapa ziua.',
       },
       {
-        title: 'Rute haotice = pierdere de bani',
-        desc: 'Ai 10 livrări în aceeași zonă dar le trimit în 3 curse diferite. 3 galoane de benzină în loc de 1. Asta-i bani iroșiți zilnic.',
+        title: 'Rutele haotice inseamna combustibil risipit',
+        desc: 'Ai 10 livrari in aceeasi zona, dar soferii tai le fac in 3 curse separate in momente diferite ale zilei. De trei ori mai mult combustibil, de trei ori mai mult timp, pentru aceleasi livrari.',
       },
       {
-        title: 'Imposibil să crești',
-        desc: 'La 5 șoferi merge planificare manuală. La 15 șoferi și 200 de comenzi, crezi că un om poate planifica? Nu. Te-ai blocat la creștere.',
+        title: 'Planificarea manuala nu poate tine pasul cu cresterea',
+        desc: 'La 5 soferi, planificarea manuala este dificila. La 15 soferi si 200 de comenzi pe zi, devine imposibila. Nu poti creste flota fara sa cresti si echipa de logistica.',
       },
     ],
     benefits: [
       {
-        title: 'Un click, toate rutele gata',
-        desc: 'Tu apesi «Optimizează». Livra calculează ruta optimă pentru toți șoferii. Fiecare șofer știe exact pe cine să viziteze și în ce ordine. Aia e. Nu mai vorbesc cu logistician. Nu mai așteptă comenzi.',
+        title: 'Un singur click, toate rutele generate',
+        desc: 'Incarci comenzile zilei si apesi «Optimizeaza». In 5 secunde, Livra genereaza ruta optima pentru fiecare sofer al tau. Fiecare sofer stie exact ce livrari are si in ce ordine le face. Logisticianul tau face altceva cu cele 2 ore economisite.',
       },
       {
-        title: 'Timpi reali, nu estimări',
-        desc: 'Nu distanțe în linie dreaptă. Livra ȘTIE că Ștefan cel Mare e plin de 9-10 dimineața. Că la Centru e trafic. Calculează după durate reale din Moldova. Rutele sunt corecte.',
+        title: 'Timpi reali pe drumurile din Moldova',
+        desc: 'Livra nu calculeaza distante in linie dreapta. Stie ca Stefan cel Mare este aglomerat de la 8 la 10 dimineata, ca in Botanica traficul este diferit fata de Centru. Rutele sunt calculate pe timpii reali de parcurs, nu pe estimari.',
       },
       {
-        title: 'Scalare fără limită',
-        desc: 'Ai 5 șoferi? Click. Ai 50 șoferi? Același click. Livra gestionează complexitatea. Tu doar lucrezi. Aia-i business scaling.',
+        title: 'Aceeasi flota, capacitate mai mare',
+        desc: 'Cu rute optimizate, fiecare sofer al tau livreaza cu 30% mai putini kilometri si reuseste sa faca mai multe livrari pe zi. Nu trebuie sa angajezi soferi noi ca sa cresti volumul. Flota pe care o ai deja lucreaza mai eficient.',
       },
     ],
     stats: [
-      { value: '5 sec', label: 'generare rute 200 comenzi' },
-      { value: '−30%', label: 'kilometri parcurși' },
+      { value: '5 sec', label: 'generare rute pentru 200 comenzi' },
+      { value: '-30%', label: 'kilometri parcursi' },
       { value: '2h', label: 'timp economisit zilnic' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Incarci comenzile zilei',
+        desc: 'Adaugi comenzile manual, le importi din sistemul tau sau vin automat din WooCommerce. Fiecare comanda are adresa si, optional, o fereastra orara.',
+      },
+      {
+        step: '02',
+        title: 'Livra optimizeaza toate rutele',
+        desc: 'Algoritmul analizeaza toate comenzile, toti soferii disponibili si timpii reali de parcurs. In 5 secunde genereaza ruta optima pentru fiecare sofer, tinand cont de ferestele orare si prioritati.',
+      },
+      {
+        step: '03',
+        title: 'Fiecare sofer primeste ruta pe telefon',
+        desc: 'Soferii tai vad ruta zilei direct in aplicatia Livra: adresele in ordinea optima, navigatia integrata si detaliile fiecarei comenzi.',
+      },
+      {
+        step: '04',
+        title: 'Tu urmaresti progresul in timp real',
+        desc: 'Pe harta din tabloul de bord vezi toti soferii tai, statusul fiecarei livrari si poti interveni daca apar modificari pe parcursul zilei.',
+      },
+    ],
+    features: [
+      {
+        title: 'Algoritm VRP cu timpi reali',
+        desc: 'Livra foloseste un algoritm de tip Vehicle Routing Problem (VRP) cu durate reale de parcurs pe drumurile din Moldova, nu distante teoretice.',
+      },
+      {
+        title: 'Respectarea ferestelor orare',
+        desc: 'Daca o comanda trebuie livrata intr-un interval orar specific, Livra construieste ruta astfel incat soferul sa ajunga in acea fereastra.',
+      },
+      {
+        title: 'Prioritizare comenzi urgente',
+        desc: 'Comenzile marcate ca urgente sunt plasate automat primele in ruta soferului, fara sa destabilizeze restul traseului optimizat.',
+      },
+      {
+        title: 'Distribuire automata intre soferi',
+        desc: 'Livra distribuie comenzile intre toti soferii disponibili in functie de zona, capacitate si volumul de lucru, echilibrand incarcatura flotei.',
+      },
+      {
+        title: 'Reoptimizare pe parcursul zilei',
+        desc: 'Daca apare o comanda noua sau un sofer intarzie, poti reoptimiza rutele ramase fara sa le afectezi pe cele deja in desfasurare.',
+      },
+      {
+        title: 'Raport de eficienta zilnic',
+        desc: 'La finalul zilei primesti automat: km parcursi per sofer, numar de livrari, timp mediu per oprire si economiile de combustibil estimate.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Cat dureaza calculul rutelor pentru o flota mare?',
+        a: 'Pentru 200 de comenzi si 10 soferi, Livra genereaza rutele in aproximativ 5 secunde. Pentru volume mai mari timpul poate creste, dar raman in limita a cateva zeci de secunde.',
+      },
+      {
+        q: 'Livra tine cont de traficul real din Chisinau?',
+        a: 'Da. Livra foloseste timpi reali de parcurs pe drumurile din Moldova, nu distante in linie dreapta. Stie ca anumite artere sunt aglomerate la anumite ore si calculeaza rutele in consecinta.',
+      },
+      {
+        q: 'Ce se intampla daca apare o comanda noua dupa ce rutele au fost generate?',
+        a: 'Poti adauga comanda noua si reoptimiza rutele ramase cu un singur click. Livra recalculeaza doar traseele nefinalizate, fara sa modifice livrarile deja in curs.',
+      },
+      {
+        q: 'Pot sa impun o fereastra orara pentru anumite livrari?',
+        a: 'Da. Fiecare comanda poate avea o fereastra orara specifica. Livra construieste ruta astfel incat soferul sa respecte toate intervalele promise.',
+      },
+      {
+        q: 'Functioneaza si pentru flote mari, de exemplu 50 de soferi?',
+        a: 'Da. Livra gestioneaza flote de orice dimensiune. Cu cat ai mai multi soferi si mai multe comenzi, cu atat optimizarea produce economii mai mari de combustibil si timp.',
+      },
     ],
   },
   'tracking-live': {
@@ -345,6 +418,61 @@ export default function UseCasePage() {
           ))}
         </div>
       </section>
+
+      {/* How it works */}
+      {useCase.howItWorks && (
+        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
+          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">Cum functioneaza</h2>
+          <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl">
+            De la comenzile zilei la soferii pe drum, totul in cateva secunde.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {useCase.howItWorks.map(step => (
+              <div key={step.step}>
+                <span className="text-[56px] font-black leading-none block text-[#ff5c2c] opacity-30 mb-3">{step.step}</span>
+                <h3 className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{step.title}</h3>
+                <p className="text-[14px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Features */}
+      {useCase.features && (
+        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
+          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">Ce poti face cu Livra</h2>
+          <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl">
+            Toate instrumentele de care ai nevoie pentru a optimiza livrarile flotei tale.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {useCase.features.map(feat => (
+              <div key={feat.title} className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6 border border-zinc-200 dark:border-zinc-800">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${colorClass[colorKey]} border-0`}>
+                  <useCase.icon size={16} />
+                </div>
+                <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{feat.title}</h3>
+                <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* FAQ */}
+      {useCase.faq && (
+        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
+          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Intrebari frecvente</h2>
+          <div className="max-w-3xl space-y-6">
+            {useCase.faq.map(item => (
+              <div key={item.q} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+                <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 mb-3">{item.q}</h3>
+                <p className="text-[14px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800 text-center">
