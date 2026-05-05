@@ -372,46 +372,116 @@ const USE_CASES: Record<string, UseCaseData> = {
   'gestionare-soferi': {
     slug: 'gestionare-soferi',
     seo: {
-      title: 'Gestionare Șoferi & Flotă | Management Livra',
-      description: 'Hartă live cu localizarea fiecărui șofer. POD digital cu foto + semnătură. Rapoarte automate de performanță.',
+      title: 'Gestionare Soferi si Flota | Management Livra',
+      description: 'Harta live cu pozitia fiecarui sofer, dovada digitala de livrare cu foto si semnatura si rapoarte automate de performanta. Control complet asupra flotei tale.',
     },
-    badge: 'Management',
-    headline: 'Vrei să știi unde e fiecare șofer? Privesc pe hartă.',
-    subline: 'O hartă cu toți șoferii. Unde sunt, ce livrări au, cum merg. Deschizi telefonul și-i vezi pe toți. Aia-i control real.',
+    badge: 'Management flota',
+    headline: 'Stii in orice moment unde este fiecare sofer si ce livrare face.',
+    subline: 'In loc sa suni soferii ca sa afli unde sunt, deschizi tabloul de bord Livra si ii vezi pe toti pe harta in timp real. Stii statusul fiecarei livrari, ai dovezi digitale pentru fiecare predare si primesti rapoarte de performanta automate la finalul zilei.',
     color: 'purple',
     icon: Users,
     painPoints: [
       {
-        title: 'Nicio vizibilitate = nicio control',
-        desc: 'Ai 10 șoferi pe rute. Tu nu știi unde sunt. Clientul îți zice «Unde e livrare mea?» și tu suni șoferul. Asta e sistem primitiv.',
+        title: 'Nu stii unde sunt soferii tai in teren',
+        desc: 'Ai 10 soferi pe rute si nu stii unde se afla niciunul. Cand un client suna sa intrebe cand ajunge comanda, tu trebuie sa suni soferul, sa astepti raspuns si sa transmiti inapoi. Este un proces lent care se repeta de zeci de ori pe zi.',
       },
       {
-        title: 'Nicio dovadă = dispute permanente',
-        desc: 'Șoferul zice: «Am lăsat la ușă». Clientul zice: «Nu mi-a dat nimeni nimic». Tu ești în mijloc, neputincios. Fără dovadă, pierzi.',
+        title: 'Fara dovada de livrare apar dispute',
+        desc: 'Soferul spune ca a lasat comanda la usa. Clientul spune ca nu a primit nimic. Fara o fotografie sau o semnatura digitala, nu poti dovedi nimic. De cele mai multe ori pierzi tu: dai banii inapoi si pierzi si marfa.',
       },
       {
-        title: 'Care șofer e eficient? Nu știi',
-        desc: 'Ai 5 șoferi. Care e mai rapid? Care pierde timp? Care are probleme? Fără date, nu poți face nimic.',
+        title: 'Nu stii care soferi sunt eficienti si care nu',
+        desc: 'Ai mai multi soferi, dar nu ai date despre performanta lor. Cine livreaza mai repede? Cine face pauze lungi? Cine are cele mai multe livrari esuate? Fara date concrete, nu poti lua decizii de management.',
       },
     ],
     benefits: [
       {
-        title: 'Hartă live = control total',
-        desc: 'Deschizi appul. Vezi toți șoferii pe hartă ACUM. Unde sunt, ce livrări au, pana cand. ETA se actualizează live. Client te sună: «Unde-i șoferul?». Tu privești pe hartă și dai veste exactă.',
+        title: 'Toti soferii tai pe harta, in timp real',
+        desc: 'Deschizi tabloul de bord Livra si vezi pozitia fiecarui sofer actualizata in timp real, ce livrare face in momentul respectiv si ETA-ul estimat. Cand un client intreaba unde ii este comanda, ai raspunsul imediat, fara sa suni pe nimeni.',
       },
       {
-        title: 'POD digital = zero dispute',
-        desc: 'Șoferul fotografiază comanda și obține semnătură pe telefon. Dovada se salvează. Clientul nu mai poate spune «Nu mi-a dat nimic». Tu ești protejat.',
+        title: 'Dovada digitala la fiecare livrare',
+        desc: 'La fiecare predare, soferul tau fotografiaza coletul si colecteaza semnatura electronica a clientului direct de pe telefon. Dovada se salveaza automat si este disponibila oricand. Nicio disputa nu mai este posibila.',
       },
       {
-        title: 'Rapoarte automate = management cu date',
-        desc: 'La finalul zilei: care șofer a livrat cât, în cât timp, pe câți km. Care a avut probleme. Tu poți vedea perfor-anta pe numere, nu pe simțiri.',
+        title: 'Rapoarte de performanta generate automat',
+        desc: 'La finalul fiecarei zile primesti automat un raport complet: livrari efectuate per sofer, kilometri parcursi, timp mediu per oprire si livrari cu probleme. Iei decizii de management pe baza de date, nu pe estimari.',
       },
     ],
     stats: [
-      { value: 'Live', label: 'hartă flotă 24/7' },
-      { value: '100%', label: 'POD digital' },
-      { value: 'Automat', label: 'rapoarte zilnice' },
+      { value: 'live', label: 'pozitia soferilor pe harta' },
+      { value: '100%', label: 'livrari cu dovada digitala' },
+      { value: '0', label: 'rapoarte completate manual' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Soferii tai instaleaza aplicatia Livra',
+        desc: 'Fiecare sofer descarca aplicatia Livra pe telefon si se conecteaza la contul flotei tale. De atunci, pozitia lui este vizibila pe harta ta in timp real.',
+      },
+      {
+        step: '02',
+        title: 'Tu urmaresti toata flota dintr-un singur ecran',
+        desc: 'Din tabloul de bord Livra vezi toti soferii tai pe harta, ruta fiecaruia, livrarea curenta si ETA-ul estimat pentru fiecare destinatie.',
+      },
+      {
+        step: '03',
+        title: 'Soferul confirma fiecare livrare cu fotografie si semnatura',
+        desc: 'La predarea coletului, soferul fotografiaza marfa si colecteaza semnatura electronica a clientului. Totul se salveaza automat in sistem.',
+      },
+      {
+        step: '04',
+        title: 'Primesti raportul zilei automat',
+        desc: 'La finalul zilei, Livra genereaza automat raportul complet al flotei: livrari, kilometri, durate, probleme. Nimic de completat manual.',
+      },
+    ],
+    features: [
+      {
+        title: 'Harta live cu toata flota',
+        desc: 'Pozitia fiecarui sofer actualizata in timp real pe harta. Stii instant unde se afla fiecare si ce livrare are in curs.',
+      },
+      {
+        title: 'Dovada digitala de livrare (POD)',
+        desc: 'Fotografie a coletului si semnatura electronica a clientului la fiecare predare. Dovezi stocate permanent, valide legal.',
+      },
+      {
+        title: 'Statusul fiecarei comenzi in timp real',
+        desc: 'Stii in orice moment daca o comanda este in drum, livrata, sau a intampinat o problema. Nu mai suni soferii pentru actualizari.',
+      },
+      {
+        title: 'Rapoarte automate de performanta',
+        desc: 'Livrari per sofer, kilometri parcursi, timp mediu per oprire, rata de livrare la prima incercare. Toate generate automat zilnic.',
+      },
+      {
+        title: 'Notificari instant pentru probleme',
+        desc: 'Daca un sofer raporteaza o problema la o livrare (client absent, adresa gresita), primesti notificare instant si poti interveni.',
+      },
+      {
+        title: 'Istoric complet al livrarilor',
+        desc: 'Acces la istoricul complet al tuturor livrarilor: data, ora, sofer, fotografie, semnatura clientului. Util pentru audit si pentru rezolvarea disputelor.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Soferii trebuie sa aiba un telefon special sau unul anume?',
+        a: 'Nu. Aplicatia Livra functioneaza pe orice telefon Android sau iPhone cu o conexiune la internet. Nu este nevoie de echipament special.',
+      },
+      {
+        q: 'Ce se intampla daca un sofer nu are semnal in teren?',
+        a: 'Aplicatia salveaza local toate actiunile soferului si le sincronizeaza automat cand conexiunea este restabilita. Confirmarile de livrare nu se pierd.',
+      },
+      {
+        q: 'Dovada digitala de livrare este valida legal?',
+        a: 'Da. Fotografia coletului impreuna cu semnatura electronica si marcajul de timp constituie dovada valida in cazul oricarei dispute cu un client.',
+      },
+      {
+        q: 'Pot vedea istoricul livrarilor unui sofer din lunile trecute?',
+        a: 'Da. Istoricul complet al livrarilor este stocat in Livra si poate fi accesat oricand. Poti filtra dupa sofer, data sau status pentru a gasi rapid ce ai nevoie.',
+      },
+      {
+        q: 'Rapoartele zilnice pot fi exportate sau trimise automat?',
+        a: 'Da. Rapoartele pot fi exportate in format CSV sau PDF si pot fi configurate sa fie trimise automat pe email la finalul fiecarei zile.',
+      },
     ],
   },
   'notificari-sms': {
