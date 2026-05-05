@@ -257,46 +257,116 @@ const INDUSTRIES: Record<string, IndustryData> = {
   florarii: {
     slug: 'florarii',
     seo: {
-      title: 'Livra pentru Florării | Livrare la Timp Garantată',
-      description: 'Livrări de flori la intervalul exact promis. Planificare automată pentru zile de vârf, confirmare cu fotografie.',
+      title: 'Livra pentru Florarii si Magazine de Cadouri | Livrare la Ora Exacta',
+      description: 'Software de optimizare rute pentru florarii si magazine de cadouri cu propria flota. Soferii tai livreaza la intervalul exact promis, clientul urmareste live si primeste confirmarea cu fotografie.',
     },
-    badge: 'Soluție pentru florării',
-    headline: 'Nu lăsa pe nimeni cu mâna goală.',
-    subline: 'O propunere de cununie ratată, o zi de naștere uitată, o aniversare fără flori — asta nu mai se mai întâmplă cu Livra. Livrări exact la ora promisă. Clienți care se întorc pe viață.',
+    badge: 'Solutie pentru florarii si magazine de cadouri',
+    headline: 'Florile si cadourile ajung la ora exacta. De fiecare data.',
+    subline: 'O propunere de cununie ratata, un cadou de ziua de nastere care ajunge a doua zi, o aniversare fara flori. Asta se intampla cand livrarea nu respecta ora promisa. Livra calculeaza rutele soferilor tai astfel incat fiecare interval sa fie respectat, indiferent de numarul de comenzi din zi.',
     color: 'pink',
     icon: Flower,
     painPoints: [
       {
-        title: 'Clienți furioși = clienți pierduti',
-        desc: '«Vrem livrare la 14:00 pentru cina cu soția». Tu zici «între 14 și 17». Șoferul ajunge la 18:00. Omul a făcut cina fără flori. El nu mai comandă de la tine și spune 20 de prieteni că ești neprofesionist.',
+        title: 'Soferul ajunge la 18:00 cand ai promis 14:00',
+        desc: '«Vreau florile la 14:00 pentru aniversare». Tu planifici manual si soferul ajunge la 18:00. Aniversarea a trecut fara cadou. Clientul nu mai comanda de la tine si spune tuturor ca esti neprofesionist.',
       },
       {
-        title: 'Zile de vârf = imposibil',
-        desc: 'De Valentine, 8 martie, ziua mamei — 500 de comenzi cu ore exacte. Cum planifici manual? Imposibil. Comenzi care se confundă, intervale ratate, clienți care amenință.',
+        title: 'De Valentine, 8 Martie si Craciun nu poti planifica manual',
+        desc: '500 de comenzi de flori si cadouri, toate cu ore exacte. Planificat manual, intervalele se suprapun, soferii nu stiu ordinea, comenzile se incurca. Clienti furioasi in cele mai importante zile ale anului.',
       },
       {
-        title: 'Nicio confirmare = nicio siguranță',
-        desc: 'Cliente care spun că nu a sosit nimic. «Am lăsat la ușă» nu e dovadă. Client insistă că nu a venit. Cine se crede? Tu pierzi flori și bani. Asta se întâmplă constant.',
+        title: 'Nu ai dovada ca florile sau cadoul au ajuns la destinatar',
+        desc: 'Clientul suna si spune ca nu a primit nimic. Soferul tau spune ca a lasat la usa. Fara fotografie sau confirmare nu poti dovedi nimic. Pierzi marfa, dai banii inapoi si iti pierzi credibilitatea.',
       },
     ],
     solutions: [
       {
-        title: 'Planificare automată pe intervale exacte',
-        desc: 'Client vrea livrare între 18:00 și 19:00 pentru cină? Tu introduci. Livra calculează ruta care respectă TOATE intervalele. Nicio oră ratată. Nicio dispută. Cliente liniștite și fericit.',
+        title: 'Rute calculate pentru a respecta fiecare interval orar',
+        desc: 'Clientul vrea livrarea intre 18:00 si 19:00? Tu introduci intervalul, Livra calculeaza ruta soferului tau astfel incat sa ajunga in fereastra respectiva. Toate intervalele din zi sunt respectate automat, fara nicio planificare manuala.',
       },
       {
-        title: 'Zile de vârf = ușor',
-        desc: 'Valentine: upload lista cu 500 de comenzi. Livra generează rutele optime în 3 secunde. Fiecare interval respectat. Zero stres. Tu doar urmărești pe hartă. Asta-i profesionism.',
+        title: 'Zile de varf gestionate in secunde',
+        desc: 'De Valentine, 8 Martie sau Craciun, incarci toate comenzile de flori si cadouri cu intervalele lor si in cateva secunde ai rutele optimizate pentru toti soferii tai. Fiecare interval respectat, zero comenzi incurcate.',
       },
       {
-        title: 'Confirmare cu fotografie = zero dispută',
-        desc: 'Șoferul fotografiază floarea cu persoana care o primește. Cliente nu mai pot spune că nu a venit. Tu ai dovada. Reputație protejată. Clienți care se întorc mereu.',
+        title: 'Confirmare cu fotografie la fiecare livrare',
+        desc: 'Soferul tau fotografiaza florile sau cadoul impreuna cu persoana care il primeste si confirma livrarea in aplicatie. Clientul vede confirmarea instant. Nicio disputa posibila. Reputatia ta este protejata.',
       },
     ],
     stats: [
-      { value: '98%', label: 'satisfacție clienți' },
+      { value: '100%', label: 'intervale de livrare respectate' },
       { value: '3 sec', label: 'planificare 500 comenzi' },
-      { value: '0', label: 'intervale ratate' },
+      { value: '0', label: 'dispute de livrare' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Introduci comenzile cu intervalele lor',
+        desc: 'Adaugi fiecare comanda cu adresa si intervalul orar promis clientului. Livra stie ca unele au prioritate si ca intervalele trebuie respectate.',
+      },
+      {
+        step: '02',
+        title: 'Livra calculeaza rutele soferilor tai',
+        desc: 'In cateva secunde, Livra genereaza ruta optima pentru fiecare sofer al tau astfel incat toate intervalele promise sa fie respectate, in ordinea geografica cea mai eficienta.',
+      },
+      {
+        step: '03',
+        title: 'Soferul livreaza cu navigatia pe telefon',
+        desc: 'Soferul tau primeste ruta in aplicatia Livra: adrese in ordine, intervalul pentru fiecare si navigatia integrata. La predare, face o fotografie si confirma livrarea cu un tap.',
+      },
+      {
+        step: '04',
+        title: 'Clientul vede confirmarea, tu controlezi totul',
+        desc: 'Clientul primeste automat fotografia de confirmare. Tu urmaresti in timp real pe harta unde se afla fiecare sofer si primesti raport complet la finalul zilei.',
+      },
+    ],
+    features: [
+      {
+        title: 'Planificare pe intervale orare exacte',
+        desc: 'Livra calculeaza rutele soferilor tai astfel incat fiecare comanda sa fie livrata in fereastra orar promisa clientului, indiferent de numarul de comenzi.',
+      },
+      {
+        title: 'Gestionare zile de varf in secunde',
+        desc: 'De Valentine, 8 Martie, Craciun sau Ziua Mamei, incarci sute de comenzi de flori si cadouri si Livra genereaza rutele optimizate pentru toti soferii tai in cateva secunde.',
+      },
+      {
+        title: 'Confirmare cu fotografie la predare',
+        desc: 'Soferul fotografiaza florile sau cadoul la predare si clientul primeste confirmarea automat. Dovada permanenta, zero dispute despre livrari neefectuate.',
+      },
+      {
+        title: 'Tracking live pentru clientii tai',
+        desc: 'Clientul primeste un link si urmareste pe harta unde se afla soferul tau si cand ajunge exact. Elimina apelurile de tipul «cand ajunge soferul?».',
+      },
+      {
+        title: 'Aplicatie mobila pentru soferii tai',
+        desc: 'Soferii tai primesc ruta zilei cu toate intervalele, navigatia integrata si confirma fiecare livrare direct din aplicatia Livra de pe telefon.',
+      },
+      {
+        title: 'Harta live cu toata flota ta',
+        desc: 'Urmaresti in timp real toti soferii tai, statusul fiecarei comenzi si interventia rapida daca un sofer intarzie la o livrare importanta.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Livra face livrarea sau este software pentru soferii nostri?',
+        a: 'Livra este software. Tu folosesti proprii soferi, Livra le calculeaza rutele astfel incat sa respecte toate intervalele orare promise clientilor tai, indiferent ca livreaza flori sau cadouri.',
+      },
+      {
+        q: 'Ce se intampla daca un sofer intarzie si un interval este in pericol?',
+        a: 'Livra iti arata in timp real pe harta statusul fiecarui sofer. Daca un interval este in pericol, poti redistribui comanda unui alt sofer mai aproape cu cateva clickuri.',
+      },
+      {
+        q: 'Cum gestionam Valentine sau 8 Martie cu sute de comenzi?',
+        a: 'Incarci toate comenzile de flori si cadouri cu intervalele lor si Livra genereaza rutele optimizate pentru toti soferii tai in cateva secunde. Fiecare interval este respectat automat.',
+      },
+      {
+        q: 'Clientul primeste vreo notificare cand sosesc florile sau cadoul?',
+        a: 'Da. Clientul primeste un link de tracking prin care urmareste soferul live si o notificare cu fotografia de confirmare imediat dupa ce soferul finalizeaza livrarea.',
+      },
+      {
+        q: 'Pot gestiona mai multi soferi in acelasi timp?',
+        a: 'Da. Livra distribuie automat comenzile intre soferii tai in functie de zona si intervalele orare. Poti gestiona o flota de orice dimensiune din acelasi tablou de bord.',
+      },
     ],
   },
   grocery: {
