@@ -487,46 +487,116 @@ const USE_CASES: Record<string, UseCaseData> = {
   'notificari-sms': {
     slug: 'notificari-sms',
     seo: {
-      title: 'Notificări SMS Automate | Livra Livrare',
-      description: '4 SMS-uri automate per comandă. Confirmație, plecare șofer, ETA 30 min, livrare. Branding personalizat.',
+      title: 'Notificari SMS Automate pentru Livrari | Livra',
+      description: 'Livra trimite automat 4 SMS-uri per comanda: confirmare, sofer pe drum, 30 minute inainte de sosire si confirmare livrare. Clientii sunt informati la fiecare pas, fara nicio actiune manuala.',
     },
-    badge: 'Comunicare',
-    headline: 'Clientul știe TOT. Tu nu mai răspunzi la telefon.',
-    subline: '4 SMS-uri automate: comanda confirmată → șofer pe drum → sosire în 30 min → livrat. Clintul e liniștit. Tu ești liber.',
+    badge: 'Comunicare automata',
+    headline: 'Clientul este informat automat la fiecare pas al livrarii.',
+    subline: 'Livra trimite automat un SMS la confirmarea comenzii, cand soferul pleaca, cu 30 de minute inainte de sosire si dupa livrare. Clientii tai stiu intotdeauna ce se intampla cu comanda lor, fara sa sune si fara ca tu sa faci ceva.',
     color: 'blue',
     icon: Bell,
     painPoints: [
       {
-        title: 'Clienți care sună tot ziua',
-        desc: 'Fiecare client vrea să știe status-ul. Fiecare apel = 5 minute. 100 apeluri = 8 ore din ziua ta la telefon. Nu mai e productiv.',
+        title: 'Clientii suna toata ziua sa intrebe statusul comenzii',
+        desc: 'Fiecare client care suna sa intrebe «cand ajunge comanda?» inseamna 5 minute din ziua unui angajat. La 50-100 de apeluri pe zi, echipa ta pierde ore intregi zilnic pe informatii pe care clientii ar trebui sa le primeasca automat.',
       },
       {
-        title: 'Clientul nu e acasă = livrare pierdută',
-        desc: 'Fără notificare, clientul nu știe că vine. Șoferul ajunge, nimeni nu deschide. Returul. Pierdere dublă.',
+        title: 'Soferul ajunge si clientul nu este acasa',
+        desc: 'Fara o notificare inainte de sosire, clientul nu stie cand ajunge soferul. Rezultatul: soferul ajunge la usa, nimeni nu deschide, livrarea esueaza. Pierzi timp, combustibil si trebuie sa reprogramezi livrarea.',
       },
       {
-        title: 'Comunicare inconsistenta = confuzie',
-        desc: 'Unii clienți primesc apel, alții SMS manual, alții nimic. Fără standard, clientul e confuz si frustrat.',
+        title: 'Unii clienti primesc informatii, altii nu',
+        desc: 'Fara un sistem automatizat, comunicarea depinde de fiecare angajat in parte. Unii clienti primesc un apel, altii un SMS trimis manual, altii nu primesc nimic. Experienta inconsistenta afecteaza increderea in brandul tau.',
       },
     ],
     benefits: [
       {
-        title: '4 SMS automate = 0 apeluri',
-        desc: 'Comandă confirmată → SMS. Șofer pe drum → SMS. Sosire în 30 min → SMS. Livrat → SMS. Clientul stie pe fiecare pas. Nu-ți sună. Tu nu mai stai la telefon.',
+        title: '4 SMS-uri automate per comanda, zero efort din partea ta',
+        desc: 'La confirmarea comenzii, la plecarea soferului, cu 30 de minute inainte de sosire si dupa livrare — Livra trimite automat cate un SMS clientului. Nu trebuie sa faci nimic. Clientul este informat la fiecare pas fara nicio interventie manuala.',
       },
       {
-        title: '+25% prim-livrare rate',
-        desc: 'Notificare la 30 minute: clientul e alertat. E acasă când vine șoferul. Prim-livrare. Asta-i success. Asta-i profit.',
+        title: 'Mai multe livrari reusite din prima incercare',
+        desc: 'Notificarea cu 30 de minute inainte de sosire ii da clientului timp sa fie prezent la adresa sau sa trimita pe cineva sa preia coletul. Livrarile esuate din cauza absentei clientului scad semnificativ, impreuna cu costurile de reprogramare.',
       },
       {
-        title: 'SMS cu brandul tău, nu cu Livra',
-        desc: 'SMS-ul sună ca din parte ta: «Comanda ta de la [magazinul tău] e pe drum». Nu vede Livra. Vede brandul tău. Client vede profesionalism.',
+        title: 'SMS-urile apar sub numele companiei tale',
+        desc: 'Mesajele sunt trimise cu numele magazinului sau companiei tale, nu cu numele Livra. Clientul vede o comunicare profesionala din partea brandului sau cu care a plasat comanda, nu de la un furnizor de software necunoscut.',
       },
     ],
     stats: [
-      { value: '4', label: 'SMS automate per comandă' },
-      { value: '−100', label: 'apeluri zilnic' },
-      { value: '+25%', label: 'prim-livrare' },
+      { value: '4', label: 'SMS-uri automate per comanda' },
+      { value: '-80%', label: 'apeluri despre statusul comenzii' },
+      { value: '+25%', label: 'livrari reusite din prima' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Comanda este confirmata',
+        desc: 'In momentul in care comanda este confirmata in sistem, clientul primeste automat primul SMS cu detaliile comenzii si informatia ca va fi contactat inainte de livrare.',
+      },
+      {
+        step: '02',
+        title: 'Soferul pleaca spre client',
+        desc: 'Cand soferul tau porneste spre adresa de livrare, clientul primeste automat un SMS de notificare ca soferul este pe drum.',
+      },
+      {
+        step: '03',
+        title: 'Notificare cu 30 de minute inainte de sosire',
+        desc: 'Cand soferul este la aproximativ 30 de minute distanta, clientul primeste o alerta automata. Are timp sa fie prezent la adresa de livrare.',
+      },
+      {
+        step: '04',
+        title: 'Confirmare dupa livrare',
+        desc: 'Dupa ce soferul confirma livrarea in aplicatie, clientul primeste automat un SMS de confirmare. Intregul flux este complet fara nicio actiune manuala.',
+      },
+    ],
+    features: [
+      {
+        title: 'Flux automat de 4 SMS-uri per comanda',
+        desc: 'Confirmare comanda, sofer pe drum, 30 minute inainte de sosire si confirmare livrare — toate trimise automat la momentul potrivit, fara nicio actiune din partea ta.',
+      },
+      {
+        title: 'SMS-uri sub numele brandului tau',
+        desc: 'Mesajele sunt trimise cu numele companiei tale ca expeditor. Clientii vad comunicare profesionala din partea brandului cu care au comandat.',
+      },
+      {
+        title: 'Texte personalizabile',
+        desc: 'Poti personaliza textul fiecarui SMS dupa tonul si stilul comunicarii brandului tau. Mesajele reflecta vocea companiei tale, nu un mesaj generic.',
+      },
+      {
+        title: 'Link de tracking inclus in SMS',
+        desc: 'SMS-ul de expediere include automat linkul de tracking prin care clientul urmareste soferul live pe harta, fara sa fie nevoie de un SMS separat.',
+      },
+      {
+        title: 'Notificare instant la livrare esuata',
+        desc: 'Daca soferul nu reuseste sa livreze (client absent, adresa gresita), clientul primeste automat un SMS de notificare si instructiuni pentru reprogramare.',
+      },
+      {
+        title: 'Raport SMS zilnic',
+        desc: 'La finalul zilei poti vedea cate SMS-uri au fost trimise, pentru ce comenzi si daca au existat erori de livrare a mesajelor.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Clientul trebuie sa instaleze ceva pentru a primi SMS-urile?',
+        a: 'Nu. SMS-urile sunt trimise direct pe numarul de telefon al clientului, la fel ca orice alt mesaj text. Nu este nevoie de aplicatie sau cont.',
+      },
+      {
+        q: 'Pot personaliza textul SMS-urilor?',
+        a: 'Da. Textul fiecarui SMS din flux poate fi personalizat. Poti folosi variabile precum numele clientului, numarul comenzii sau numele soferului in mesaj.',
+      },
+      {
+        q: 'SMS-urile apar ca venind de la compania mea sau de la Livra?',
+        a: 'Apar ca venind de la compania ta. Configurezi numele expeditorului in contul Livra si toate mesajele sunt trimise sub acel nume.',
+      },
+      {
+        q: 'Ce se intampla daca numarul de telefon al clientului este gresit?',
+        a: 'Livra detecteaza eroarea de livrare a SMS-ului si o marcheaza in tabloul de bord. Primesti o notificare si poti corecta numarul si retrimite mesajul.',
+      },
+      {
+        q: 'Pot dezactiva anumite SMS-uri din flux daca nu le vreau pe toate?',
+        a: 'Da. Fiecare SMS din flux poate fi activat sau dezactivat individual din setarile contului. Poti configura exact ce notificari sa primeasca clientii tai.',
+      },
     ],
   },
 }
