@@ -77,7 +77,7 @@ const INDUSTRIES: Record<string, IndustryData> = {
     },
     badge: 'Solutie pentru farmacii',
     headline: 'Medicamentul ajunge la timp. Intotdeauna.',
-    subline: 'Diabeticul care asteapta insulina, bunica care asteapta tensiunea, vietile care depind de livrarile tale. Livra prioritizeaza urgentele, livreaza in maximum 2 ore si iti ofera dovezi digitale complete pentru fiecare comanda.',
+    subline: 'Diabeticul care asteapta insulina, bunica care asteapta pastilele de tensiune, vietile care depind de livrarile tale. Livra prioritizeaza urgentele, livreaza in maximum 2 ore si iti ofera dovezi digitale complete pentru fiecare comanda.',
     color: 'green',
     icon: Pill,
     painPoints: [
