@@ -372,10 +372,10 @@ const INDUSTRIES: Record<string, IndustryData> = {
   grocery: {
     slug: 'grocery',
     seo: {
-      title: 'Livra pentru Grocery si Supermarketuri | Optimizare Rute Livrare',
-      description: 'Software de optimizare rute pentru grocery si supermarketuri cu propria flota. Soferii tai livreaza in fereastra de 2 ore promisa, clientii urmaresc live si comenzile se consolideaza automat pe acelasi bloc.',
+      title: 'Livra pentru Magazine Alimentare si Supermarketuri | Optimizare Rute Livrare',
+      description: 'Software de optimizare rute pentru magazine alimentare si supermarketuri cu propria flota. Soferii tai livreaza in fereastra de 2 ore promisa, clientii urmaresc live si comenzile se consolideaza automat pe acelasi bloc.',
     },
-    badge: 'Solutie pentru grocery si supermarketuri',
+    badge: 'Solutie pentru magazine alimentare si supermarketuri',
     headline: 'Soferii tai livreaza mai multe comenzi pe zi. Clientii stiu exact cand ajungi.',
     subline: 'In grocery, viteza si predictibilitatea sunt totul. Livra optimizeaza rutele soferilor tai, grupeaza comenzile din acelasi bloc intr-o singura oprire si ofera clientilor un link de tracking live. Acelasi numar de soferi, capacitate mai mare, clienti care comanda din nou.',
     color: 'blue',

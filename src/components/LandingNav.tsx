@@ -6,7 +6,7 @@ const INDUSTRII = [
   { label: 'E-commerce', to: '/industrii/ecommerce' },
   { label: 'Farmacii', to: '/industrii/farmacii' },
   { label: 'Florării & cadouri', to: '/industrii/florarii' },
-  { label: 'Grocery & supermarketuri', to: '/industrii/grocery' },
+  { label: 'Magazine alimentare & supermarketuri', to: '/industrii/grocery' },
   { label: 'B2B & distribuție', to: '/industrii/b2b' },
 ]
 
