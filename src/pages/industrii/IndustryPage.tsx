@@ -585,15 +585,15 @@ export default function IndustryPage() {
       {/* Features */}
       {industry.features && (
         <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">Functionalitati pentru farmacii</h2>
+          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">Ce poti face cu Livra</h2>
           <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl">
-            Fiecare functionalitate a fost gandita pentru nevoile specifice ale unei farmacii cu livrare la domiciliu.
+            Fiecare functionalitate a fost gandita pentru companiile care au propria flota si vor sa livreze mai eficient.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {industry.features.map(feat => (
               <div key={feat.title} className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6 border border-zinc-200 dark:border-zinc-800">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${colorClass[colorKey]} border-0`}>
-                  <Pill size={16} />
+                  <industry.icon size={16} />
                 </div>
                 <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{feat.title}</h3>
                 <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{feat.desc}</p>
