@@ -372,46 +372,116 @@ const INDUSTRIES: Record<string, IndustryData> = {
   grocery: {
     slug: 'grocery',
     seo: {
-      title: 'Livra pentru Grocery & Supermarketuri | Livrare în 2h',
-      description: 'Livrare rapidă în fereastra promisă de 2 ore. Consolidare automată de comenzi, optimizare pentru traficul din Chișinău.',
+      title: 'Livra pentru Grocery si Supermarketuri | Optimizare Rute Livrare',
+      description: 'Software de optimizare rute pentru grocery si supermarketuri cu propria flota. Soferii tai livreaza in fereastra de 2 ore promisa, clientii urmaresc live si comenzile se consolideaza automat pe acelasi bloc.',
     },
-    badge: 'Soluție pentru grocery',
-    headline: 'Mâncare proaspătă = clienți fideli.',
-    subline: 'Livrare în 2 ore = răcitor freschi. Răcitori freschi = clienți care comandă în fiecare zi. Livra consolidează comenzi din același bloc și optimizează rutele pe trafic real.',
+    badge: 'Solutie pentru grocery si supermarketuri',
+    headline: 'Soferii tai livreaza mai multe comenzi pe zi. Clientii stiu exact cand ajungi.',
+    subline: 'In grocery, viteza si predictibilitatea sunt totul. Livra optimizeaza rutele soferilor tai, grupeaza comenzile din acelasi bloc intr-o singura oprire si ofera clientilor un link de tracking live. Acelasi numar de soferi, capacitate mai mare, clienti care comanda din nou.',
     color: 'blue',
     icon: ShoppingCart,
     painPoints: [
       {
-        title: 'Clienți care comanda o dată și dispar',
-        desc: 'Ai promis 2h dar a venit în 5. Leii caldă, mâncarea improprie. Clintul nu mai comandă. Merge la Jumbo care e mai rapid. Pentru tine e o vânzare pierdută pentru totdeauna.',
+        title: 'Clientul a asteptat 5 ore si nu mai comanda niciodata',
+        desc: 'Ai promis livrare in 2 ore si soferul a ajuns in 5. Produsele calde, clientul furios. Nu mai comanda de la tine si merge la un competitor care respecta fereastra promisa. O vanzare pierduta pentru totdeauna.',
       },
       {
-        title: 'Rute prost planificate = oportunități ratate',
-        desc: 'Blocul din Botanica are 15 clienți zilnici. Dar ai 5 curse separate acolo. Combustibil risipiti, șofer obosit, clienți care nu mai comandă. Și piezi bani de fiecare dată.',
+        title: 'Soferii fac curse separate in acelasi bloc',
+        desc: 'Blocul din Botanica are 10 clienti zilnici, dar soferii tai fac 5 curse separate acolo in momente diferite. Combustibil risipit, timp pierdut, soferi obositi. Capacitatea flotei tale nu este folosita la maximum.',
       },
       {
-        title: 'Ferestre prea largi = clienți care se duc la competitor',
-        desc: 'Clienții nu vor să aștepte 6 ore pentru proaspete. Ei comandă de la Glovo care promite 1h. Tu nu poți competi. Clienți pierduti.',
+        title: 'Nu poti promite o fereastra de 2 ore fara optimizare',
+        desc: 'Fara un sistem de rutare, fereastra de livrare este de 4-6 ore. Clientii nu accepta asta si prefera competitorii care promit 1-2 ore. Nu poti concura fara sa iti optimizezi rutele soferilor.',
       },
     ],
     solutions: [
       {
-        title: 'Livrări în 2 ore, consolidate inteligent',
-        desc: 'Livra grupează automat comenzile din același bloc în o singură oprire. Același șofer, o singură oprire, mai ieftin, mai rapid. Clienți din Botanica știu: vor livrare în 2h. Comandă de 3 ori pe săptămână.',
+        title: 'Comenzile din acelasi bloc, intr-o singura oprire',
+        desc: 'Livra grupeaza automat toate comenzile din acelasi bloc sau aceeasi strada si le atribuie aceluiasi sofer in aceeasi cursa. O singura oprire in loc de cinci. Mai putine curse, mai multe livrari pe zi, mai putin combustibil.',
       },
       {
-        title: 'Rute optime pe traficul real',
-        desc: 'Nu distanțe în linie dreaptă — Livra știe că Ștefan cel Mare e plin la 9-10. Calculează rutele după trafic real din Chișinău. Livrări predictibile. Promisiuni ținute.',
+        title: 'Rute calculate pe traficul real din Chisinau',
+        desc: 'Livra stie ca Stefan cel Mare este blocat dimineata si ca Botanica se livreaza mai eficient dupa-amiaza. Rutele soferilor tai sunt calculate pe trafic real, nu pe distante in linie dreapta. Fereastra de 2 ore devine realizabila.',
       },
       {
-        title: 'Clienți care comandă de 2 ori pe săptămână',
-        desc: 'Livrare rapidă și consistentă = client loyal. Client loyal = cumpărături mai mari. Cumpărături mai mari = mai mult profit. Asta-i business growth.',
+        title: 'Clientul urmareste live unde e soferul tau',
+        desc: 'La fiecare comanda expediata, clientul primeste un link de tracking si vede pe harta pozitia soferului tau si ETA-ul actualizat. Nu mai suna sa intrebe cand ajunge. Tu nu mai pierzi timp cu apeluri.',
       },
     ],
     stats: [
-      { value: '2h', label: 'livrare garantată' },
-      { value: '+40%', label: 'comenzi zilnice repeat' },
-      { value: '−25%', label: 'cost combustibil' },
+      { value: 'max 2h', label: 'fereastra de livrare realizabila' },
+      { value: '+35%', label: 'livrari pe sofer pe zi' },
+      { value: '-25%', label: 'cost combustibil' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Comenzile zilei intra in Livra',
+        desc: 'Importi comenzile din sistemul tau sau le adaugi manual. Livra vede adresele, ferestele orare si volumul fiecarei comenzi.',
+      },
+      {
+        step: '02',
+        title: 'Livra consolideaza si optimizeaza rutele',
+        desc: 'Comenzile din acelasi bloc sunt grupate automat. Rutele soferilor tai sunt calculate pe trafic real astfel incat fereastra de 2 ore sa fie respectata pentru toti clientii.',
+      },
+      {
+        step: '03',
+        title: 'Soferii pleaca cu ruta pe telefon',
+        desc: 'Fiecare sofer al tau primeste ruta optimizata in aplicatia Livra: adrese in ordine, navigatie integrata si confirmare rapida la fiecare livrare.',
+      },
+      {
+        step: '04',
+        title: 'Clientul urmareste live, tu controlezi tot',
+        desc: 'Clientul vede soferul tau pe harta in timp real. Tu urmaresti intreaga flota dintr-un singur ecran si primesti raport automat la finalul zilei.',
+      },
+    ],
+    features: [
+      {
+        title: 'Consolidare comenzi pe acelasi bloc',
+        desc: 'Livra grupeaza automat comenzile din acelasi bloc sau strada si le atribuie aceluiasi sofer intr-o singura cursa. Mai putine km, mai multe livrari.',
+      },
+      {
+        title: 'Rute pe trafic real din Chisinau',
+        desc: 'Rutele soferilor tai tin cont de traficul real, nu de distante ideale. Fereastra de livrare de 2 ore devine predictibila si realizabila in fiecare zi.',
+      },
+      {
+        title: 'Tracking live pentru clientii tai',
+        desc: 'Fiecare client primeste un link de tracking si urmareste pe harta soferul tau si ETA-ul actualizat in timp real. Zero apeluri despre «cand ajunge livrarea?».',
+      },
+      {
+        title: 'Aplicatie mobila pentru soferii tai',
+        desc: 'Soferii tai primesc ruta zilei cu navigatia integrata si confirma fiecare livrare direct din aplicatia Livra. Fara foi de hartie, fara apeluri.',
+      },
+      {
+        title: 'Harta live cu toata flota ta',
+        desc: 'Urmaresti in timp real unde se afla fiecare sofer al tau, statusul fiecarei comenzi si intervii rapid daca o fereastra este in pericol.',
+      },
+      {
+        title: 'Rapoarte automate la finalul zilei',
+        desc: 'Livrari efectuate, km parcursi per sofer, comenzi cu probleme, cost estimat combustibil. Totul generat automat, fara nicio introducere manuala.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Livra face livrarea sau este software pentru soferii nostri?',
+        a: 'Livra este software. Tu folosesti proprii soferi, Livra le optimizeaza rutele, grupeaza comenzile din acelasi bloc si ofera clientilor tai tracking live.',
+      },
+      {
+        q: 'Cum poate Livra sa garanteze o fereastra de 2 ore?',
+        a: 'Livra calculeaza rutele soferilor tai pe trafic real din Chisinau si grupeaza comenzile geografic. Rezultatul este ca fiecare sofer are un traseu realist care respecta ferestele promise.',
+      },
+      {
+        q: 'Ce inseamna consolidarea comenzilor?',
+        a: 'Daca ai 8 comenzi in acelasi bloc, Livra le atribuie aceluiasi sofer intr-o singura cursa in loc de 8 curse separate. Acelasi sofer livreaza toti cei 8 clienti intr-o singura oprire in zona.',
+      },
+      {
+        q: 'Ce vede clientul dupa ce comanda este expediata?',
+        a: 'Clientul primeste un SMS cu un link de tracking. Vede pe harta pozitia exacta a soferului tau si ETA-ul actualizat in timp real pana la sosire.',
+      },
+      {
+        q: 'Functioneaza si pentru volume mari, de exemplu weekend sau promotii?',
+        a: 'Da. Livra gestioneaza orice volum. Cu cat ai mai multe comenzi, cu atat optimizarea este mai eficienta, pentru ca Livra poate consolida mai multe comenzi pe acelasi traseu.',
+      },
     ],
   },
   b2b: {
