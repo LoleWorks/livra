@@ -257,46 +257,116 @@ const USE_CASES: Record<string, UseCaseData> = {
   'integrare-woocommerce': {
     slug: 'integrare-woocommerce',
     seo: {
-      title: 'Integrare WooCommerce & OpenCart | Livra Plugin',
-      description: 'Plugin WooCommerce gata de instalat. Comenzile ajung direct în Livra. Statusuri sincronizate bidirecțional.',
+      title: 'Integrare WooCommerce si OpenCart | Plugin Livra',
+      description: 'Conecteaza WooCommerce sau OpenCart la Livra in 5 minute. Comenzile noi din site apar automat la soferi, fara nicio introducere manuala, si statusurile se sincronizeaza automat.',
     },
-    badge: 'Integrare e-commerce',
-    headline: 'Instaleaza si uita-te cum lucrurile se intampla',
-    subline: 'Nu mai introduci comenzi manual. Plugin-ul Livra se conectează la WooCommerce în 5 minute. Fiecare comandă nouă apare automat. Basta cu Excel.',
+    badge: 'Integrare magazine online',
+    headline: 'Comenzile din site ajung automat la soferii tai. Zero introducere manuala.',
+    subline: 'Pluginul Livra se conecteaza la WooCommerce sau OpenCart in 5 minute. De atunci, fiecare comanda noua din site apare instant in Livra si ajunge la soferul potrivit fara nicio actiune din partea ta.',
     color: 'orange',
     icon: Zap,
     painPoints: [
       {
-        title: 'Copiere manuală = erori și pierderi',
-        desc: 'Comenzi din WooCommerce trebuie copiate în altă parte. Angajatul se greșeste. Comandă se pierde. Client furious. Asta se întâmplă zilnic.',
+        title: 'Comenzile din site le copiezi manual la soferi',
+        desc: 'Comanda vine in WooCommerce, tu o copiezi intr-un Excel sau o trimiti pe WhatsApp soferului. La 50 de comenzi pe zi apar erori. La 200 de comenzi pe zi este haos. O comanda pierduta sau o adresa gresita inseamna client nemultumit.',
       },
       {
-        title: 'Statusuri nesincronizate = confuzie',
-        desc: 'Comanda e livrată de fapt, dar în WooCommerce apare «în procesare». Client crede că e pierdută. Te sună. Tu zici că e livrată. Cine are dreptate? Nimeni. Chaos.',
+        title: 'Statusul din WooCommerce nu reflecta realitatea',
+        desc: 'Soferul a livrat comanda, dar in WooCommerce apare in continuare «in procesare». Clientul crede ca comanda este pierduta si suna. Tu trebuie sa actualizezi manual statusul in doua sisteme diferite in fiecare zi.',
       },
       {
-        title: 'Mai multe sisteme = mai mult stres',
-        desc: 'Stoc în WooCommerce. Comenzi în altă parte. Livrări în a treia parte. Niciodată nu știi versiunea corectă a adevărului.',
+        title: 'Date impartite in sisteme separate care nu comunica',
+        desc: 'Comenzile sunt in WooCommerce, livrarile sunt intr-un Excel, soferii sunt pe WhatsApp. Niciodata nu ai o imagine completa si corecta a ce se intampla in timp real cu comenzile tale.',
       },
     ],
     benefits: [
       {
-        title: '5 minute setup, 0 ore munca',
-        desc: 'Download plugin. Apesi activate. Introduci API key. Gata. Fiecare comandă nouă apare automat în Livra. Zero introducere manuală. Zero erori. Zero stres.',
+        title: 'Instalare in 5 minute, functioneaza de atunci automat',
+        desc: 'Descarci pluginul Livra, il activezi in WooCommerce sau OpenCart si introduci cheia API. De atunci, fiecare comanda noua din site apare automat in Livra si este atribuita soferului potrivit. Nu mai exista copiere manuala, nu mai exista erori de transcriere.',
       },
       {
-        title: 'Statusuri sincronizate automat',
-        desc: 'Șoferul marchează comanda ca livrată. Statusul se actualizează automat în WooCommerce. Clintul vede că e livrată. WooCommerce vede că e livrată. Un adevăr.',
+        title: 'Statusul comenzii se sincronizeaza automat in ambele sensuri',
+        desc: 'Cand soferul tau marcheaza comanda ca livrata in aplicatia Livra, statusul se actualizeaza automat in WooCommerce sau OpenCart. Clientul vede statusul corect fara ca tu sa faci nimic.',
       },
       {
-        title: 'Un sistem, adevărul singular',
-        desc: 'Tot ce conteaza e în Livra. Stoc, comenzi, livrări. Oamenii te vor cere statusul comenzii? Link tracking. Aia e. Nu mai zile cu 3 sisteme conflictuale.',
+        title: 'Un singur loc pentru toate comenzile si livrarile',
+        desc: 'Toate comenzile din site, statusul fiecarei livrari si pozitia soferilor se afla intr-un singur tablou de bord. Nu mai ai nevoie sa verifici mai multe sisteme pentru a sti ce se intampla.',
       },
     ],
     stats: [
-      { value: '5 min', label: 'timp setup total' },
-      { value: '0', label: 'introducere manuală' },
-      { value: '100%', label: 'sincronizare automata' },
+      { value: '5 min', label: 'timp de instalare plugin' },
+      { value: '0', label: 'comenzi introduse manual' },
+      { value: '100%', label: 'sincronizare automata statusuri' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Instalezi pluginul in WooCommerce sau OpenCart',
+        desc: 'Descarci pluginul Livra din repository, il activezi in panoul de administrare al magazinului tau si introduci cheia API. Instalarea dureaza sub 5 minute.',
+      },
+      {
+        step: '02',
+        title: 'Comenzile noi apar automat in Livra',
+        desc: 'De indata ce un client plaseaza o comanda in magazinul tau online, aceasta apare instant in Livra cu toate detaliile: adresa, produse, date de contact.',
+      },
+      {
+        step: '03',
+        title: 'Livra atribuie comanda soferului si optimizeaza ruta',
+        desc: 'Comanda este atribuita automat soferului potrivit si inclusa in ruta optimizata a zilei. Soferul o vede pe telefon fara nicio actiune suplimentara din partea ta.',
+      },
+      {
+        step: '04',
+        title: 'Statusul se actualizeaza automat in magazinul tau',
+        desc: 'Dupa livrare, statusul comenzii se sincronizeaza automat inapoi in WooCommerce sau OpenCart. Clientul vede «Livrat» fara ca tu sa intervii.',
+      },
+    ],
+    features: [
+      {
+        title: 'Plugin nativ WooCommerce',
+        desc: 'Integrare directa cu WooCommerce. Instalare simpla din panoul de administrare, fara cunostinte tehnice avansate.',
+      },
+      {
+        title: 'Suport OpenCart 3.x',
+        desc: 'Extensia Livra pentru OpenCart functioneaza cu versiunile 3.x. Comenzile noi apar automat in Livra la fel ca in WooCommerce.',
+      },
+      {
+        title: 'Sincronizare statusuri bidirectionala',
+        desc: 'Statusul comenzii se actualizeaza automat in ambele directii: din magazin spre Livra si din Livra inapoi spre magazin dupa livrare.',
+      },
+      {
+        title: 'Transfer automat al datelor comenzii',
+        desc: 'Adresa de livrare, datele clientului, produsele si orice note speciale sunt transferate automat din magazin in Livra, fara copiere manuala.',
+      },
+      {
+        title: 'API REST pentru sisteme custom',
+        desc: 'Daca folosesti o platforma proprie sau un ERP, Livra ofera API REST documentat pentru integrare directa cu orice sistem de gestiune a comenzilor.',
+      },
+      {
+        title: 'Import CSV pentru comenzi in bulk',
+        desc: 'Poti importa comenzile zilei si printr-un fisier CSV. Util pentru operatiunile care nu au o platforma online sau care primesc comenzi prin alte canale.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Functioneaza pluginul cu orice versiune de WooCommerce?',
+        a: 'Pluginul Livra este compatibil cu WooCommerce 5.0 si versiunile mai noi. Daca folosesti o versiune mai veche, echipa tehnica te poate ajuta cu integrarea.',
+      },
+      {
+        q: 'Ce date sunt transferate din WooCommerce in Livra?',
+        a: 'Se transfera automat adresa de livrare, numele clientului, numarul de telefon, produsele din comanda si orice note de livrare adaugate de client la plasarea comenzii.',
+      },
+      {
+        q: 'Trebuie sa am cunostinte tehnice pentru a instala pluginul?',
+        a: 'Nu. Instalarea se face din panoul de administrare WordPress, la fel ca orice alt plugin. Introduci cheia API din contul Livra si integrarea este gata in cateva minute.',
+      },
+      {
+        q: 'Pot integra Livra daca nu folosesc WooCommerce sau OpenCart?',
+        a: 'Da. Livra ofera API REST complet documentat pentru integrare cu orice platforma sau sistem custom. De asemenea, poti importa comenzi prin fisiere CSV.',
+      },
+      {
+        q: 'Statusul din WooCommerce se actualizeaza automat dupa livrare?',
+        a: 'Da. Cand soferul tau confirma livrarea in aplicatia Livra, statusul comenzii se actualizeaza automat in WooCommerce sau OpenCart fara nicio actiune manuala.',
+      },
     ],
   },
   'gestionare-soferi': {
