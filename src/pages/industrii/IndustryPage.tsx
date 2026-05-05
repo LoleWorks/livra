@@ -18,6 +18,9 @@ interface IndustryData {
   painPoints: Array<{ title: string; desc: string }>
   solutions: Array<{ title: string; desc: string }>
   stats: Array<{ value: string; label: string }>
+  howItWorks?: Array<{ step: string; title: string; desc: string }>
+  features?: Array<{ title: string; desc: string }>
+  faq?: Array<{ q: string; a: string }>
 }
 
 const INDUSTRIES: Record<string, IndustryData> = {
@@ -69,46 +72,116 @@ const INDUSTRIES: Record<string, IndustryData> = {
   farmacii: {
     slug: 'farmacii',
     seo: {
-      title: 'Livra pentru Farmacii | Livrare Urgentă Medicamentoasă',
-      description: 'Livrare rapidă de medicamente cu prioritate, POD digital și notificări automate pentru pacienți.',
+      title: 'Livra pentru Farmacii | Livrare Urgenta Medicamente Moldova',
+      description: 'Livrare rapida de medicamente cu prioritizare urgente, dovada digitala de livrare si notificari automate pentru pacienti. Solutia completa pentru farmacii din Moldova.',
     },
-    badge: 'Soluție pentru farmacii',
-    headline: 'Medicamentul ajunge la timp. Întotdeauna.',
-    subline: 'Diabeticul cu ceas care așteaptă insulina, bunica care așteaptă tensionul — vieți depind de livrările tale. Livra prioritizează urgențele, ajung în <2h, și tu ai dovezi digitale complete pentru fiecare.',
+    badge: 'Solutie pentru farmacii',
+    headline: 'Medicamentul ajunge la timp. Intotdeauna.',
+    subline: 'Diabeticul care asteapta insulina, bunica care asteapta tensiunea, vietile care depind de livrarile tale. Livra prioritizeaza urgentele, livreaza in maximum 2 ore si iti ofera dovezi digitale complete pentru fiecare comanda.',
     color: 'green',
     icon: Pill,
     painPoints: [
       {
-        title: 'Pacienți furioși = pierdere de reputație',
-        desc: 'O persoană cu diabetul care așteaptă 3 ore = reclamație pe Facebook. O vânzare care nu-și primește medicamentul la timp = problemă medicală + lawsuit potențial. Rating-ul scade, clienții se duc la competitor.',
+        title: 'Pacienti nemultumiti inseamna reputatie pierduta',
+        desc: 'O persoana cu diabet care asteapta 3 ore inseamna reclamatie publica. Un pacient care nu primeste medicamentul la timp inseamna problema medicala si risc legal. Ratingul scade, clientii merg la concurenta.',
       },
       {
-        title: 'Urgente și rutine în același rând',
-        desc: 'Cum diferențiezi o comandă urgentă (pacient care durează) de una rutină? Fără sistem, toate sunt la fel. Pacienții urgentul ajung ultimii. Asta e neacceptabil medicamentos.',
+        title: 'Urgentele si comenzile obisnuite tratate la fel',
+        desc: 'Cum diferentiezi o comanda urgenta de una de rutina? Fara un sistem clar, toate ajung in acelasi rand. Pacientii cu urgente ajung ultimii. Acest lucru este inacceptabil intr-o farmacie.',
       },
       {
-        title: 'Nicio dovadă = disputa permanentă',
-        desc: '«Am lăsat la ușă» vs «Nu mi-a dat nimeni nimic». Fără dovadă, pierzi crediblitate. Clientul zice că nu a primit. Tu spui că da. Cine câștigă? Clientul. Și tu refund și piezi medicamentul.',
+        title: 'Fara dovada de livrare, apar dispute',
+        desc: '«Am lasat la usa» versus «Nu mi-a dat nimeni nimic». Fara dovada concreta, pierzi credibilitate. Clientul sustine ca nu a primit. Tu sustii ca da. In lipsa dovezii, dai banii inapoi si pierzi si medicamentul.',
       },
     ],
     solutions: [
       {
-        title: 'Urgente prioritizate automat',
-        desc: 'Marchezi o comandă ca urgentă → Livra o pune automat pe primul loc în ruta șoferului → pacientul o primește în <2h. Alte comenzi continuă normal. Vieți salvate, clienți mulțumiți.',
+        title: 'Urgentele, prioritizate automat',
+        desc: 'Marchezi o comanda ca urgenta si Livra o plaseaza automat pe primul loc in ruta soferului. Pacientul o primeste in maximum 2 ore. Celelalte comenzi continua normal. Vieti protejate, clienti multumiti.',
       },
       {
-        title: 'Dovadă digitală pentru fiecare livrare',
-        desc: 'Șoferul fotografiază medicamentul și primește semnătură electronică a pacientului. Dovada se salvează pentru totdeauna. Nicio dispută posibilă. Tu ești protejat legal.',
+        title: 'Dovada digitala pentru fiecare livrare',
+        desc: 'Soferul fotografiaza medicamentul si colecteaza semnatura electronica a pacientului. Dovada se salveaza permanent. Nicio disputa nu mai este posibila. Farmacia ta este protejata legal la fiecare pas.',
       },
       {
-        title: 'Compliance complet și transparent',
-        desc: 'Registrul complet al fiecărei livrări: cine, când, unde, foto. Util pentru audit, pentru pacienți, pentru protecție legală. Ești 100% transparent și 100% protejat.',
+        title: 'Evidenta completa si transparenta',
+        desc: 'Registrul detaliat al fiecarei livrari: cine, cand, unde, fotografie. Util pentru audit intern, pentru pacienti si pentru protectie juridica. Esti 100% transparent si 100% protejat.',
       },
     ],
     stats: [
-      { value: '< 2h', label: 'livrare urgentă garantată' },
+      { value: 'max 2h', label: 'livrare urgenta garantata' },
       { value: '0', label: 'dispute de livrare' },
-      { value: '100%', label: 'compliance cu documente' },
+      { value: '100%', label: 'evidenta completa a livrarilor' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Comanda intra in sistem',
+        desc: 'Pacientul comanda telefonic sau online. Comanda apare instant in Livra cu toate detaliile: adresa, medicament, urgenta sau rutina.',
+      },
+      {
+        step: '02',
+        title: 'Livra calculeaza ruta optima',
+        desc: 'In functie de urgenta si locatie, Livra atribuie comanda soferului potrivit si calculeaza ruta care respecta prioritatile si intervalele promise.',
+      },
+      {
+        step: '03',
+        title: 'Pacientul urmareste livrarea',
+        desc: 'SMS automat la confirmare si la sosire. Pacientul stie exact cand ajunge soferul. Zero apeluri la farmacie pentru a intreba «unde e comanda?».',
+      },
+      {
+        step: '04',
+        title: 'Dovada digitala la predare',
+        desc: 'Soferul fotografiaza medicamentul si colecteaza semnatura electronica. Dovada se salveaza automat si este disponibila oricand pentru audit sau verificare.',
+      },
+    ],
+    features: [
+      {
+        title: 'Prioritizare urgente cu un singur click',
+        desc: 'Marcheaza orice comanda ca urgenta si ea va fi livrata inainte de toate celelalte comenzi din ruta soferului, indiferent de ordine.',
+      },
+      {
+        title: 'Notificari automate prin SMS',
+        desc: 'Pacientul primeste SMS la confirmarea comenzii, cand soferul pleaca si cu 15 minute inainte de sosire. Fara apeluri inutile.',
+      },
+      {
+        title: 'Semnatura electronica si fotografie',
+        desc: 'Fiecare livrare este confirmata cu semnatura digitala a pacientului si o fotografie a medicamentului predat. Dovezi legale valide.',
+      },
+      {
+        title: 'Rapoarte detaliate pentru audit',
+        desc: 'Exporta rapoarte complete cu toate livrarile: data, ora exacta, adresa, sofer, semnatura pacientului. Ideal pentru inspectii si audit farmaceutic.',
+      },
+      {
+        title: 'Urmarire live a soferilor',
+        desc: 'Vezi pe harta in timp real unde se afla fiecare sofer si care este statusul fiecarei livrari. Control deplin, fara apeluri constante.',
+      },
+      {
+        title: 'Integrare cu sistemele existente',
+        desc: 'Livra se conecteaza la softul farmaciei tale prin API sau import CSV. Comenzile intra automat, fara introducere manuala.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Cat de repede livreaza soferul o comanda urgenta?',
+        a: 'Comenzile marcate ca urgente sunt plasate automat pe primul loc in ruta soferului. In Chisinau, timpul mediu de livrare urgenta este sub 2 ore de la confirmarea comenzii.',
+      },
+      {
+        q: 'Ce se intampla daca pacientul nu este acasa?',
+        a: 'Soferul fotografiaza medicamentul la usa si noteaza incidentul in aplicatie. Primesti notificare instant si poti contacta pacientul pentru a reprograma livrarea.',
+      },
+      {
+        q: 'Cum dovedim ca am livrat medicamentul corect?',
+        a: 'Fiecare livrare este insotita de fotografie si semnatura electronica a pacientului, stocate permanent in sistemul Livra. Aceste dovezi sunt valide legal in cazul oricarei dispute.',
+      },
+      {
+        q: 'Se integreaza Livra cu softul farmaciei noastre?',
+        a: 'Da. Livra ofera API REST si import CSV pentru conectare cu orice sistem de gestiune a farmaciei. Echipa tehnica te ajuta sa configurezi integrarea in mai putin de o zi.',
+      },
+      {
+        q: 'Pot gestiona mai multi soferi in acelasi timp?',
+        a: 'Absolut. Livra gestioneaza flote de orice dimensiune. Rutele sunt distribuite automat intre soferi in functie de zona si volumul de comenzi.',
+      },
     ],
   },
   florarii: {
@@ -347,10 +420,68 @@ export default function IndustryPage() {
         </div>
       </section>
 
+      {/* How it works */}
+      {industry.howItWorks && (
+        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
+          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">Cum functioneaza</h2>
+          <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl">
+            De la comanda pana la dovada de livrare, totul este automatizat.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {industry.howItWorks.map(step => (
+              <div key={step.step} className="relative">
+                <div className={`text-[48px] font-bold mb-3 ${colorClass[colorKey]} bg-transparent border-0 inline-block`}
+                  style={{ WebkitBackgroundClip: 'unset', color: 'inherit' }}>
+                  <span className="text-[#ff5c2c] opacity-30 text-[56px] font-black leading-none block">{step.step}</span>
+                </div>
+                <h3 className="text-[16px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{step.title}</h3>
+                <p className="text-[14px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Features */}
+      {industry.features && (
+        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
+          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">Functionalitati pentru farmacii</h2>
+          <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-12 max-w-2xl">
+            Fiecare functionalitate a fost gandita pentru nevoile specifice ale unei farmacii cu livrare la domiciliu.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {industry.features.map(feat => (
+              <div key={feat.title} className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6 border border-zinc-200 dark:border-zinc-800">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${colorClass[colorKey]} border-0`}>
+                  <Pill size={16} />
+                </div>
+                <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{feat.title}</h3>
+                <p className="text-[13px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* FAQ */}
+      {industry.faq && (
+        <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800">
+          <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-12">Intrebari frecvente</h2>
+          <div className="max-w-3xl space-y-6">
+            {industry.faq.map(item => (
+              <div key={item.q} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+                <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 mb-3">{item.q}</h3>
+                <p className="text-[14px] text-zinc-600 dark:text-zinc-400 leading-relaxed">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-zinc-200 dark:border-zinc-800 text-center">
         <h2 className="text-[32px] font-bold text-zinc-900 dark:text-zinc-50 mb-4">
-          Gata să lucruri să se schimbe?
+          Gata sa schimbi cum livrezi?
         </h2>
         <p className="text-[16px] text-zinc-600 dark:text-zinc-400 mb-8">
           Sute de companii din Moldova folosesc deja Livra. Tu poți începe azi, gratuit pentru 7 zile.
