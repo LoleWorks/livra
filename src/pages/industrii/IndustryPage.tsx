@@ -27,46 +27,116 @@ const INDUSTRIES: Record<string, IndustryData> = {
   ecommerce: {
     slug: 'ecommerce',
     seo: {
-      title: 'Livra pentru Magazine Online | WooCommerce & OpenCart',
-      description: 'Conectează WooCommerce sau OpenCart la Livra. Comenzile sunt trimise automat, rutele optimizate, și clienții văd urmărirea live.',
+      title: 'Livra pentru Magazine Online | WooCommerce & OpenCart Moldova',
+      description: 'Software de livrare pentru magazine online din Moldova. Conecteaza WooCommerce sau OpenCart, optimizeaza rutele soferilor tai si lasa clientii sa urmareasca coletul live.',
     },
-    badge: 'Soluție pentru magazine online',
-    headline: 'Livrări rapide. Clienți loiali. Afaceri care cresc.',
-    subline: 'În Moldova, livrarea rapidă e cea mai bună reclame. Dar doar dacă o faci bine. Livra o automatizează total — comenzile din site direct la șoferi, rutele calculate în secunde, clienții văd unde e coletul lor.',
+    badge: 'Solutie pentru magazine online',
+    headline: 'Comenzile din site ajung direct la soferii tai. Clientul urmareste totul live.',
+    subline: 'In Moldova, livrarea rapida este cea mai buna reclama. Livra conecteaza magazinul tau online la propria flota de soferi: comenzile intra automat, rutele sunt calculate in secunde si clientul vede pe harta unde ii este coletul.',
     color: 'orange',
     icon: Package,
     painPoints: [
       {
-        title: '«Unde e comanda mea?»',
-        desc: 'Fiecare client care sună = 5 minute din ziua ta și o vânzare mai puțin probabil. Clienții care nu primesc răspuns rapid nu se mai întorc. Și spun 10 prieteni că ești lent.',
+        title: '«Unde e comanda mea?» — apeluri care iti consuma ziua',
+        desc: 'Fiecare client care suna dupa colet inseamna 5 minute din ziua unui angajat. La 20 de apeluri pe zi sunt 2 ore pierdute zilnic pe informatii pe care clientul ar trebui sa le vada singur.',
       },
       {
-        title: 'Livrări care ajung târziu = clienți pierduti',
-        desc: 'Ai promis 2 zile, dar șoferul face 4 din cauza rutelor haotice? Clintul nu mai comandă. Merge la competitor mai rapid. Și lasă o recenzie proastă.',
+        title: 'Soferii fac trasee lungi din cauza rutelor prost planificate',
+        desc: 'Fara optimizare, soferul livreaza haotic: Botanica, Centru, Ciocana, Centru din nou. Combustibil risipit, timp pierdut, mai putine comenzi livrate pe zi. Capacitatea flotei tale nu este folosita la maximum.',
       },
       {
-        title: 'Black Friday = haos total',
-        desc: 'Azi 800 de comenzi și 2 persoane le introduc manual. Erori, comenzi pierdute, clienți furioși, returnuri, pierdeți bani.',
+        title: 'Comenzile din site le introduci manual la soferi',
+        desc: 'Comanda vine in WooCommerce, tu o copiezi intr-un Excel sau o trimiti pe WhatsApp soferului. La 50 de comenzi pe zi apar erori. La 200 de comenzi pe zi este haos complet.',
       },
     ],
     solutions: [
       {
-        title: 'Zero introducere manuală',
-        desc: 'Pluginul se conectează la WooCommerce în 5 minute. Fiecare comandă nouă apare automat la șofer. Nu mai există erori din introducere manuală. Nici o dată nu pierzi vreun client din cauza unei greșeli administrative.',
+        title: 'Comenzile din site merg automat la soferii tai',
+        desc: 'Pluginul Livra se conecteaza la WooCommerce sau OpenCart in 5 minute. Fiecare comanda noua apare instant in aplicatia soferului tau, fara niciun pas manual din partea ta. Zero erori, zero comenzi pierdute.',
       },
       {
-        title: 'Clienți informați = clienți fericiți',
-        desc: 'SMS automat: comandă confirmată → șofer pe drum → sosire în 30 minute → livrat. Clienții nu sună. Tu nu pierzi timp. Nu mai stau la telefon 8 ore pe zi.',
+        title: 'Clientul urmareste live unde e soferul tau',
+        desc: 'La fiecare comanda expediata, clientul primeste automat un link de tracking. Vede pe harta pozitia soferului tau si ETA-ul actualizat in timp real. Nu mai suna. Tu nu mai pierzi timp cu apeluri.',
       },
       {
-        title: 'Rute optimale în secunde',
-        desc: 'Ai 200 de comenzi? Livra calculează ruta optimă pentru toți șoferii automat. 30% mai puțin km, mai multe livrări pe zi, mai puțin combustibil. Duminică livrezi cât ai livrat luni-vineri.',
+        title: 'Rutele soferilor tai, optimizate in secunde',
+        desc: 'Ai 200 de comenzi si 5 soferi? Livra calculeaza automat ruta optima pentru fiecare. Cu 30% mai putini kilometri, mai multe livrari pe zi, mai putin combustibil. Aceeasi flota, capacitate mai mare.',
       },
     ],
     stats: [
-      { value: '−80%', label: 'apeluri «unde e coletul»' },
-      { value: '+3×', label: 'livrări pe șofer pe zi' },
-      { value: '5 min', label: 'timp setup total' },
+      { value: '−80%', label: 'apeluri de la clienti' },
+      { value: '+30%', label: 'livrari pe sofer pe zi' },
+      { value: '5 min', label: 'setup WooCommerce/OpenCart' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Conectezi magazinul in 5 minute',
+        desc: 'Instalezi pluginul Livra in WooCommerce sau OpenCart. De acum inainte, fiecare comanda noua din site apare automat in Livra, fara nicio actiune manuala.',
+      },
+      {
+        step: '02',
+        title: 'Livra optimizeaza rutele soferilor tai',
+        desc: 'La inceputul zilei, Livra grupeaza toate comenzile si calculeaza ruta optima pentru fiecare sofer al tau. Urgentele si intervalele de livrare sunt respectate automat.',
+      },
+      {
+        step: '03',
+        title: 'Soferul pleaca cu lista pe telefon',
+        desc: 'Soferul tau primeste ruta zilei direct in aplicatia Livra. Navigatie inclusa, confirmare la fiecare oprire si actualizare automata a statusului comenzii.',
+      },
+      {
+        step: '04',
+        title: 'Clientul urmareste live, tu vezi tot',
+        desc: 'Clientul primeste link de tracking si vede soferul pe harta. Tu ai tabloul de bord cu toata flota in timp real si raport complet la finalul zilei.',
+      },
+    ],
+    features: [
+      {
+        title: 'Plugin WooCommerce si OpenCart',
+        desc: 'Integrare directa cu cele mai populare platforme de e-commerce din Moldova. Comenzile noi apar automat in Livra, fara niciun pas manual.',
+      },
+      {
+        title: 'Tracking live pentru clientii tai',
+        desc: 'Fiecare client primeste un link prin care urmareste pe harta pozitia soferului tau si timpul estimat de sosire, actualizat in timp real.',
+      },
+      {
+        title: 'Optimizare rute pentru flota ta',
+        desc: 'Livra calculeaza traseul optim pentru fiecare sofer al tau, reducand distanta totala cu pana la 30% si crescand numarul de livrari pe zi.',
+      },
+      {
+        title: 'Aplicatie mobila pentru soferii tai',
+        desc: 'Soferii tai primesc ruta zilei, navigatia integrata si confirma fiecare livrare direct din aplicatia Livra. Fara Excel, fara WhatsApp, fara hartii.',
+      },
+      {
+        title: 'Notificari automate pentru clienti',
+        desc: 'SMS automat la confirmare, la expediere si cu 15 minute inainte de sosire. Clientii sunt informati fara niciun efort din partea ta.',
+      },
+      {
+        title: 'Rapoarte de livrare automate',
+        desc: 'La finalul zilei: livrari efectuate, km parcursi per sofer, comenzi cu probleme. Totul generat automat, gata de exportat sau trimis partenerilor.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Livra face livrarea sau este software pentru soferii nostri?',
+        a: 'Livra este software. Tu folosesti proprii soferi, Livra ii ajuta sa lucreze mai eficient: preia comenzile automat din site, le calculeaza ruta optima si permite clientilor sa urmareasca livrarea live.',
+      },
+      {
+        q: 'Functioneaza cu WooCommerce si OpenCart?',
+        a: 'Da. Livra are plugin nativ pentru WooCommerce si OpenCart. Instalarea dureaza sub 5 minute si comenzile noi apar automat in sistem fara nicio configurare suplimentara.',
+      },
+      {
+        q: 'Ce vede clientul dupa ce comanda este expediata?',
+        a: 'Clientul primeste un SMS cu un link de tracking. Da click si vede pe harta pozitia exacta a soferului tau si timpul estimat de sosire, actualizat in timp real.',
+      },
+      {
+        q: 'Cat de mult creste eficienta soferilor dupa Livra?',
+        a: 'In medie, magazinele online care folosesc Livra reduc distanta parcursa cu 25-30% si reusesc sa livreze cu 30% mai multe comenzi pe zi cu aceeasi flota de soferi.',
+      },
+      {
+        q: 'Functioneaza si pentru volume mari, de exemplu Black Friday?',
+        a: 'Da. Livra gestioneaza orice volum. Incarci toate comenzile zilei si in cateva secunde ai rutele optimizate pentru toti soferii tai, indiferent de numarul de comenzi.',
+      },
     ],
   },
   farmacii: {
