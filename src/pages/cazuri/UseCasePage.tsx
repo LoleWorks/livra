@@ -142,46 +142,116 @@ const USE_CASES: Record<string, UseCaseData> = {
   'tracking-live': {
     slug: 'tracking-live',
     seo: {
-      title: 'Tracking Live Comenzi | Urmărire în Timp Real Livra',
-      description: 'Clienții văd șoferul pe hartă. Link SMS, notificări automate la 30 minute, −80% apeluri «unde e coletul».',
+      title: 'Tracking Live Comenzi | Urmarire in Timp Real Livra',
+      description: 'Clientii tai vad soferul pe harta in timp real. Link de tracking trimis automat prin SMS, notificari la fiecare pas si cu 80% mai putine apeluri despre statusul comenzii.',
     },
-    badge: 'Client experience',
-    headline: '«Unde e coletul?» — răspunsul e în SMS.',
-    subline: 'Clintul primește link și vede șoferul pe hartă ACUM. Nu mai sună. Nu mai așteptă. Nu mai e stres. Tu economisești 100 apeluri pe zi.',
+    badge: 'Experienta clientului',
+    headline: 'Clientul vede pe harta unde ii este coletul. In timp real.',
+    subline: 'In loc sa sune sa intrebe «unde e comanda mea?», clientul tau deschide linkul primit prin SMS si vede exact unde se afla soferul tau pe harta si cand ajunge. Zero incertitudine, zero apeluri inutile.',
     color: 'green',
     icon: Eye,
     painPoints: [
       {
-        title: '«Unde e comanda mea?» — 100 apeluri zilnic',
-        desc: 'Fiecare apel = 5 minute din ziua ta. 100 apeluri = 8 ore. Tu stai la telefon cu clienții în loc să faci altceva. Si clintul e frustrat că nu știe.',
+        title: 'Apeluri despre statusul comenzii care iti consuma ziua',
+        desc: 'Fiecare client care suna sa intrebe unde ii este comanda inseamna 5 minute din ziua unui angajat. La 50-100 de apeluri pe zi, vorbim de ore intregi pierdute zilnic pe informatii pe care clientul ar trebui sa le aiba automat.',
       },
       {
-        title: 'Clienți care nu sunt acasă = pierdere dublă',
-        desc: 'Șoferul ajunge, nimeni nu deschide. Returul. Tu pierzi timp, combustibil și încredere clientului. Fără notificare prealabilă, asta se întâmplă constant.',
+        title: 'Soferul ajunge si clientul nu este acasa',
+        desc: 'Fara o notificare prealabila, clientul nu stie cand ajunge soferul. Rezultatul: soferul ajunge la usa, nimeni nu deschide, livrarea esueaza. Pierzi timp, combustibil si trebuie sa reprogramezi.',
       },
       {
-        title: 'Clienți care nu se mai întorc',
-        desc: 'Nu știind când vine, clientul comandă de la altcineva care-l notifică. Livra move. Incertitudinea = pierdere de client.',
+        title: 'Incertitudinea duce clientul la concurenta',
+        desc: 'Clientii care nu stiu cand ajunge comanda lor aleg data viitoare un competitor care ii tine informati. Lipsa comunicarii despre statusul livrarii este unul dintre principalele motive pentru care clientii nu recomanda si nu revin.',
       },
     ],
     benefits: [
       {
-        title: 'Clientul vede pe hartă. Real-time.',
-        desc: 'SMS cu link. Clientul deschide browserul. Vede pe hartă unde e șoferul ACUM. Vede ETA-ul actualizat la fiecare 60 de secunde. Zero incertitudine. Client calm.',
+        title: 'Clientul vede soferul pe harta in timp real',
+        desc: 'La expediere, clientul primeste automat un SMS cu un link de tracking. Deschide browserul si vede pe harta pozitia exacta a soferului tau, actualizata in timp real, si ETA-ul estimat de sosire. Nu mai suna, pentru ca are toate informatiile.',
       },
       {
-        title: '−80% apeluri inbound',
-        desc: 'Clienții nu mai sună. Vor să știe unde e? Deschid linkul. Nu-ți mai ocupă linia. Nu-ți mai pierzi angajații cu «unde e coletul mea». Tu scapi de 8 ore de telefon zilnic.',
+        title: 'Cu 80% mai putine apeluri despre statusul comenzii',
+        desc: 'Clientii care au acces la tracking live nu mai suna sa intrebe unde le este coletul. Echipa ta este eliberata de apeluri repetitive si se poate concentra pe activitati cu valoare mai mare.',
       },
       {
-        title: '+25% prim-livrare',
-        desc: 'Notificare la 30 minute: «Șoferul e la 30 de minute distanță». Clientul stie. E acasă când ajunge. Prim-livrare. Asta-i profit.',
+        title: 'Mai multe livrari reusite din prima incercare',
+        desc: 'Notificarea cu 30 de minute inainte de sosire ii da clientului timp sa fie acasa sau sa trimita pe cineva sa preia coletul. Livrarile esuate scad semnificativ, iar costul de reprogramare dispare.',
       },
     ],
     stats: [
-      { value: '−80%', label: 'apeluri «unde e coletul»' },
-      { value: '+25%', label: 'prim-livrare rate' },
-      { value: 'Real-time', label: 'ETA pe hartă' },
+      { value: '-80%', label: 'apeluri despre statusul comenzii' },
+      { value: '+25%', label: 'livrari reusite din prima' },
+      { value: 'live', label: 'pozitia soferului pe harta' },
+    ],
+    howItWorks: [
+      {
+        step: '01',
+        title: 'Comanda este expediata',
+        desc: 'In momentul in care soferul tau preia comanda si pleaca spre client, Livra genereaza automat un link unic de tracking pentru acea livrare.',
+      },
+      {
+        step: '02',
+        title: 'Clientul primeste SMS cu linkul',
+        desc: 'Clientul primeste automat un SMS cu linkul de tracking. Da click si vede pe harta unde se afla soferul tau in acel moment si cand este estimata sosirea.',
+      },
+      {
+        step: '03',
+        title: 'Notificare la 30 de minute inainte de sosire',
+        desc: 'Cand soferul tau este la aproximativ 30 de minute distanta, clientul primeste o notificare automata. Are timp sa fie prezent la adresa de livrare.',
+      },
+      {
+        step: '04',
+        title: 'Confirmare la livrare',
+        desc: 'Dupa ce soferul finalizeaza livrarea, clientul primeste o confirmare finala. Linkul de tracking se dezactiveaza automat.',
+      },
+    ],
+    features: [
+      {
+        title: 'Harta live cu pozitia soferului',
+        desc: 'Clientul vede pe harta pozitia exacta a soferului tau, actualizata in timp real pe masura ce acesta se deplaseaza spre adresa de livrare.',
+      },
+      {
+        title: 'ETA actualizat in timp real',
+        desc: 'Timpul estimat de sosire se recalculeaza automat in functie de pozitia curenta a soferului si conditiile de trafic. Clientul vede mereu o estimare corecta.',
+      },
+      {
+        title: 'SMS automat la expediere',
+        desc: 'Linkul de tracking este trimis automat prin SMS in momentul expedierii, fara nicio actiune manuala din partea ta sau a soferului.',
+      },
+      {
+        title: 'Notificare la 30 de minute inainte de sosire',
+        desc: 'Clientul primeste o alertа automata cand soferul este aproape. Reduce semnificativ livrarile esuate din cauza absentei clientului.',
+      },
+      {
+        title: 'Confirmare automata la livrare',
+        desc: 'Dupa finalizarea livrarii, clientul primeste automat o confirmare. Nicio actiune manuala necesara, totul este automatizat.',
+      },
+      {
+        title: 'SMS cu brandul tau',
+        desc: 'Mesajele SMS sunt trimise sub numele companiei tale, nu sub numele Livra. Clientul vede comunicare profesionala din partea brandului tau.',
+      },
+    ],
+    faq: [
+      {
+        q: 'Clientul trebuie sa instaleze o aplicatie pentru tracking?',
+        a: 'Nu. Clientul primeste un link prin SMS si urmareste livrarea direct in browser, fara nicio aplicatie de instalat. Functioneaza pe orice telefon.',
+      },
+      {
+        q: 'Cat de des se actualizeaza pozitia soferului pe harta?',
+        a: 'Pozitia soferului se actualizeaza la fiecare 10-30 de secunde, in functie de conexiunea la internet. Clientul vede intotdeauna o pozitie recenta.',
+      },
+      {
+        q: 'Pot personaliza mesajele SMS trimise clientilor?',
+        a: 'Da. Mesajele SMS pot fi personalizate cu numele companiei tale si cu textul pe care il doresti. Clientii vor vedea comunicare din partea brandului tau.',
+      },
+      {
+        q: 'Ce se intampla cu linkul dupa ce livrarea este finalizata?',
+        a: 'Linkul de tracking expira automat dupa finalizarea livrarii. Clientul nu mai poate vedea pozitia soferului dupa ce comanda a fost predata.',
+      },
+      {
+        q: 'Functioneaza tracking-ul si cand soferul este in zone cu semnal slab?',
+        a: 'Aplicatia soferului salveaza pozitia si o trimite imediat ce conexiunea este restabilita. In zone cu semnal intermitent, actualizarile pot fi mai rare, dar pozitia ramane vizibila.',
+      },
     ],
   },
   'integrare-woocommerce': {
