@@ -72,115 +72,115 @@ const INDUSTRIES: Record<string, IndustryData> = {
   farmacii: {
     slug: 'farmacii',
     seo: {
-      title: 'Livra pentru Farmacii | Livrare Urgenta Medicamente Moldova',
-      description: 'Livrare rapida de medicamente cu prioritizare urgente, dovada digitala de livrare si notificari automate pentru pacienti. Solutia completa pentru farmacii din Moldova.',
+      title: 'Livra pentru Farmacii | Optimizare Rute si Tracking Live pentru Soferii Tai',
+      description: 'Software de optimizare rute si tracking live pentru farmacii cu propria flota. Pacientii urmaresc soferii in timp real, tu gestionezi toate comenzile dintr-un singur loc.',
     },
     badge: 'Solutie pentru farmacii',
-    headline: 'Medicamentul ajunge la timp. Intotdeauna.',
-    subline: 'Diabeticul care asteapta insulina, bunica care asteapta pastilele de tensiune, vietile care depind de livrarile tale. Livra prioritizeaza urgentele, livreaza in maximum 2 ore si iti ofera dovezi digitale complete pentru fiecare comanda.',
+    headline: 'Soferii tai. Rute mai scurte. Pacienti care stiu exact cand ajungi.',
+    subline: 'Farmacia ta are proprii soferi si vrei sa-i folosesti cat mai eficient. Livra calculeaza ruta optima pentru fiecare sofer, pacientul urmareste live unde se afla medicamentul sau, iar tu ai control complet asupra intregii flote dintr-un singur ecran.',
     color: 'green',
     icon: Pill,
     painPoints: [
       {
-        title: 'Pacienti nemultumiti inseamna reputatie pierduta',
-        desc: 'O persoana cu diabet care asteapta 3 ore inseamna reclamatie publica. Un pacient care nu primeste medicamentul la timp inseamna problema medicala si risc legal. Ratingul scade, clientii merg la concurenta.',
+        title: '«Cand ajunge soferul?» — intrebarea care blocheaza telefonul',
+        desc: 'Zece pacienti suna pe zi sa intrebe unde le sunt medicamentele. Angajatii raspund la acelasi apel in loc sa se ocupe de clientii din farmacie. Timp pierdut, pacienti iritati, reputatie afectata.',
       },
       {
-        title: 'Urgentele si comenzile obisnuite tratate la fel',
-        desc: 'Cum diferentiezi o comanda urgenta de una de rutina? Fara un sistem clar, toate ajung in acelasi rand. Pacientii cu urgente ajung ultimii. Acest lucru este inacceptabil intr-o farmacie.',
+        title: 'Soferul face trasee lungi cand ar putea face trasee scurte',
+        desc: 'Fara optimizare, soferul merge de la Botanica la Ciocana si inapoi la Botanica. Combustibil risipit, timp pierdut, mai putine livrari pe zi. Capacitatea flotei tale nu este folosita la maximum.',
       },
       {
-        title: 'Fara dovada de livrare, apar dispute',
-        desc: '«Am lasat la usa» versus «Nu mi-a dat nimeni nimic». Fara dovada concreta, pierzi credibilitate. Clientul sustine ca nu a primit. Tu sustii ca da. In lipsa dovezii, dai banii inapoi si pierzi si medicamentul.',
+        title: 'Nu stii ce face soferul tau in teren',
+        desc: 'A ajuns la pacient? A livrat? De ce a durat 45 de minute intre doua adrese? Fara vizibilitate in timp real, gestionezi flota prin apeluri si estimari. Nu prin date.',
       },
     ],
     solutions: [
       {
-        title: 'Urgentele, prioritizate automat',
-        desc: 'Marchezi o comanda ca urgenta si Livra o plaseaza automat pe primul loc in ruta soferului. Pacientul o primeste in maximum 2 ore. Celelalte comenzi continua normal. Vieti protejate, clienti multumiti.',
+        title: 'Ruta optima calculata automat pentru fiecare sofer',
+        desc: 'Introduci comenzile zilei si Livra calculeaza automat ruta care minimizeaza distanta si timpul pentru fiecare sofer al tau. Urgentele sunt plasate primul in ruta, celelalte in ordinea optima. Mai multe livrari, acelasi numar de soferi.',
       },
       {
-        title: 'Dovada digitala pentru fiecare livrare',
-        desc: 'Soferul fotografiaza medicamentul si colecteaza semnatura electronica a pacientului. Dovada se salveaza permanent. Nicio disputa nu mai este posibila. Farmacia ta este protejata legal la fiecare pas.',
+        title: 'Pacientul urmareste live unde e soferul tau',
+        desc: 'La fiecare comanda, pacientul primeste un link de tracking. Vede pe harta exact unde se afla soferul si cand ajunge la el. Zero apeluri la farmacie. Pacientul este informat, tu esti linistit.',
       },
       {
-        title: 'Evidenta completa si transparenta',
-        desc: 'Registrul detaliat al fiecarei livrari: cine, cand, unde, fotografie. Util pentru audit intern, pentru pacienti si pentru protectie juridica. Esti 100% transparent si 100% protejat.',
+        title: 'Tu vezi toata flota dintr-un singur ecran',
+        desc: 'Harta in timp real cu toti soferii tai, statusul fiecarei livrari si istoricul complet al zilei. Stii instant daca un sofer are o problema, poti redistribui comenzi si ai rapoarte automate la finalul zilei.',
       },
     ],
     stats: [
-      { value: 'max 2h', label: 'livrare urgenta garantata' },
-      { value: '0', label: 'dispute de livrare' },
-      { value: '100%', label: 'evidenta completa a livrarilor' },
+      { value: '+30%', label: 'livrari pe sofer pe zi' },
+      { value: '0', label: 'apeluri «unde e soferul»' },
+      { value: 'live', label: 'tracking pentru pacienti' },
     ],
     howItWorks: [
       {
         step: '01',
-        title: 'Comanda intra in sistem',
-        desc: 'Pacientul comanda telefonic sau online. Comanda apare instant in Livra cu toate detaliile: adresa, medicament, urgenta sau rutina.',
+        title: 'Introduci comenzile zilei',
+        desc: 'Adaugi manual comenzile sau le importi din sistemul farmaciei. Fiecare comanda are adresa, pacientul si daca e urgenta sau rutina.',
       },
       {
         step: '02',
-        title: 'Livra calculeaza ruta optima',
-        desc: 'In functie de urgenta si locatie, Livra atribuie comanda soferului potrivit si calculeaza ruta care respecta prioritatile si intervalele promise.',
+        title: 'Livra optimizeaza rutele soferilor tai',
+        desc: 'In cateva secunde, Livra calculeaza ruta optima pentru fiecare sofer al tau. Urgentele sunt primele, restul in ordinea care minimizeaza timpul total de mers.',
       },
       {
         step: '03',
-        title: 'Pacientul urmareste livrarea',
-        desc: 'SMS automat la confirmare si la sosire. Pacientul stie exact cand ajunge soferul. Zero apeluri la farmacie pentru a intreba «unde e comanda?».',
+        title: 'Soferul pleaca cu ruta pe telefon',
+        desc: 'Soferul tau primeste ruta direct in aplicatia Livra de pe telefon. Navigatie integrata, lista de livrari in ordine, confirmarea fiecarei opriri cu un singur tap.',
       },
       {
         step: '04',
-        title: 'Dovada digitala la predare',
-        desc: 'Soferul fotografiaza medicamentul si colecteaza semnatura electronica. Dovada se salveaza automat si este disponibila oricand pentru audit sau verificare.',
+        title: 'Pacientul urmareste live, tu vezi tot',
+        desc: 'Pacientul primeste link de tracking si vede soferul pe harta. Tu vezi toata flota in timp real si primesti raport complet la finalul zilei.',
       },
     ],
     features: [
       {
+        title: 'Optimizare rute pentru flota ta',
+        desc: 'Livra calculeaza traseul care minimizeaza distanta si timpul pentru fiecare sofer al tau, tinand cont de urgente si de traficul real din Chisinau.',
+      },
+      {
+        title: 'Link de tracking pentru pacienti',
+        desc: 'Pacientul primeste automat un link prin care urmareste live pozitia soferului tau pe harta si ETA-ul actualizat in timp real.',
+      },
+      {
+        title: 'Aplicatie mobila pentru soferii tai',
+        desc: 'Soferii tai descarca aplicatia Livra, primesc ruta zilei si confirma fiecare livrare direct de pe telefon. Fara hartii, fara apeluri.',
+      },
+      {
         title: 'Prioritizare urgente cu un singur click',
-        desc: 'Marcheaza orice comanda ca urgenta si ea va fi livrata inainte de toate celelalte comenzi din ruta soferului, indiferent de ordine.',
+        desc: 'Marchezi o comanda ca urgenta si Livra o plaseaza automat pe primul loc in ruta soferului, fara sa deranjeze restul traseului.',
       },
       {
-        title: 'Notificari automate prin SMS',
-        desc: 'Pacientul primeste SMS la confirmarea comenzii, cand soferul pleaca si cu 15 minute inainte de sosire. Fara apeluri inutile.',
+        title: 'Harta live cu toata flota ta',
+        desc: 'Vezi in timp real unde se afla fiecare sofer al tau, ce livrare face si care e statusul fiecarei comenzi. Control complet, zero apeluri.',
       },
       {
-        title: 'Semnatura electronica si fotografie',
-        desc: 'Fiecare livrare este confirmata cu semnatura digitala a pacientului si o fotografie a medicamentului predat. Dovezi legale valide.',
-      },
-      {
-        title: 'Rapoarte detaliate pentru audit',
-        desc: 'Exporta rapoarte complete cu toate livrarile: data, ora exacta, adresa, sofer, semnatura pacientului. Ideal pentru inspectii si audit farmaceutic.',
-      },
-      {
-        title: 'Urmarire live a soferilor',
-        desc: 'Vezi pe harta in timp real unde se afla fiecare sofer si care este statusul fiecarei livrari. Control deplin, fara apeluri constante.',
-      },
-      {
-        title: 'Integrare cu sistemele existente',
-        desc: 'Livra se conecteaza la softul farmaciei tale prin API sau import CSV. Comenzile intra automat, fara introducere manuala.',
+        title: 'Rapoarte automate la finalul zilei',
+        desc: 'Km parcursi per sofer, livrari efectuate, durata per oprire, comenzi cu probleme. Toate generate automat, fara introducere manuala.',
       },
     ],
     faq: [
       {
-        q: 'Cat de repede livreaza soferul o comanda urgenta?',
-        a: 'Comenzile marcate ca urgente sunt plasate automat pe primul loc in ruta soferului. In Chisinau, timpul mediu de livrare urgenta este sub 2 ore de la confirmarea comenzii.',
+        q: 'Livra face livrarea sau e doar software pentru soferii nostri?',
+        a: 'Livra este software. Tu folosesti proprii soferi, Livra ii ajuta sa lucreze mai eficient: le calculeaza ruta optima, le arata comenzile pe telefon si le permite sa confirme livrarile digital.',
       },
       {
-        q: 'Ce se intampla daca pacientul nu este acasa?',
-        a: 'Soferul fotografiaza medicamentul la usa si noteaza incidentul in aplicatie. Primesti notificare instant si poti contacta pacientul pentru a reprograma livrarea.',
+        q: 'Cum vede pacientul unde e soferul?',
+        a: 'La fiecare comanda, pacientul primeste automat un SMS cu un link de tracking. Da click pe link si vede pe harta pozitia soferului tau in timp real si timpul estimat de sosire.',
       },
       {
-        q: 'Cum dovedim ca am livrat medicamentul corect?',
-        a: 'Fiecare livrare este insotita de fotografie si semnatura electronica a pacientului, stocate permanent in sistemul Livra. Aceste dovezi sunt valide legal in cazul oricarei dispute.',
+        q: 'Cat de mult reduce Livra distanta parcursa de soferi?',
+        a: 'In medie, farmaciile care folosesc Livra reduc distanta totala parcursa cu 25-35% si reusesc sa faca cu 30% mai multe livrari pe zi cu aceeasi flota.',
       },
       {
         q: 'Se integreaza Livra cu softul farmaciei noastre?',
-        a: 'Da. Livra ofera API REST si import CSV pentru conectare cu orice sistem de gestiune a farmaciei. Echipa tehnica te ajuta sa configurezi integrarea in mai putin de o zi.',
+        a: 'Da. Livra ofera API REST si import CSV pentru conectare cu orice sistem de gestiune a farmaciei. Comenzile intra automat in Livra fara introducere manuala.',
       },
       {
         q: 'Pot gestiona mai multi soferi in acelasi timp?',
-        a: 'Absolut. Livra gestioneaza flote de orice dimensiune. Rutele sunt distribuite automat intre soferi in functie de zona si volumul de comenzi.',
+        a: 'Da. Livra gestioneaza flote de orice dimensiune. Rutele sunt distribuite automat intre soferii tai in functie de zona si volumul de comenzi al zilei.',
       },
     ],
   },
