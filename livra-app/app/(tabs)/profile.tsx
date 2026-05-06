@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -17,10 +17,12 @@ const rows = [
 ]
 
 export default function ProfileScreen() {
-  const router  = useRouter()
-  const insets  = useSafeAreaInsets()
+  const router       = useRouter()
+  const insets       = useSafeAreaInsets()
   const { customer, signOut } = useAuth()
   const { allStops } = useOrders()
+  const devTaps      = useRef(0)
+  const devTimer     = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const name     = customer?.name ?? '—'
   const phone    = customer?.phone ?? ''
@@ -38,6 +40,18 @@ export default function ProfileScreen() {
       : r.sub,
   }))
 
+  function handleTitleTap() {
+    if (!__DEV__) return
+    devTaps.current += 1
+    if (devTimer.current) clearTimeout(devTimer.current)
+    if (devTaps.current >= 5) {
+      devTaps.current = 0
+      router.push('/dev-notifications' as any)
+      return
+    }
+    devTimer.current = setTimeout(() => { devTaps.current = 0 }, 2000)
+  }
+
   const handleRow = (row: typeof rows[0] & { sub: string }) => {
     if (row.danger) {
       Alert.alert('Ieși din cont?', '', [
@@ -53,9 +67,9 @@ export default function ProfileScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.titleRow}>
+      <TouchableOpacity style={styles.titleRow} onPress={handleTitleTap} activeOpacity={1}>
         <Text style={styles.title}>Profil</Text>
-      </View>
+      </TouchableOpacity>
       <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(T.space.xl, insets.bottom + T.space.md) }]} showsVerticalScrollIndicator={false}>
         <View style={styles.userCard}>
           <View style={styles.avatar}><Text style={styles.avatarText}>{initials}</Text></View>

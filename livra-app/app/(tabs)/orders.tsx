@@ -4,11 +4,13 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { tokens as T } from '../../src/theme/tokens'
 import { useOrders } from '../../src/context/OrdersContext'
+import { useTrackedParcels, SavedParcel } from '../../src/context/TrackedParcelsContext'
 import { RouteStop } from '../../src/lib/supabase'
 import StatusBadge from '../../src/components/StatusBadge'
+import { CarrierBadge } from '../../src/components/CarrierBadge'
 import { Feather } from '@expo/vector-icons'
 
-type Filter = 'Toate' | 'Active' | 'Livrate'
+type Filter = 'Toate' | 'Active' | 'Livrate' | 'Colete'
 
 function stopStatus(s: RouteStop): 'dispatched' | 'delivered' | 'failed' {
   if (s.status === 'pending')   return 'dispatched'
@@ -20,13 +22,21 @@ export default function OrdersScreen() {
   const router  = useRouter()
   const insets  = useSafeAreaInsets()
   const { allStops, loading, refresh } = useOrders()
+  const { parcels, removeParcel } = useTrackedParcels()
   const [filter, setFilter] = useState<Filter>('Toate')
 
-  const filtered = allStops.filter(s => {
+  const filteredStops = allStops.filter(s => {
     if (filter === 'Active')  return s.status === 'pending'
     if (filter === 'Livrate') return s.status === 'completed'
+    if (filter === 'Colete')  return false
     return true
   })
+
+  const filteredParcels =
+    filter === 'Active'  ? parcels.filter(p => !p.done) :
+    filter === 'Livrate' ? parcels.filter(p => p.done) :
+    filter === 'Colete'  ? parcels :
+    parcels  // 'Toate' — show all
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -35,7 +45,7 @@ export default function OrdersScreen() {
       </View>
 
       <View style={styles.chips}>
-        {(['Toate', 'Active', 'Livrate'] as Filter[]).map(f => (
+        {(['Toate', 'Active', 'Livrate', 'Colete'] as Filter[]).map(f => (
           <TouchableOpacity key={f} onPress={() => setFilter(f)}
             style={[styles.chip, filter === f && styles.chipActive]}>
             <Text style={[styles.chipText, filter === f && styles.chipTextActive]}>{f}</Text>
@@ -48,13 +58,14 @@ export default function OrdersScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={T.color.primary} />}
       >
-        {filtered.length === 0 && (
+        {filteredStops.length === 0 && filteredParcels.length === 0 && (
           <View style={styles.empty}>
             <Feather name="package" size={36} color={T.color.inkSubtle} />
             <Text style={styles.emptyText}>Nicio comandă</Text>
           </View>
         )}
-        {filtered.map(s => (
+
+        {filteredStops.map(s => (
           <TouchableOpacity key={s.id} onPress={() => router.push(`/order/${s.id}`)} activeOpacity={0.8} style={styles.row}>
             <View style={styles.rowIcon}>
               <Text style={styles.rowIconText}>{(s.shop_name ?? s.package_description ?? s.address)[0]?.toUpperCase() ?? '?'}</Text>
@@ -69,6 +80,42 @@ export default function OrdersScreen() {
             </View>
           </TouchableOpacity>
         ))}
+
+        {filteredParcels.length > 0 && (
+          <>
+            {filter === 'Toate' && filteredStops.length > 0 && (
+              <Text style={styles.parcelSectionLabel}>COLETE URMĂRITE</Text>
+            )}
+            {filteredParcels.map((p: SavedParcel) => (
+              <TouchableOpacity
+                key={p.awb}
+                activeOpacity={0.8}
+                style={styles.row}
+                onPress={() => router.push(`/parcel-tracking?awb=${p.awb}${p.carrier ? `&carrier=${encodeURIComponent(p.carrier)}` : ''}`)}
+                onLongPress={() => removeParcel(p.awb)}
+              >
+                {p.carrier
+                  ? <CarrierBadge carrier={p.carrier} variant="icon" done={p.done} />
+                  : <View style={[styles.rowIcon, styles.rowIconParcel, p.done && styles.rowIconDone]}>
+                      <Feather name={p.done ? 'check' : 'mail'} size={18} color={p.done ? T.color.success : T.color.primary} />
+                    </View>
+                }
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <View style={styles.rowTop}>
+                    <Text style={styles.rowTitle} numberOfLines={1}>{p.customLabel || p.awb}</Text>
+                    <View style={[styles.parcelBadge, p.done && styles.parcelBadgeDone]}>
+                      <Text style={[styles.parcelBadgeText, p.done && styles.parcelBadgeTextDone]}>
+                        {p.done ? 'Livrat' : 'În drum'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.rowDesc} numberOfLines={1}>{p.customLabel ? p.awb : p.label}</Text>
+                  <Text style={styles.rowDate}>{p.added}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </>
+        )}
       </ScrollView>
     </View>
   )
@@ -92,5 +139,15 @@ const styles = StyleSheet.create({
   rowTop:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
   rowTitle:      { fontSize: T.size.bodySm, fontWeight: T.weight.semibold, color: T.color.ink, flex: 1, marginRight: T.space.xs },
   rowDesc:       { fontSize: T.size.bodySm, color: T.color.ink },
-  rowDate:       { fontSize: T.size.caption, color: T.color.inkMuted, marginTop: 2 },
+  rowDate:          { fontSize: T.size.caption, color: T.color.inkMuted, marginTop: 2 },
+  rowIconParcel:    { backgroundColor: T.color.primaryLight },
+  rowIconDone:      { backgroundColor: T.color.successBg },
+  parcelSectionLabel: {
+    fontFamily: T.font.mono, fontSize: T.size.micro, color: T.color.inkSubtle,
+    letterSpacing: 0.6, textTransform: 'uppercase', marginTop: T.space.md, marginBottom: T.space.sm,
+  },
+  parcelBadge:      { paddingHorizontal: 8, paddingVertical: 3, borderRadius: T.radius.pill, backgroundColor: T.color.primaryLight },
+  parcelBadgeDone:  { backgroundColor: T.color.successBg },
+  parcelBadgeText:  { fontSize: T.size.micro, fontWeight: T.weight.bold, color: T.color.primary },
+  parcelBadgeTextDone: { color: T.color.success },
 })

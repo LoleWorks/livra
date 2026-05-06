@@ -19,7 +19,7 @@ except ImportError:
     pass
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -32,6 +32,8 @@ VROOM_HOSTED  = "openrouteservice.org" in VROOM_URL  # true when using ORS publi
 SUPABASE_URL              = os.environ.get("SUPABASE_URL", "")
 SUPABASE_ANON_KEY         = os.environ.get("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+SMS_MD_API_KEY            = os.environ.get("SMS_MD_API_KEY", "")
+SMS_MD_SENDER             = os.environ.get("SMS_MD_SENDER", "Livra")
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -901,6 +903,486 @@ async def unified_change_password(req: UnifiedChangePasswordRequest):
     if res.status_code not in (200, 204):
         raise HTTPException(status_code=500, detail=res.text)
     return {"ok": True}
+
+
+# ── SMS helper (sms.md) ───────────────────────────────────────────────────────
+
+async def send_sms(phone: str, message: str) -> bool:
+    if not SMS_MD_API_KEY or not phone:
+        return False
+    # Normalize Moldovan number to international format
+    p = phone.strip().replace(" ", "").replace("-", "")
+    if p.startswith("0") and len(p) == 9:
+        p = "+373" + p[1:]
+    elif not p.startswith("+"):
+        p = "+373" + p
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                "https://sms.md/api/v1/send",
+                headers={"Authorization": f"Bearer {SMS_MD_API_KEY}", "Content-Type": "application/json"},
+                json={"to": p, "message": message, "from": SMS_MD_SENDER},
+                timeout=10,
+            )
+            return r.status_code in (200, 201)
+    except Exception as exc:
+        print(f"[sms] Failed to send to {p}: {exc}")
+        return False
+
+
+# ── Push notification helper (Expo) ──────────────────────────────────────────
+
+async def send_expo_push(token: str, title: str, body: str, data: dict) -> bool:
+    if not token or not token.startswith("ExponentPushToken"):
+        return False
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                "https://exp.host/--/api/v2/push/send",
+                json={"to": token, "title": title, "body": body, "data": data},
+                timeout=10,
+            )
+            return r.status_code == 200
+    except Exception as exc:
+        print(f"[push] Failed: {exc}")
+        return False
+
+
+# ── Bitrix24 helpers ─────────────────────────────────────────────────────────
+
+def _bx_base(domain: str, user_id: str, token: str) -> str:
+    return f"https://{domain}/rest/{user_id}/{token}/"
+
+async def _bx_get_deal(domain: str, user_id: str, token: str, deal_id: str) -> dict:
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{_bx_base(domain, user_id, token)}crm.deal.get.json",
+            params={"id": deal_id},
+            timeout=10,
+        )
+        if r.status_code == 200:
+            return r.json().get("result", {})
+    return {}
+
+async def _bx_get_stage_id(domain: str, user_id: str, token: str, stage_name: str) -> Optional[str]:
+    """Return the Bitrix24 stage ID for a given stage name. If stage_name contains ':' treat it as an ID already."""
+    if ":" in stage_name:
+        return stage_name
+    base = _bx_base(domain, user_id, token)
+    async with httpx.AsyncClient() as client:
+        # Check default pipeline (category 0) and any other pipelines
+        cats_r = await client.get(f"{base}crm.dealcategory.list.json", timeout=10)
+        cat_ids = ["0"]
+        if cats_r.status_code == 200:
+            for c in cats_r.json().get("result", []):
+                cid = str(c.get("ID", ""))
+                if cid and cid not in cat_ids:
+                    cat_ids.append(cid)
+        for cat_id in cat_ids:
+            r = await client.get(
+                f"{base}crm.dealcategory.stage.list.json",
+                params={"id": cat_id},
+                timeout=10,
+            )
+            if r.status_code == 200:
+                for s in r.json().get("result", []):
+                    if s.get("NAME", "").strip().lower() == stage_name.strip().lower():
+                        return str(s["STATUS_ID"])
+    return None
+
+async def _bx_update_deal_stage(domain: str, user_id: str, token: str, deal_id: str, stage_id: str) -> bool:
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{_bx_base(domain, user_id, token)}crm.deal.update.json",
+            json={"id": int(deal_id), "fields": {"STAGE_ID": stage_id}},
+            timeout=10,
+        )
+        return r.status_code == 200
+
+async def _bx_add_comment(domain: str, user_id: str, token: str, deal_id: str, text: str) -> bool:
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{_bx_base(domain, user_id, token)}crm.timeline.comment.add.json",
+            json={"entityTypeId": 2, "entityId": int(deal_id), "fields": {"COMMENT": text}},
+            timeout=10,
+        )
+        return r.status_code == 200
+
+
+@app.post("/webhook/bitrix24/{company_id}", status_code=200)
+async def bitrix24_webhook(company_id: str, request: Request):
+    secret = request.query_params.get("secret", "")
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        raise HTTPException(503, "Not configured")
+
+    async with httpx.AsyncClient() as client:
+        cfg_res = await client.get(
+            f"{SUPABASE_URL}/rest/v1/livra_crm_integrations"
+            f"?company_id=eq.{company_id}&crm_type=eq.bitrix24&select=*",
+            headers=_sb_headers(),
+        )
+    cfg_list = cfg_res.json() if cfg_res.status_code == 200 else []
+    if not cfg_list:
+        raise HTTPException(404, "Bitrix24 config not found")
+    cfg = cfg_list[0]
+
+    if cfg.get("webhook_secret") and cfg["webhook_secret"] != secret:
+        raise HTTPException(403, "Invalid secret")
+
+    try:
+        body = await request.body()
+        from urllib.parse import parse_qs
+        params = parse_qs(body.decode("utf-8"), keep_blank_values=True)
+    except Exception:
+        raise HTTPException(400, "Invalid body")
+
+    deal_id = params.get("data[FIELDS][ID]", [""])[0]
+    if not deal_id:
+        return {"received": 0, "processed": 0}
+
+    domain   = cfg.get("subdomain", "")   # stored in subdomain column
+    user_id  = cfg.get("api_user_id", "")
+    token    = cfg.get("api_token", "")
+    trigger_stage = cfg.get("trigger_stage", "").strip()
+
+    if not domain or not user_id or not token:
+        raise HTTPException(400, "Bitrix24 credentials not configured")
+
+    deal = await _bx_get_deal(domain, user_id, token, deal_id)
+    if not deal:
+        raise HTTPException(502, "Could not fetch deal from Bitrix24")
+
+    # Check trigger stage
+    deal_stage = deal.get("STAGE_ID", "")
+    if trigger_stage:
+        target_id = await _bx_get_stage_id(domain, user_id, token, trigger_stage)
+        if target_id and deal_stage != target_id:
+            return {"received": 1, "processed": 0}
+
+    field_phone   = cfg.get("field_phone",   "UF_CRM_PHONE")
+    field_address = cfg.get("field_address", "UF_CRM_ADDRESS")
+    field_items   = cfg.get("field_items",   "UF_CRM_ITEMS")
+
+    phone   = str(deal.get(field_phone,   "") or "").strip()
+    address = str(deal.get(field_address, "") or "").strip()
+    items   = str(deal.get(field_items,   "") or "").strip()
+
+    if not address:
+        print(f"[bitrix24] Deal {deal_id} skipped — no address in field '{field_address}'")
+        return {"received": 1, "processed": 0}
+
+    delivery_payload = {
+        "company_id":       company_id,
+        "source":           "bitrix24",
+        "external_id":      deal_id,
+        "customer_name":    deal.get("TITLE", ""),
+        "customer_phone":   phone,
+        "delivery_address": address,
+        "notes":            items,
+        "status":           "pending",
+    }
+    async with httpx.AsyncClient() as client:
+        ins = await client.post(
+            f"{SUPABASE_URL}/rest/v1/livra_webhook_orders",
+            headers={**_sb_headers(), "Prefer": "return=representation"},
+            json=delivery_payload,
+        )
+        if ins.status_code not in (200, 201):
+            print(f"[bitrix24] Failed to insert delivery: {ins.text}")
+            raise HTTPException(500, "Failed to save delivery")
+
+        if phone:
+            cust_res = await client.get(
+                f"{SUPABASE_URL}/rest/v1/livra_customers"
+                f"?phone=eq.{phone}&select=push_token,name",
+                headers=_sb_headers(),
+            )
+            customers = cust_res.json() if cust_res.status_code == 200 else []
+            cust = customers[0] if customers else None
+            push_token = cust.get("push_token") if cust else None
+            cust_name  = cust.get("name", "") if cust else ""
+
+            if push_token:
+                await send_expo_push(
+                    push_token,
+                    title="Comanda ta este in curs de livrare!",
+                    body="Descarca aplicatia Livra pentru a urmari livrarea in timp real.",
+                    data={"type": "new_order"},
+                )
+            else:
+                sms_text = (
+                    f"Buna{', ' + cust_name.split()[0] if cust_name else ''}! "
+                    f"Comanda ta este confirmata si va fi livrata curand. "
+                    f"Urmareste livrarea la livra.md/track"
+                )
+                await send_sms(phone, sms_text)
+
+    print(f"[bitrix24] Processed deal {deal_id} — {deal.get('TITLE')}")
+    return {"received": 1, "processed": 1}
+
+
+# ── amoCRM webhook receiver ───────────────────────────────────────────────────
+
+def _amo_field(custom_fields: list[dict], name: str) -> str:
+    """Extract a custom field value from amoCRM payload by field name (case-insensitive)."""
+    for f in custom_fields:
+        if f.get("name", "").strip().lower() == name.strip().lower():
+            vals = f.get("values", [])
+            if vals:
+                return str(vals[0].get("value", "")).strip()
+    return ""
+
+
+@app.post("/webhook/amocrm/{company_id}", status_code=200)
+async def amocrm_webhook(company_id: str, request: Request):
+    # Validate secret
+    secret = request.query_params.get("secret", "")
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        raise HTTPException(503, "Not configured")
+
+    async with httpx.AsyncClient() as client:
+        # Load CRM integration config
+        cfg_res = await client.get(
+            f"{SUPABASE_URL}/rest/v1/livra_crm_integrations"
+            f"?company_id=eq.{company_id}&crm_type=eq.amocrm&select=*",
+            headers=_sb_headers(),
+        )
+    cfg_list = cfg_res.json() if cfg_res.status_code == 200 else []
+    if not cfg_list:
+        raise HTTPException(404, "amoCRM config not found")
+    cfg = cfg_list[0]
+
+    if cfg.get("webhook_secret") and cfg["webhook_secret"] != secret:
+        raise HTTPException(403, "Invalid secret")
+
+    # amoCRM sends form-encoded data
+    try:
+        body = await request.body()
+        from urllib.parse import parse_qs
+        params = parse_qs(body.decode("utf-8"), keep_blank_values=True)
+    except Exception:
+        raise HTTPException(400, "Invalid body")
+
+    # Extract leads from form params — amoCRM format: leads[status][0][field]
+    leads = []
+    i = 0
+    while True:
+        prefix = f"leads[status][{i}]"
+        id_key = f"{prefix}[id]"
+        if not any(k.startswith(f"{prefix}[") for k in params):
+            break
+
+        lead_id   = params.get(f"{prefix}[id]",          [""])[0]
+        lead_name = params.get(f"{prefix}[name]",         [""])[0]
+        status_id = params.get(f"{prefix}[status_id]",   [""])[0]
+
+        # Parse custom fields from flat form params
+        custom_fields: list[dict] = []
+        j = 0
+        while True:
+            cf_prefix = f"{prefix}[custom_fields][{j}]"
+            if not any(k.startswith(f"{cf_prefix}[") for k in params):
+                break
+            fname  = params.get(f"{cf_prefix}[name]", [""])[0]
+            fvalue = params.get(f"{cf_prefix}[values][0][value]", [""])[0]
+            if fname:
+                custom_fields.append({"name": fname, "values": [{"value": fvalue}]})
+            j += 1
+
+        leads.append({"id": lead_id, "name": lead_name, "status_id": status_id, "custom_fields": custom_fields})
+        i += 1
+
+    trigger_stage = cfg.get("trigger_stage", "Confirmat").strip().lower()
+
+    processed = 0
+    for lead in leads:
+        # We check trigger by status name — amoCRM also sends status_name
+        status_name = params.get(
+            f"leads[status][{leads.index(lead)}][status_name]", [""]
+        )[0].strip().lower()
+
+        if trigger_stage and status_name and status_name != trigger_stage:
+            continue  # skip leads not in our trigger stage
+
+        phone   = _amo_field(lead["custom_fields"], cfg.get("field_phone",   "Telefon"))
+        address = _amo_field(lead["custom_fields"], cfg.get("field_address", "Adresa livrare"))
+        items   = _amo_field(lead["custom_fields"], cfg.get("field_items",   "Produse"))
+
+        if not address:
+            print(f"[amocrm] Lead {lead['id']} skipped — no address field")
+            continue
+
+        # Insert delivery into Supabase
+        delivery_payload = {
+            "company_id":       company_id,
+            "source":           "amocrm",
+            "external_id":      lead["id"],
+            "customer_name":    lead.get("name", ""),
+            "customer_phone":   phone,
+            "delivery_address": address,
+            "notes":            items,
+            "status":           "pending",
+        }
+        async with httpx.AsyncClient() as client:
+            ins = await client.post(
+                f"{SUPABASE_URL}/rest/v1/livra_webhook_orders",
+                headers={**_sb_headers(), "Prefer": "return=representation"},
+                json=delivery_payload,
+            )
+            if ins.status_code not in (200, 201):
+                print(f"[amocrm] Failed to insert delivery: {ins.text}")
+                continue
+
+            # Check if customer has a push token
+            if phone:
+                cust_res = await client.get(
+                    f"{SUPABASE_URL}/rest/v1/livra_customers"
+                    f"?phone=eq.{phone}&select=push_token,name",
+                    headers=_sb_headers(),
+                )
+                customers = cust_res.json() if cust_res.status_code == 200 else []
+                cust = customers[0] if customers else None
+                push_token = cust.get("push_token") if cust else None
+                cust_name  = cust.get("name", "") if cust else ""
+
+                if push_token:
+                    await send_expo_push(
+                        push_token,
+                        title="Comanda ta este in curs de livrare!",
+                        body=f"Descarca aplicatia Livra pentru a urmari livrarea in timp real.",
+                        data={"type": "new_order"},
+                    )
+                else:
+                    # SMS fallback
+                    sms_text = (
+                        f"Buna{', ' + cust_name.split()[0] if cust_name else ''}! "
+                        f"Comanda ta este confirmata si va fi livrata curand. "
+                        f"Urmareste livrarea la livra.md/track"
+                    )
+                    await send_sms(phone, sms_text)
+
+        processed += 1
+        print(f"[amocrm] Processed lead {lead['id']} — {lead.get('name')}")
+
+    return {"received": len(leads), "processed": processed}
+
+
+# ── Livra → amoCRM: push delivery failure back ────────────────────────────────
+
+class DeliveryFailedRequest(BaseModel):
+    company_id:  str
+    external_id: str   # CRM lead/deal ID stored when the webhook was received
+    fail_reason: str = ""
+    crm_type:    str = ""  # 'amocrm' | 'bitrix24' — auto-detected from order source if blank
+
+async def _amo_get_pipeline_stage_id(subdomain: str, token: str, pipeline_id: str, stage_name: str) -> Optional[int]:
+    """Find the status_id of a stage by name within a pipeline."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"https://{subdomain}.amocrm.ru/api/v4/leads/pipelines/{pipeline_id}/statuses",
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            return None
+        for status in r.json().get("_embedded", {}).get("statuses", []):
+            if status.get("name", "").strip().lower() == stage_name.strip().lower():
+                return status["id"]
+    return None
+
+@app.post("/webhook/delivery-failed")
+async def delivery_failed(req: DeliveryFailedRequest):
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        raise HTTPException(503, "Not configured")
+
+    crm_type = req.crm_type
+
+    # Auto-detect CRM type from the order's source if not specified
+    if not crm_type:
+        async with httpx.AsyncClient() as client:
+            order_res = await client.get(
+                f"{SUPABASE_URL}/rest/v1/livra_webhook_orders"
+                f"?company_id=eq.{req.company_id}&external_id=eq.{req.external_id}&select=source",
+                headers=_sb_headers(),
+            )
+            orders = order_res.json() if order_res.status_code == 200 else []
+            crm_type = orders[0].get("source", "amocrm") if orders else "amocrm"
+
+    async with httpx.AsyncClient() as client:
+        cfg_res = await client.get(
+            f"{SUPABASE_URL}/rest/v1/livra_crm_integrations"
+            f"?company_id=eq.{req.company_id}&crm_type=eq.{crm_type}&select=*",
+            headers=_sb_headers(),
+        )
+        cfg_list = cfg_res.json() if cfg_res.status_code == 200 else []
+        if not cfg_list:
+            raise HTTPException(404, f"{crm_type} config not found for this company")
+        cfg = cfg_list[0]
+
+    if crm_type == "bitrix24":
+        domain   = cfg.get("subdomain", "")
+        user_id  = cfg.get("api_user_id", "")
+        token    = cfg.get("api_token", "")
+        failed_stage = cfg.get("failed_stage", "Replanificare")
+
+        if not domain or not user_id or not token:
+            raise HTTPException(400, "Bitrix24 credentials not configured")
+
+        stage_id = await _bx_get_stage_id(domain, user_id, token, failed_stage)
+        if not stage_id:
+            raise HTTPException(404, f"Stage '{failed_stage}' not found in Bitrix24")
+
+        ok = await _bx_update_deal_stage(domain, user_id, token, req.external_id, stage_id)
+        if not ok:
+            raise HTTPException(502, "Bitrix24 deal update failed")
+
+        if req.fail_reason:
+            await _bx_add_comment(domain, user_id, token, req.external_id, f"Livrare esuata: {req.fail_reason}")
+
+        print(f"[bitrix24] Deal {req.external_id} moved to '{failed_stage}' — reason: {req.fail_reason}")
+        return {"ok": True, "stage": failed_stage}
+
+    # amoCRM
+    subdomain    = cfg.get("subdomain", "")
+    api_token    = cfg.get("api_token", "")
+    failed_stage = cfg.get("failed_stage", "Replanificare")
+
+    if not subdomain or not api_token:
+        raise HTTPException(400, "amoCRM credentials not configured")
+
+    async with httpx.AsyncClient() as client:
+        lead_res = await client.get(
+            f"https://{subdomain}.amocrm.ru/api/v4/leads/{req.external_id}",
+            headers={"Authorization": f"Bearer {api_token}"},
+            timeout=10,
+        )
+        if lead_res.status_code != 200:
+            raise HTTPException(502, f"Could not fetch lead from amoCRM: {lead_res.status_code}")
+        pipeline_id = str(lead_res.json().get("pipeline_id", ""))
+
+        stage_id = await _amo_get_pipeline_stage_id(subdomain, api_token, pipeline_id, failed_stage)
+        if not stage_id:
+            raise HTTPException(404, f"Stage '{failed_stage}' not found in pipeline {pipeline_id}")
+
+        patch_res = await client.patch(
+            f"https://{subdomain}.amocrm.ru/api/v4/leads/{req.external_id}",
+            headers={"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"},
+            json={"status_id": stage_id},
+            timeout=10,
+        )
+        if patch_res.status_code not in (200, 204):
+            raise HTTPException(502, f"amoCRM update failed: {patch_res.status_code}")
+
+        if req.fail_reason:
+            await client.post(
+                f"https://{subdomain}.amocrm.ru/api/v4/notes",
+                headers={"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"},
+                json={"_embedded": {"notes": [{"entity_id": int(req.external_id), "note_type": "common", "params": {"text": f"Livrare esuata: {req.fail_reason}"}}]}},
+                timeout=10,
+            )
+
+    print(f"[amocrm] Lead {req.external_id} moved to '{failed_stage}' — reason: {req.fail_reason}")
+    return {"ok": True, "stage": failed_stage}
 
 
 @app.get("/track/{token}")

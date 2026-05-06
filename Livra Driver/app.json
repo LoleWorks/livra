@@ -17,7 +17,10 @@
       "infoPlist": {
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Livra Driver transmite poziția ta GPS în timp ce ești pe rută.",
         "NSLocationWhenInUseUsageDescription": "Livra Driver are nevoie de locația ta pentru navigare.",
-        "UIBackgroundModes": ["location", "fetch"],
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ],
         "LSApplicationQueriesSchemes": [
           "waze",
           "comgooglemaps",
@@ -62,11 +65,11 @@
       ],
       "./plugins/withNavAppQueries"
     ],
+    "owner": "livra_app",
     "extra": {
       "eas": {
-        "projectId": "a1b42622-2a75-45d2-9002-185aa94917d5"
+        "projectId": "9d063486-330b-4b75-941a-9f8135d5df10"
       }
-    },
-    "owner": "livra_driver"
+    }
   }
 }

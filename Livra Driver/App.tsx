@@ -66,13 +66,6 @@ export default function App() {
   const handleStartTracking = async (driverId: string) => {
     activeDriver.current = driverId
     await startTracking(driverId)
-
-    AppState.addEventListener('change', (state) => {
-      if (!activeDriver.current) return
-      if (state === 'background' || state === 'inactive' || state === 'active') {
-        supabase.from('livra_drivers').update({ status: 'active' }).eq('id', activeDriver.current)
-      }
-    })
   }
 
   const checkSession = async () => {

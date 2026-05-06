@@ -1,13 +1,17 @@
 import { Helmet } from 'react-helmet-async'
-import { useState, useRef, Fragment, useEffect } from 'react'
-import { MapContainer, Polyline, Marker, Tooltip } from 'react-leaflet'
-import { YandexMapLayer, YandexTrafficLayer } from '../components/YandexLayer'
-import MoldovaBorder from '../components/MoldovaBorder'
-import L from 'leaflet'
+import { useState, useRef, useEffect, Fragment } from 'react'
+import {
+  DndContext, DragOverlay,
+  PointerSensor, useSensor, useSensors, closestCorners, useDroppable,
+} from '@dnd-kit/core'
+import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import {
   Wand2, Trash2, MapPin, Clock,
-  ChevronRight, ChevronDown, CheckCircle2, X, Check, Radio,
+  ChevronRight, ChevronDown, CheckCircle2, X, Check,
   Package, UtensilsCrossed, Fuel, AlertTriangle, Ban, Inbox, ClipboardList, Truck, User, Upload,
+  GripVertical, Navigation, RefreshCw,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getUser } from '../lib/auth'
@@ -51,22 +55,6 @@ async function fetchRoadPath(waypoints: [number, number][]): Promise<[number, nu
   } catch { return null }
 }
 
-function stopIcon(num: number, color: string) {
-  return L.divIcon({
-    html: `<div style="width:20px;height:20px;background:${color};color:white;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.2)">${num}</div>`,
-    iconSize: [20, 20], iconAnchor: [10, 10], className: '',
-  })
-}
-
-function breakIcon(kind: 'lunch_break' | 'fuel_break') {
-  const svg = kind === 'lunch_break'
-    ? `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>`
-    : `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="15" y2="22"/><line x1="4" y1="9" x2="14" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg>`
-  return L.divIcon({
-    html: `<div style="width:24px;height:24px;background:#f59e0b;color:white;border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${svg}</div>`,
-    iconSize: [24, 24], iconAnchor: [12, 12], className: '',
-  })
-}
 
 function fmtDuration(mins: number) {
   const h = Math.floor(mins / 60), m = mins % 60
@@ -454,6 +442,171 @@ function OptimizeLoadingScreen() {
   )
 }
 
+// ── Kanban sub-components ─────────────────────────────────────────────────────
+
+function buildMapsUrl(col: DriverRoute): string {
+  const hasWarehouse = col.start_lat !== 0 || col.start_lng !== 0
+  const deliveries = col.stops.filter(s => s.type === 'delivery')
+  if (!deliveries.length || !hasWarehouse) return '#'
+  const warehouse = `${col.start_lat},${col.start_lng}`
+  // Always use the customer's text address — Google Maps geocodes it far more
+  // accurately than Photon/Nominatim, avoiding reverse-geocode mismatches.
+  const waypoints = deliveries.map(s => s.address).join('|')
+  return `https://www.google.com/maps/dir/?api=1&origin=${warehouse}&waypoints=${encodeURIComponent(waypoints)}&destination=${warehouse}&travelmode=driving`
+}
+
+const DEFERRED_COL_ID = '__deferred__'
+
+function StopCard({ stop, color, ghost = false, approxTimes = false }: { stop: RouteStop; color: string; ghost?: boolean; approxTimes?: boolean }) {
+  const isBreak = stop.type === 'lunch_break' || stop.type === 'fuel_break'
+  if (isBreak) {
+    return (
+      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 ${ghost ? 'opacity-40' : ''}`}>
+        {stop.type === 'lunch_break' ? <UtensilsCrossed size={12} className="text-amber-600 dark:text-amber-400 flex-shrink-0" /> : <Fuel size={12} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />}
+        <span className="text-[12px] font-medium text-amber-700 dark:text-amber-400 truncate">{stop.customer}</span>
+        {stop.arrival_time && <span className="text-[10px] text-amber-500 font-mono ml-auto flex-shrink-0">{stop.arrival_time}</span>}
+      </div>
+    )
+  }
+  return (
+    <div className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl p-3 shadow-sm ${ghost ? 'opacity-40' : ''}`}>
+      <div className="flex items-start gap-2">
+        <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0 mt-0.5" style={{ background: color }}>
+          {stop.order}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-50">{stop.customer}</span>
+            {stop.arrival_time && (
+              <span className={`text-[10px] font-mono ${approxTimes ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                {approxTimes ? '~' : ''}{stop.arrival_time}
+              </span>
+            )}
+          </div>
+          <div className="flex items-start gap-1 text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+            <MapPin size={9} className="flex-shrink-0 mt-0.5" />
+            <span className="break-words">{stop.address}</span>
+          </div>
+          {stop.package_description && (
+            <div className="flex items-center gap-1 text-[11px] text-brand-orange dark:text-orange-400 mt-0.5">
+              <Package size={9} className="flex-shrink-0" /><span className="break-words">{stop.package_description}</span>
+            </div>
+          )}
+          {stop.phone && <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">{stop.phone}</div>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SortableStop({ stop, color, approxTimes = false }: { stop: RouteStop; color: string; approxTimes?: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: stop.delivery_id })
+  const style = { transform: CSS.Transform.toString(transform), transition }
+  return (
+    <div ref={setNodeRef} style={style} className={`relative ${isDragging ? 'z-10' : ''}`}>
+      <div className={`flex items-center gap-1.5 group ${stop.type === 'delivery' ? 'cursor-grab active:cursor-grabbing' : ''}`} {...(stop.type === 'delivery' ? { ...attributes, ...listeners } : {})}>
+        {stop.type === 'delivery' && (
+          <div className="text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-400 dark:group-hover:text-zinc-500 flex-shrink-0 transition-colors">
+            <GripVertical size={14} />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <StopCard stop={stop} color={color} ghost={isDragging} approxTimes={approxTimes} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function KanbanColumn({ col, estKm, estMin, approximate, approxTimes }: {
+  col: DriverRoute; estKm: number; estMin: number; approximate: boolean; approxTimes: boolean
+}) {
+  const { setNodeRef } = useDroppable({ id: col.driver_id })
+  const isDeferred = col.driver_id === DEFERRED_COL_ID
+  const deliveryCount = col.stops.filter(s => s.type === 'delivery').length
+  const mapsUrl = buildMapsUrl(col)
+
+  if (isDeferred) {
+    return (
+      <div className="flex flex-col w-72 flex-shrink-0 bg-amber-50/60 dark:bg-amber-950/20 rounded-2xl border-2 border-dashed border-amber-300 dark:border-amber-800 max-h-full">
+        <div className="p-3 border-b border-amber-200 dark:border-amber-900/50 flex-shrink-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <span className="text-[14px] font-semibold text-amber-700 dark:text-amber-300 flex-1">Neplanificate</span>
+            <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded-full flex-shrink-0">
+              {deliveryCount} comenzi
+            </span>
+          </div>
+          <p className="text-[11px] text-amber-600/70 dark:text-amber-500/70">
+            Trage în coloana unui șofer pentru a adăuga la ruta de azi
+          </p>
+        </div>
+        <div ref={setNodeRef} className="flex-1 overflow-y-auto p-2 space-y-1.5 min-h-[120px]">
+          <SortableContext items={col.stops.map(s => s.delivery_id)} strategy={verticalListSortingStrategy}>
+            {col.stops.map(stop => (
+              <SortableStop key={stop.delivery_id} stop={stop} color={col.color} approxTimes={approxTimes} />
+            ))}
+          </SortableContext>
+          {col.stops.length === 0 && (
+            <div className="h-20 flex items-center justify-center text-[11px] text-amber-500/60 dark:text-amber-600/60 border-2 border-dashed border-amber-200 dark:border-amber-800/50 rounded-xl">
+              Trage o livrare aici pentru a o amâna
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col w-72 flex-shrink-0 bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800 max-h-full">
+      <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: col.color }} />
+          <span className="text-[14px] font-semibold text-zinc-900 dark:text-zinc-50 truncate flex-1">{col.driver_name}</span>
+          <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full flex-shrink-0">
+            {deliveryCount} opriri
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-[11px] flex-1">
+            <span className={approximate ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-400 dark:text-zinc-500'}>
+              {approximate ? '~' : ''}{estKm} km
+            </span>
+            <span className="text-zinc-300 dark:text-zinc-600">·</span>
+            <span className={`flex items-center gap-0.5 ${approximate ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-400 dark:text-zinc-500'}`}>
+              <Clock size={9} />{approximate ? '~' : ''}{fmtDuration(estMin)}
+            </span>
+            {approximate && (
+              <span className="text-[10px] text-amber-500/70 dark:text-amber-400/70">estimat</span>
+            )}
+          </div>
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-[11px] text-blue-500 hover:text-blue-600 font-medium flex-shrink-0"
+            onClick={e => e.stopPropagation()}
+          >
+            <Navigation size={10} />Google Maps
+          </a>
+        </div>
+      </div>
+      <div ref={setNodeRef} className="flex-1 overflow-y-auto p-2 space-y-1.5 min-h-[120px]">
+        <SortableContext items={col.stops.map(s => s.delivery_id)} strategy={verticalListSortingStrategy}>
+          {col.stops.map(stop => (
+            <SortableStop key={stop.delivery_id} stop={stop} color={col.color} />
+          ))}
+        </SortableContext>
+        {col.stops.length === 0 && (
+          <div className="h-20 flex items-center justify-center text-[11px] text-zinc-400 dark:text-zinc-600 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+            Trage o livrare aici
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function RoutesPage() {
@@ -469,12 +622,10 @@ export default function RoutesPage() {
   const [step, setStep]         = useState<'input' | 'loading' | 'results'>('input')
   const [, setLoadingMsg] = useState('')
   const [result, setResult]     = useState<OptimizeResult | null>(null)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const [toast, setToast]           = useState<string | null>(null)
   const [dispatched, setDispatched] = useState(false)
   const [recalling, setRecalling]   = useState(false)
-  const [traffic, setTraffic]       = useState(false)
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab]           = useState<'new' | 'scheduled' | 'finished'>('new')
   // Date the dispatcher is optimizing for. Defaults to today; manager can pick
@@ -484,10 +635,176 @@ export default function RoutesPage() {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
   })
   const [finishedStops, setFinishedStops]   = useState<FinishedStop[]>([])
-  const [resultsTab, setResultsTab]         = useState<'map' | 'routes'>('map')
-  const [sidebarOpen, setSidebarOpen]       = useState(false)
+
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Kanban state
+  const [kanbanCols, setKanbanCols]     = useState<DriverRoute[]>([])
+  const [activeStop, setActiveStop]     = useState<{ stop: RouteStop; color: string } | null>(null)
+  const [kanbanModified, setKanbanModified] = useState(false)
+  const [reoptimizing, setReoptimizing] = useState(false)
+  const skipKanbanRebuild = useRef(false)
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const adminId = getUser()?.id
+
+  // Sync kanban columns when result changes (skipped after re-optimize to preserve manual assignments)
+  useEffect(() => {
+    if (!result) return
+    if (skipKanbanRebuild.current) { skipKanbanRebuild.current = false; return }
+    setKanbanModified(false)
+    const driverCols = result.routes.map(r => ({ ...r, stops: [...r.stops] }))
+    const deferredStops: RouteStop[] = (result.deferred ?? []).map((d, i) => {
+      const orig = deliveries.find(del => del.id === d.delivery_id)
+      return {
+        order: i + 1,
+        delivery_id: d.delivery_id,
+        customer: d.customer,
+        address: d.address,
+        phone: orig?.phone ?? '',
+        lat: 0,
+        lng: 0,
+        type: 'delivery',
+        break_duration_min: 0,
+        package_description: orig?.package_description || undefined,
+      }
+    })
+    const cols: DriverRoute[] = [...driverCols]
+    if (deferredStops.length > 0) {
+      cols.push({
+        driver_id: DEFERRED_COL_ID,
+        driver_name: 'Neplanificate',
+        color: '#f59e0b',
+        stops: deferredStops,
+        total_distance_km: 0,
+        total_duration_min: 0,
+        start_lat: 0,
+        start_lng: 0,
+      })
+    }
+    setKanbanCols(cols)
+  }, [result])
+
+  // ── DnD handlers ─────────────────────────────────────────────────────────────
+
+  function renumber(cols: DriverRoute[]): DriverRoute[] {
+    const toHHMM = (totalMin: number) => {
+      const h = Math.floor(totalMin / 60) % 24
+      const m = Math.round(totalMin % 60)
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+    }
+    const parseHHMM = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m }
+    const [sh, sm] = shiftStart.split(':').map(Number)
+    const shiftStartMin = sh * 60 + sm
+
+    return cols.map(col => {
+      if (col.driver_id === DEFERRED_COL_ID) return col
+
+      const origRoute = result?.routes.find(r => r.driver_id === col.driver_id)
+      const origDeliveries = origRoute?.stops.filter(s => s.type === 'delivery') ?? []
+      const origBreakMin   = origRoute?.stops
+        .filter(s => s.type === 'lunch_break' || s.type === 'fuel_break')
+        .reduce((sum, s) => sum + (s.break_duration_min || 0), 0) ?? 0
+
+      // Start time = original first stop arrival (warehouse → first stop travel already baked in)
+      const firstArrival = origDeliveries[0]?.arrival_time
+      const startMin = firstArrival ? parseHHMM(firstArrival) : shiftStartMin + 15
+
+      // Average interval between consecutive stops (service + inter-stop travel, excl. breaks)
+      const lastArrival = origDeliveries[origDeliveries.length - 1]?.arrival_time
+      const avgIntervalMin =
+        origDeliveries.length > 1 && firstArrival && lastArrival
+          ? (parseHHMM(lastArrival) - parseHHMM(firstArrival) - origBreakMin) / (origDeliveries.length - 1)
+          : serviceTimeMin + 15
+
+      let n = 1
+      let runningMin = startMin
+      return {
+        ...col,
+        stops: col.stops.map(s => {
+          if (s.type === 'lunch_break' || s.type === 'fuel_break') {
+            const arrival_time = toHHMM(runningMin)
+            runningMin += s.break_duration_min || 30
+            return { ...s, arrival_time }
+          }
+          const arrival_time = toHHMM(runningMin)
+          runningMin += avgIntervalMin
+          return { ...s, order: n++, arrival_time }
+        }),
+      }
+    })
+  }
+
+  function resolveColId(id: string): string | null {
+    // id may be a stop's delivery_id or a column's driver_id
+    for (const col of kanbanCols) {
+      if (col.driver_id === id) return id
+      if (col.stops.some(s => s.delivery_id === id)) return col.driver_id
+    }
+    return null
+  }
+
+  function findColIdByStopId(stopId: string): string | null {
+    for (const col of kanbanCols) {
+      if (col.stops.some(s => s.delivery_id === stopId)) return col.driver_id
+    }
+    return null
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    const stopId = event.active.id as string
+    for (const col of kanbanCols) {
+      const stop = col.stops.find(s => s.delivery_id === stopId)
+      if (stop) { setActiveStop({ stop, color: col.color }); break }
+    }
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over } = event
+    if (!over) return
+    const activeId = active.id as string
+    const overId   = over.id as string
+    const srcColId = findColIdByStopId(activeId)
+    const dstColId = resolveColId(overId)
+    if (!srcColId || !dstColId || srcColId === dstColId) return
+    setKanbanCols(cols => {
+      const next = cols.map(c => ({ ...c, stops: [...c.stops] }))
+      const src = next.find(c => c.driver_id === srcColId)!
+      const dst = next.find(c => c.driver_id === dstColId)!
+      const idx = src.stops.findIndex(s => s.delivery_id === activeId)
+      const [stop] = src.stops.splice(idx, 1)
+      const overIdx = dst.stops.findIndex(s => s.delivery_id === overId)
+      if (overIdx >= 0) dst.stops.splice(overIdx, 0, stop)
+      else              dst.stops.push(stop)
+      return renumber(next)
+    })
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    setActiveStop(null)
+    setKanbanModified(true)
+    if (!over || active.id === over.id) return
+    const activeId = active.id as string
+    const overId   = over.id as string
+    // cross-column move was already handled in onDragOver; only do same-column reorder here
+    const srcColId = findColIdByStopId(activeId)
+    const overColId = resolveColId(overId)
+    if (!srcColId || srcColId !== overColId) return
+    // over.id is a stop in the same column — reorder
+    const overStopId = kanbanCols.find(c => c.driver_id === srcColId)?.stops.find(s => s.delivery_id === overId)?.delivery_id
+    if (!overStopId) return
+    setKanbanCols(cols => renumber(cols.map(col => {
+      if (col.driver_id !== srcColId) return col
+      const stops = [...col.stops]
+      const oldIdx = stops.findIndex(s => s.delivery_id === activeId)
+      const newIdx = stops.findIndex(s => s.delivery_id === overId)
+      return { ...col, stops: arrayMove(stops, oldIdx, newIdx) }
+    })))
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const mapDelivery = (r: any) => ({
@@ -776,7 +1093,6 @@ export default function RoutesPage() {
         })
       )
       setResult({ ...result, routes: routesWithPaths })
-      setSelectedId(routesWithPaths[0]?.driver_id ?? null)
       setStep('results')
       console.log('[optimize-routes] response:', result)
       const allDeferred = [
@@ -803,6 +1119,83 @@ export default function RoutesPage() {
       setStep('input')
       setToast(`Eroare: ${(e as Error).message || 'serverul nu răspunde'}`)
       console.error(e)
+    }
+  }
+
+  // ── Re-optimize after Kanban edits ──────────────────────────────────────────
+
+  async function handleReoptimize() {
+    if (!result) return
+    setReoptimizing(true)
+    const parseMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m }
+    const toHHMM  = (n: number) => `${String(Math.floor(n / 60) % 24).padStart(2, '0')}:${String(Math.round(n % 60)).padStart(2, '0')}`
+    try {
+      const driverCols = kanbanCols.filter(col => col.driver_id !== DEFERRED_COL_ID)
+      const perDriverResults = await Promise.all(
+        driverCols.map(async col => {
+          const colDeliveries = col.stops.filter(s => s.type === 'delivery')
+          if (!colDeliveries.length) return { driverId: col.driver_id, route: null, hadRejected: false }
+          const { data, error } = await supabase.functions.invoke('optimize-routes', {
+            body: {
+              deliveries: colDeliveries.map(s => ({
+                id: s.delivery_id,
+                address: s.address,
+                customer: s.customer,
+                phone: s.phone || '',
+                notes: '',
+                package_description: s.package_description || '',
+              })),
+              drivers: [{ id: col.driver_id, name: col.driver_name, start_lat: col.start_lat, start_lng: col.start_lng }],
+              skip_breaks: false,
+              shift_start_time: shiftStart,
+              default_service_time_min: serviceTimeMin,
+              allow_overtime: allowOvertime,
+              max_workday_hours: 8,
+              overtime_max_hours: 10,
+            },
+          })
+          if (error || !data?.routes?.[0]) return { driverId: col.driver_id, route: null, hadRejected: false }
+          const route = data.routes[0] as DriverRoute
+
+          // Find stops the optimizer deferred (user explicitly assigned them — keep in column)
+          const optimizedIds = new Set(route.stops.filter(s => s.type === 'delivery').map(s => s.delivery_id))
+          const rejected = colDeliveries.filter(s => !optimizedIds.has(s.delivery_id))
+          if (rejected.length) {
+            const lastDelivery = route.stops.filter(s => s.type === 'delivery').at(-1)
+            let runMin = lastDelivery?.arrival_time ? parseMin(lastDelivery.arrival_time) + serviceTimeMin + 5 : parseMin(shiftStart) + 60
+            for (const s of rejected) {
+              route.stops.push({ ...s, order: route.stops.length + 1, arrival_time: toHHMM(runMin) })
+              runMin += serviceTimeMin + 15
+            }
+          }
+          return { driverId: col.driver_id, route, hadRejected: rejected.length > 0 }
+        })
+      )
+
+      const anyRejected = perDriverResults.some(r => r.hadRejected)
+      if (anyRejected) setToast('Unele comenzi nu au putut fi secvențiate optim și au fost adăugate la final.')
+
+      setKanbanCols(prev => prev.map(col => {
+        if (col.driver_id === DEFERRED_COL_ID) return col
+        const found = perDriverResults.find(r => r.driverId === col.driver_id)
+        if (!found?.route) return col
+        return { ...col, stops: found.route.stops, total_distance_km: found.route.total_distance_km, total_duration_min: found.route.total_duration_min }
+      }))
+      skipKanbanRebuild.current = true
+      setResult(prev => prev ? {
+        ...prev,
+        routes: prev.routes.map(r => {
+          const found = perDriverResults.find(res => res.driverId === r.driver_id)
+          if (!found?.route) return r
+          return { ...r, stops: found.route.stops, total_distance_km: found.route.total_distance_km, total_duration_min: found.route.total_duration_min }
+        }),
+      } : prev)
+      // Keep kanbanModified=true if any stops had approximate times appended
+      setKanbanModified(anyRejected)
+    } catch (e) {
+      setToast(`Eroare la re-optimizare: ${(e as Error).message}`)
+    } finally {
+      setReoptimizing(false)
     }
   }
 
@@ -974,19 +1367,27 @@ export default function RoutesPage() {
               <button onClick={() => setStep('input')} className="text-[12px] text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors flex-shrink-0">
                 ← Înapoi
               </button>
-              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate hidden sm:block">Rezultate</span>
+              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate hidden sm:block">Secvență livrări</span>
               {result.savings_pct > 0 && (
                 <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full hidden sm:block">
                   -{result.savings_pct}% distanță
                 </span>
               )}
-            </div>
-            {/* Mobile tab switcher */}
-            <div className="flex md:hidden items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 gap-0.5 flex-shrink-0">
-              <button onClick={() => setResultsTab('map')} className={`px-3 py-1 text-[11px] font-semibold rounded-md transition-colors ${resultsTab === 'map' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Hartă</button>
-              <button onClick={() => setResultsTab('routes')} className={`px-3 py-1 text-[11px] font-semibold rounded-md transition-colors ${resultsTab === 'routes' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 shadow-sm' : 'text-zinc-500 dark:text-zinc-400'}`}>Rute</button>
+              <span className="text-[11px] text-zinc-400 dark:text-zinc-500 hidden sm:block">
+                {result.total_stops} opriri · {kanbanCols.length} șoferi
+              </span>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
+              {kanbanModified && (
+                <button
+                  onClick={handleReoptimize}
+                  disabled={reoptimizing}
+                  className="flex items-center gap-1.5 text-[12px] font-semibold px-3 py-2 rounded-lg border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/60 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw size={13} className={reoptimizing ? 'animate-spin' : ''} />
+                  <span>{reoptimizing ? 'Se re-optimizează…' : 'Re-optimizează'}</span>
+                </button>
+              )}
               {dispatched && (
                 <button
                   onClick={handleRecall}
@@ -1012,232 +1413,44 @@ export default function RoutesPage() {
             </div>
           </div>
 
-          <div className="flex flex-1 overflow-hidden">
-            <div className={`${resultsTab === 'map' ? 'flex-1' : 'hidden'} md:flex-1 relative`}>
-              <MapContainer center={[47.0245, 28.8322]} zoom={12} crs={L.CRS.EPSG3395} style={{ height: '100%', width: '100%' }}>
-                <YandexMapLayer />
-                <MoldovaBorder />
-                {traffic && <YandexTrafficLayer opacity={0.85} />}
-                {result.routes.map(route => (
-                  <Fragment key={route.driver_id}>
-                    {route.path && (
-                      <Polyline
-                        positions={route.path}
-                        pathOptions={{ color: route.color, weight: route.driver_id === selectedId ? 5 : 2.5, opacity: route.driver_id === selectedId ? 0.9 : 0.3 }}
-                      />
-                    )}
-                    {/* Driver start position */}
-                    <Marker
-                      position={[route.start_lat, route.start_lng]}
-                      icon={L.divIcon({
-                        html: `<div style="width:12px;height:12px;background:${route.color};border:2.5px solid white;border-radius:50%;box-shadow:0 0 0 3px ${route.color}44"></div>`,
-                        iconSize: [12, 12], iconAnchor: [6, 6], className: '',
-                      })}
-                    >
-                      <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-                        <span style={{ fontSize: 11 }}>{route.driver_name} | start</span>
-                      </Tooltip>
-                    </Marker>
-                    {route.stops.map(stop => {
-                      if (stop.type === 'lunch_break' || stop.type === 'fuel_break') {
-                        return (
-                          <Marker
-                            key={stop.delivery_id}
-                            position={[stop.lat, stop.lng]}
-                            icon={breakIcon(stop.type as 'lunch_break' | 'fuel_break')}
-                          >
-                            <Tooltip direction="top" offset={[0, -14]} opacity={1}>
-                              <span style={{ fontSize: 11 }}>
-                                {stop.customer}{stop.arrival_time ? ` · ${stop.arrival_time}` : ''} | {stop.address}
-                              </span>
-                            </Tooltip>
-                          </Marker>
-                        )
-                      }
-                      return (
-                        <Marker key={stop.delivery_id} position={[stop.lat, stop.lng]} icon={stopIcon(stop.order, route.color)}>
-                          <Tooltip direction="top" offset={[0, -13]} opacity={1}>
-                            <span style={{ fontSize: 11 }}>{stop.customer} | {stop.address}</span>
-                          </Tooltip>
-                        </Marker>
-                      )
-                    })}
-                  </Fragment>
-                ))}
-              </MapContainer>
 
-              {/* Traffic toggle */}
-              <div className="absolute top-4 right-4 md:top-4 z-[1000]">
-                <button
-                  onClick={() => setTraffic(t => !t)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium border shadow-sm transition-colors ${
-                    traffic
-                      ? 'bg-amber-500 border-amber-400 text-white'
-                      : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  <Radio size={12} /> Trafic live
-                </button>
+          {/* Kanban board */}
+          <div className="flex-1 overflow-x-auto overflow-y-hidden bg-zinc-100 dark:bg-zinc-950">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCorners}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="flex gap-4 h-full p-4 min-w-max">
+                {kanbanCols.map(col => {
+                  const origRoute = result.routes.find(r => r.driver_id === col.driver_id)
+                  const baseCount = origRoute?.stops.filter(s => s.type === 'delivery').length ?? 0
+                  const curCount  = col.stops.filter(s => s.type === 'delivery').length
+                  const ratio     = baseCount > 0 ? curCount / baseCount : 0
+                  const estKm     = Math.round(col.total_distance_km * ratio * 10) / 10
+                  const estMin    = Math.round(col.total_duration_min * ratio)
+                  return (
+                    <KanbanColumn
+                      key={col.driver_id}
+                      col={col}
+                      estKm={estKm}
+                      estMin={estMin}
+                      approximate={baseCount > 0 && curCount !== baseCount}
+                      approxTimes={kanbanModified}
+                    />
+                  )
+                })}
               </div>
-
-              <div className="absolute bottom-4 left-4 z-[1000] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 flex flex-col gap-1.5 shadow-sm max-w-[calc(50vw-1rem)]">
-                {result.routes.map(r => (
-                  <button key={r.driver_id} onClick={() => setSelectedId(r.driver_id)}
-                    className={`flex items-center gap-2 text-left px-2 py-1 rounded-lg transition-colors min-w-0 ${r.driver_id === selectedId ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'}`}
-                  >
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: r.color }} />
-                    <span className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 truncate">{r.driver_name.split(' ')[0]}</span>
-                    <span className="text-[11px] text-zinc-400 dark:text-zinc-500 hidden sm:inline flex-shrink-0">{r.stops.length} opriri · {r.total_distance_km} km</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={`${resultsTab === 'routes' ? 'flex w-full' : 'hidden'} md:flex md:w-72 flex-shrink-0 flex-col border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto`}>
-              {result.deferred?.length > 0 && (() => {
-                const geocodeFails   = result.deferred.filter(d => d.reason === 'geocode_failed' || d.reason === 'geocode failed')
-                const noCapacity     = result.deferred.filter(d => d.reason === 'no_capacity' || d.reason === 'no capacity')
-                const noDriver       = result.deferred.filter(d => d.reason === 'no_driver_for_warehouse')
-                const noSku          = result.deferred.filter(d => d.reason === 'unmatched_inventory')
-                return (
-                  <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50 space-y-2">
-                    {geocodeFails.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <AlertTriangle size={12} className="text-red-600 dark:text-red-400 flex-shrink-0" />
-                          <span className="text-[12px] font-semibold text-red-600 dark:text-red-400">
-                            {geocodeFails.length} {geocodeFails.length === 1 ? 'adresă negăsită' : 'adrese negăsite'}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-amber-700/80 dark:text-amber-500/80 mb-1">
-                          Verifică ortografia adresei sau editează-o manual.
-                        </div>
-                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
-                          {geocodeFails.map(d => (
-                            <div key={d.delivery_id} className="text-[11px] text-zinc-700 dark:text-zinc-300 truncate">
-                              • {d.customer} | <span className="text-red-600 dark:text-red-400">{d.address}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {noCapacity.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <AlertTriangle size={12} className="text-amber-700 dark:text-amber-400 flex-shrink-0" />
-                          <span className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
-                            {noCapacity.length} {noCapacity.length === 1 ? 'livrare amânată' : 'livrări amânate'} pentru mâine
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-amber-600/70 dark:text-amber-500/70 mb-1">
-                          Nu încap în 8h cu șoferii activi. Adaugă un șofer sau acceptă amânarea.
-                        </div>
-                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
-                          {noCapacity.map(d => (
-                            <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
-                              • {d.customer} | {d.address}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {noDriver.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <AlertTriangle size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
-                          <span className="text-[12px] font-semibold text-purple-700 dark:text-purple-400">
-                            {noDriver.length} {noDriver.length === 1 ? 'comandă' : 'comenzi'} fără șofer la depozitul corect
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-amber-600/70 dark:text-amber-500/70 mb-1">
-                          Niciun șofer activ nu este asignat depozitului acestor produse.
-                        </div>
-                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
-                          {noDriver.map(d => (
-                            <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
-                              • {d.customer} | {d.address}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {noSku.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <AlertTriangle size={12} className="text-amber-700 dark:text-amber-400 flex-shrink-0" />
-                          <span className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">
-                            {noSku.length} {noSku.length === 1 ? 'comandă' : 'comenzi'} cu SKU lipsă din inventar
-                          </span>
-                        </div>
-                        <div className="space-y-0.5 max-h-24 overflow-y-auto">
-                          {noSku.map(d => (
-                            <div key={d.delivery_id} className="text-[11px] text-zinc-600 dark:text-zinc-400 truncate">
-                              • {d.customer} | {d.address}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+              <DragOverlay>
+                {activeStop && (
+                  <div className="rotate-1 opacity-95 shadow-2xl w-72">
+                    <StopCard stop={activeStop.stop} color={activeStop.color} />
                   </div>
-                )
-              })()}
-              {result.routes.map(route => (
-                <div key={route.driver_id}>
-                  <button onClick={() => setSelectedId(route.driver_id)}
-                    className={`w-full flex items-start gap-3 px-4 py-3 border-b-2 text-left transition-colors ${route.driver_id === selectedId ? 'bg-zinc-50 dark:bg-zinc-800/40' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/20'}`}
-                    style={{ borderBottomColor: route.color }}
-                  >
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1" style={{ background: route.color }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-zinc-900 dark:text-zinc-50">{route.driver_name}</span>
-                      </div>
-                      <div className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5 flex items-center gap-2">
-                        <span>{route.stops.length} opriri</span><span>·</span>
-                        <span>{route.total_distance_km} km</span><span>·</span>
-                        <span className="flex items-center gap-1"><Clock size={9} />{fmtDuration(route.total_duration_min)}</span>
-                      </div>
-                    </div>
-                  </button>
-                  {route.driver_id === selectedId && route.stops.map(stop => {
-                    if (stop.type === 'lunch_break' || stop.type === 'fuel_break') {
-                      const isLunch = stop.type === 'lunch_break'
-                      return (
-                        <div key={stop.delivery_id} className="flex items-start gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800/50 bg-amber-50/60 dark:bg-amber-950/20">
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
-                            {isLunch ? <UtensilsCrossed size={11} /> : <Fuel size={11} />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[12px] font-semibold text-amber-700 dark:text-amber-400">{stop.customer}</span>
-                              {stop.arrival_time && <span className="text-[10px] text-amber-600 dark:text-amber-500 font-mono">{stop.arrival_time}</span>}
-                              <span className="text-[10px] text-amber-500 dark:text-amber-500 bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 rounded-full">{stop.break_duration_min} min</span>
-                            </div>
-                            <div className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{stop.address}</div>
-                          </div>
-                        </div>
-                      )
-                    }
-                    return (
-                      <div key={stop.delivery_id} className="flex items-start gap-3 px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800/50">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0 mt-0.5" style={{ background: route.color }}>
-                          {stop.order}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[12px] font-medium text-zinc-800 dark:text-zinc-200 truncate">{stop.customer}</span>
-                            {stop.arrival_time && <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">{stop.arrival_time}</span>}
-                          </div>
-                          <div className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate">{stop.address}</div>
-                          {stop.package_description && <div className="flex items-center gap-1 text-[11px] text-brand-orange dark:text-orange-400 truncate mt-0.5"><Package size={9} className="flex-shrink-0" /><span className="truncate">{stop.package_description}</span></div>}
-                          {stop.phone && <div className="text-[11px] text-zinc-400 dark:text-zinc-500">{stop.phone}</div>}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
+                )}
+              </DragOverlay>
+            </DndContext>
           </div>
         </div>
       </>
