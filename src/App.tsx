@@ -27,6 +27,7 @@ import DriverDownload from './pages/DriverDownload'
 import TermsOfUse from './pages/TermsOfUse'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import CheckoutDemo from './pages/dev/CheckoutDemo'
+import NovapostTrackingDemo from './pages/dev/NovapostTrackingDemo'
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/confidentialitate" element={<PrivacyPolicy />} />
           <Route path="/urmarire/:token" element={<Track />} />
           <Route path="/dev/checkout" element={<CheckoutDemo />} />
+          <Route path="/dev/novapost" element={<NovapostTrackingDemo />} />
           <Route path="/industrii/:slug" element={<IndustryPage />} />
           <Route path="/cazuri/:slug" element={<UseCasePage />} />
           {/* Legacy redirects */}

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { MapContainer, Marker, useMapEvents } from 'react-leaflet'
 import { YandexMapLayer } from './YandexLayer'
 import L from 'leaflet'
-import { X, MapPin, Phone, Check, ChevronDown } from 'lucide-react'
+import { X, MapPin, Check } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -87,7 +87,7 @@ export default function LivraCheckoutButton({ onFill }: Props) {
   const [label, setLabel] = useState('Casa')
   const [customLabel, setCustomLabel] = useState('')
   const [foundUser, setFoundUser] = useState<LivraUser | null>(null)
-  const [selectedAddress, setSelectedAddress] = useState<SavedAddress | null>(null)
+  const [, setSelectedAddress] = useState<SavedAddress | null>(null)
   const [error, setError] = useState('')
   const [otpSent, setOtpSent] = useState(false)
 
