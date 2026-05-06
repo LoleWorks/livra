@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Package, MapPin, Clock, CheckCircle, Circle, ChevronRight, AlertCircle, Truck, ExternalLink } from 'lucide-react'
+import { MapContainer, Marker } from 'react-leaflet'
+import { YandexMapLayer } from '../../components/YandexLayer'
+import L from 'leaflet'
+
+const DEPOT_ICON = L.divIcon({
+  className: '',
+  html: `<div style="width:36px;height:36px;background:#ff5c2c;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(255,92,44,0.5)"></div>`,
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+})
 
 const TEST_AWB = 'NPMD00000000051596NPG'
 
@@ -57,6 +67,19 @@ function fmtDateTime(iso: string) {
   return `${fmtDate(iso)}, ${fmtTime(iso)}`
 }
 
+function getLastKnownCoords(tracking: TrackingEvent[]): [number, number] | null {
+  const candidates = [...tracking]
+    .filter(e => e.event_status !== 'future')
+    .reverse()
+  for (const e of candidates) {
+    const { latitude, longitude } = e.division_coordinates
+    if (latitude && longitude && latitude !== 0 && longitude !== 0) {
+      return [latitude, longitude]
+    }
+  }
+  return null
+}
+
 function getProgressPercent(tracking: TrackingEvent[]) {
   const total = tracking.length
   const passed = tracking.filter(e => e.event_status === 'passed').length
@@ -97,6 +120,7 @@ export default function NovapostTrackingDemo() {
   const futureEvents = data?.tracking.filter(e => e.event_status === 'future') ?? []
   const progress = data ? getProgressPercent(data.tracking) : 0
   const outForDelivery = data ? isOutForDelivery(data.tracking) : false
+  const lastCoords = data ? getLastKnownCoords(data.tracking) : null
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -195,6 +219,37 @@ export default function NovapostTrackingDemo() {
                   <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{currentEvent.division_name}</p>
                   <p className="text-xs text-zinc-500">{currentEvent.settlement_name}, {currentEvent.country_code}</p>
                 </div>
+              </div>
+            )}
+
+            {/* Map — last known depot location */}
+            {lastCoords && (
+              <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+                  <p className="text-xs font-mono text-zinc-400 uppercase tracking-wider">Ultima locație cunoscută</p>
+                  <span className="text-xs text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">Depou · nu GPS live</span>
+                </div>
+                <div style={{ height: 200 }}>
+                  <MapContainer
+                    center={lastCoords}
+                    zoom={14}
+                    crs={L.CRS.EPSG3395}
+                    style={{ height: '100%', width: '100%' }}
+                    zoomControl={false}
+                    attributionControl={false}
+                    dragging={false}
+                    scrollWheelZoom={false}
+                  >
+                    <YandexMapLayer />
+                    <Marker position={lastCoords} icon={DEPOT_ICON} />
+                  </MapContainer>
+                </div>
+                {currentEvent?.division_name && (
+                  <div className="px-4 py-3 flex items-center gap-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <MapPin size={13} className="text-orange-500 shrink-0" />
+                    <span className="text-xs text-zinc-600 dark:text-zinc-400">{currentEvent.division_name}, {currentEvent.settlement_name}</span>
+                  </div>
+                )}
               </div>
             )}
 
