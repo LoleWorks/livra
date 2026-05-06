@@ -26,6 +26,7 @@ import Onboarding from './pages/Onboarding'
 import DriverDownload from './pages/DriverDownload'
 import TermsOfUse from './pages/TermsOfUse'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import CheckoutDemo from './pages/dev/CheckoutDemo'
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/termeni" element={<TermsOfUse />} />
           <Route path="/confidentialitate" element={<PrivacyPolicy />} />
           <Route path="/urmarire/:token" element={<Track />} />
+          <Route path="/dev/checkout" element={<CheckoutDemo />} />
           <Route path="/industrii/:slug" element={<IndustryPage />} />
           <Route path="/cazuri/:slug" element={<UseCasePage />} />
           {/* Legacy redirects */}
