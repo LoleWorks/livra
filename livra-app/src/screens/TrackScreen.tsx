@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, statusColors } from '../lib/colors'
+import { getDeliveryById, subscribeToDelivery } from '../lib/api'
 import type { RootStackParamList, Delivery } from '../types'
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Track'>
@@ -13,43 +14,20 @@ function fmtTime(iso: string) {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-const MOCK: Delivery = {
-  id: 'd1',
-  orderId: '4821',
-  storeName: 'Fashion MD',
-  address: 'Str. Albișoara 34, ap. 7',
-  status: 'en_route',
-  stopOrder: 3,
-  totalStops: 8,
-  timeWindowStart: new Date(Date.now() - 10 * 60000).toISOString(),
-  timeWindowEnd: new Date(Date.now() + 20 * 60000).toISOString(),
-  notes: 'Etajul 3, scara A',
-  driverName: 'Alexandru M.',
-  driverInitials: 'AM',
-  driverLocation: { lat: 47.024, lng: 28.835, updatedAt: new Date(Date.now() - 30000).toISOString() },
-  destinationLat: 47.026,
-  destinationLng: 28.838,
-  createdAt: new Date(Date.now() - 2 * 3600000).toISOString(),
-}
-
 function MapPlaceholder({ driverInitials }: { driverInitials: string }) {
   return (
     <View style={map.container}>
-      {/* Street grid */}
       <View style={[map.street, map.streetH, { top: '30%' }]} />
       <View style={[map.street, map.streetH, { top: '55%' }]} />
       <View style={[map.street, map.streetH, { top: '75%' }]} />
       <View style={[map.street, map.streetV, { left: '25%' }]} />
       <View style={[map.street, map.streetV, { left: '60%' }]} />
-      {/* Route line (dashed simulation) */}
       {[0, 1, 2, 3, 4, 5].map(i => (
-        <View key={i} style={[map.dash, { top: `${28 + i * 8}%`, left: `${28 + i * 5}%` }]} />
+        <View key={i} style={[map.dash, { top: `${28 + i * 8}%` as any, left: `${28 + i * 5}%` as any }]} />
       ))}
-      {/* Destination */}
       <View style={map.dest}>
         <Ionicons name="home" size={16} color={colors.white} />
       </View>
-      {/* Driver */}
       <View style={map.driver}>
         <Text style={map.driverText}>{driverInitials}</Text>
       </View>
@@ -61,9 +39,26 @@ export default function TrackScreen({ route }: Props) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const [delivery, setDelivery] = useState<Delivery | null>(null)
   const [loading, setLoading] = useState(true)
+  const unsubRef = useRef<(() => void) | null>(null)
+
+  const reload = async () => {
+    const d = await getDeliveryById(route.params.deliveryId)
+    if (d) setDelivery(d)
+  }
 
   useEffect(() => {
-    setTimeout(() => { setDelivery(MOCK); setLoading(false) }, 600)
+    getDeliveryById(route.params.deliveryId).then(d => {
+      if (d) {
+        setDelivery(d)
+        // subscribe to real-time updates for this stop + driver
+        // we need the route's driver_id — fetch it via a fresh query isn't ideal here
+        // instead we poll every 15s as a fallback for the map position
+      }
+      setLoading(false)
+    })
+
+    const interval = setInterval(reload, 15000)
+    return () => clearInterval(interval)
   }, [route.params.deliveryId])
 
   if (loading) {
@@ -71,7 +66,7 @@ export default function TrackScreen({ route }: Props) {
   }
   if (!delivery) return null
 
-  const sc = statusColors[delivery.status]
+  const sc = statusColors[delivery.status] ?? statusColors['dispatched']
 
   return (
     <View style={styles.container}>
@@ -89,14 +84,16 @@ export default function TrackScreen({ route }: Props) {
           <Text style={[styles.statusText, { color: sc.text }]}>{sc.label}</Text>
         </View>
 
-        <View style={styles.timeBlock}>
-          <Text style={styles.timeLabel}>Interval de livrare</Text>
-          <Text style={styles.timeValue}>
-            {fmtTime(delivery.timeWindowStart)}
-            <Text style={styles.timeSep}> – </Text>
-            {fmtTime(delivery.timeWindowEnd)}
-          </Text>
-        </View>
+        {delivery.timeWindowStart && delivery.timeWindowEnd && (
+          <View style={styles.timeBlock}>
+            <Text style={styles.timeLabel}>Interval de livrare</Text>
+            <Text style={styles.timeValue}>
+              {fmtTime(delivery.timeWindowStart)}
+              <Text style={styles.timeSep}> – </Text>
+              {fmtTime(delivery.timeWindowEnd)}
+            </Text>
+          </View>
+        )}
 
         <View style={styles.progressSection}>
           <View style={styles.progressRow}>
@@ -123,9 +120,6 @@ export default function TrackScreen({ route }: Props) {
             <Text style={styles.driverName}>{delivery.driverName ?? 'Curier'}</Text>
             <Text style={styles.driverSub}>Curierul tău</Text>
           </View>
-          <TouchableOpacity style={styles.callBtn} onPress={() => Linking.openURL('tel:+37300000000')}>
-            <Ionicons name="call-outline" size={20} color={colors.black} />
-          </TouchableOpacity>
         </View>
 
         {delivery.address && (
@@ -154,15 +148,13 @@ const map = StyleSheet.create({
   dest: {
     position: 'absolute', top: '22%', left: '58%',
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: colors.emerald,
-    borderWidth: 3, borderColor: colors.white,
+    backgroundColor: colors.emerald, borderWidth: 3, borderColor: colors.white,
     alignItems: 'center', justifyContent: 'center',
   },
   driver: {
     position: 'absolute', bottom: '35%', left: '25%',
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: colors.orange,
-    borderWidth: 3, borderColor: colors.white,
+    backgroundColor: colors.orange, borderWidth: 3, borderColor: colors.white,
     alignItems: 'center', justifyContent: 'center',
   },
   driverText: { fontSize: 11, fontWeight: '700', color: colors.white },
@@ -173,8 +165,8 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   backBtn: {
     position: 'absolute', top: 52, left: 20,
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center',
+    width: 40, height: 40, borderRadius: 12, backgroundColor: colors.white,
+    alignItems: 'center', justifyContent: 'center',
     shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, elevation: 4,
   },
   card: {
@@ -199,7 +191,6 @@ const styles = StyleSheet.create({
   driverInitials: { fontSize: 14, fontWeight: '700', color: colors.orange },
   driverName: { fontSize: 15, fontWeight: '600', color: colors.black },
   driverSub: { fontSize: 12, color: colors.gray400 },
-  callBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.gray100, alignItems: 'center', justifyContent: 'center' },
   addressRow: { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginBottom: 6 },
   addressText: { fontSize: 13, color: colors.gray500, flex: 1 },
   notesRow: { flexDirection: 'row', gap: 6, alignItems: 'flex-start' },

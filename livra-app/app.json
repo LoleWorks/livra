@@ -3,6 +3,7 @@
     "name": "Livra",
     "slug": "livra-app",
     "version": "1.0.0",
+    "scheme": "livra",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,19 +14,47 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "md.livra.app"
+      "bundleIdentifier": "md.livra.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Livra foloseste locatia ta pentru a estima timpul de livrare.",
+        "NSLocationAlwaysUsageDescription": "Livra foloseste locatia ta pentru a estima timpul de livrare.",
+        "NSUserNotificationsUsageDescription": "Primeste notificari despre statusul coletelor tale."
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#f4f3ef"
       },
-      "package": "md.livra.app"
+      "package": "md.livra.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FF5C2C"
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -33,7 +62,18 @@
             "ndkVersion": "25.1.8937393"
           }
         }
-      ]
-    ]
+      ],
+      "expo-secure-store",
+      "expo-router",
+      "expo-font",
+      "@react-native-community/datetimepicker"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7f036364-8fc2-4522-b4ea-4086422d92c0"
+      }
+    },
+    "owner": "livra_app"
   }
 }
